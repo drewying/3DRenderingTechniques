@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46661D0846CD0066A83D /* AppDelegate.swift */; };
-		D1CD46691D0846CD0066A83D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46681D0846CD0066A83D /* ViewController.swift */; };
 		D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466A1D0846CD0066A83D /* Main.storyboard */; };
 		D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466D1D0846CD0066A83D /* Assets.xcassets */; };
 		D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */; };
 		D1CD467C1D0846CD0066A83D /* RenderingTechniquesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD467B1D0846CD0066A83D /* RenderingTechniquesTests.swift */; };
 		D1CD46871D0846CD0066A83D /* RenderingTechniquesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */; };
+		D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizationViewController.swift */; };
+		D1CD46971D084B0A0066A83D /* PixelData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46961D084B0A0066A83D /* PixelData.swift */; };
+		D1CD46991D0862A50066A83D /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1CD46981D0862A50066A83D /* teapot.obj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +38,6 @@
 /* Begin PBXFileReference section */
 		D1CD46631D0846CD0066A83D /* RenderingTechniques.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RenderingTechniques.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46661D0846CD0066A83D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D1CD46681D0846CD0066A83D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		D1CD466B1D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D1CD466D1D0846CD0066A83D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D1CD46701D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -47,6 +48,9 @@
 		D1CD46821D0846CD0066A83D /* RenderingTechniquesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RenderingTechniquesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderingTechniquesUITests.swift; sourceTree = "<group>"; };
 		D1CD46881D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D1CD46941D0846F50066A83D /* RasterizationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RasterizationViewController.swift; sourceTree = "<group>"; };
+		D1CD46961D084B0A0066A83D /* PixelData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PixelData.swift; sourceTree = "<group>"; };
+		D1CD46981D0862A50066A83D /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,11 +102,13 @@
 			isa = PBXGroup;
 			children = (
 				D1CD46661D0846CD0066A83D /* AppDelegate.swift */,
-				D1CD46681D0846CD0066A83D /* ViewController.swift */,
 				D1CD466A1D0846CD0066A83D /* Main.storyboard */,
 				D1CD466D1D0846CD0066A83D /* Assets.xcassets */,
 				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
 				D1CD46721D0846CD0066A83D /* Info.plist */,
+				D1CD46981D0862A50066A83D /* teapot.obj */,
+				D1CD46941D0846F50066A83D /* RasterizationViewController.swift */,
+				D1CD46961D084B0A0066A83D /* PixelData.swift */,
 			);
 			path = RenderingTechniques;
 			sourceTree = "<group>";
@@ -229,6 +235,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1CD46991D0862A50066A83D /* teapot.obj in Resources */,
 				D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */,
 				D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */,
 				D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */,
@@ -256,7 +263,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D1CD46691D0846CD0066A83D /* ViewController.swift in Sources */,
+				D1CD46971D084B0A0066A83D /* PixelData.swift in Sources */,
+				D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */,
 				D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -484,6 +492,7 @@
 				D1CD468D1D0846CD0066A83D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D1CD468E1D0846CD0066A83D /* Build configuration list for PBXNativeTarget "RenderingTechniquesTests" */ = {
 			isa = XCConfigurationList;
@@ -492,6 +501,7 @@
 				D1CD46901D0846CD0066A83D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D1CD46911D0846CD0066A83D /* Build configuration list for PBXNativeTarget "RenderingTechniquesUITests" */ = {
 			isa = XCConfigurationList;
@@ -500,6 +510,7 @@
 				D1CD46931D0846CD0066A83D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
