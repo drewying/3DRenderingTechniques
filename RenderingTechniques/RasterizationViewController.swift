@@ -27,17 +27,23 @@ class RasterizationViewController: UIViewController {
     var pixelData:PixelData = PixelData(width: 0, height: 0)
     var triangles:[Triangle] = Array<Triangle>()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         pixelData = PixelData(width: Int(mainImageView.bounds.size.width), height: Int(mainImageView.bounds.size.height))
         
         loadTeapot()
         NSLog("Beginning Render")
         for triangle:Triangle in triangles{
             plotTriangle(triangle)
+            //plotTriangleLines(triangle)
         }
         mainImageView.image = pixelData.getImageRepresentation()
         NSLog("Render Finished")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
     }
     
     func loadTeapot(){
@@ -55,8 +61,8 @@ class RasterizationViewController: UIViewController {
                     if (line.hasPrefix("f ")){
                         let values:[String] = line.componentsSeparatedByString(" ")
                         let i0:Int = (values[1].substringToIndex((values[1].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
-                        let i1:Int = (values[2].substringToIndex((values[1].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
-                        let i2:Int = (values[3].substringToIndex((values[1].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
+                        let i1:Int = (values[2].substringToIndex((values[2].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
+                        let i2:Int = (values[3].substringToIndex((values[3].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
                         triangles.append(Triangle(p0: points[i0], p1: points[i1], p2: points[i2]))
                     }
                 }
@@ -68,10 +74,99 @@ class RasterizationViewController: UIViewController {
         }
     }
 
+    func plotTopFlatTriangle(p0:Point, p1:Point, p2:Point){
+        let inverseSlope0:Float = (p2.x - p0.x) / (p2.y - p0.y)
+        let inverseSlope1:Float = (p2.x - p1.x) / (p2.y - p1.y)
+        
+        var currentX0:Float = p2.x
+        var currentX1:Float = p2.x
+        
+        for y in (Int(p0.y + 1)...Int(p2.y)).reverse(){
+            
+            let start = Int(min(currentX0, currentX1))
+            let end = Int(max(currentX0, currentX1))
+            
+            for x in (start...end){
+                let color:PixelColor = fragmentShader(Point(x: Float(x), y: Float(y), z: p1.z))
+                pixelData.plot(x, y: y, pixelColor: color)
+            }
+            currentX0 -= inverseSlope0
+            currentX1 -= inverseSlope1
+        }
+    }
+    
+    func plotBottomFlatTriangle(p0:Point, p1:Point, p2:Point){
+        let inverseSlope0:Float = (p1.x - p0.x) / (p1.y - p0.y)
+        let inverseSlope1:Float = (p2.x - p0.x) / (p2.y - p0.y)
+    
+        var currentX0:Float = p0.x
+        var currentX1:Float = p0.x
+    
+        for y in Int(p0.y)...Int(p1.y){
+
+            let start = Int(min(currentX0, currentX1))
+            let end = Int(max(currentX0, currentX1))
+            
+            for x in (start...end){
+                let color:PixelColor = fragmentShader(Point(x: Float(x), y: Float(y), z: p1.z))
+                pixelData.plot(x, y: y, pixelColor: color)
+            }
+            currentX0 += inverseSlope0
+            currentX1 += inverseSlope1
+        }
+    }
+   
+    func plotTriangleLines(triangle:Triangle){
+         plotLine(triangle.p0, p1: triangle.p1)
+         plotLine(triangle.p1, p1: triangle.p2)
+         plotLine(triangle.p2, p1: triangle.p0)
+    }
+
+    
     func plotTriangle(triangle:Triangle){
-        plotLine(triangle.p0, p1: triangle.p1)
-        plotLine(triangle.p1, p1: triangle.p2)
-        plotLine(triangle.p2, p1: triangle.p0)
+        
+        
+        var p0:Point = triangle.p0
+        if (triangle.p1.y > p0.y){
+            p0 = triangle.p1
+        }
+        if (triangle.p2.y > p0.y){
+            p0 = triangle.p2
+        }
+        
+        var p2:Point = triangle.p0;
+        if (triangle.p1.y < p2.y){
+            p2 = triangle.p1
+        }
+        if (triangle.p2.y < p2.y){
+            p2 = triangle.p2
+        }
+        
+        var p1:Point = triangle.p0
+        if (p1.y == p0.y || p1.y == p2.y){
+            p1 = triangle.p1;
+        }
+        if (p1.y == p0.y || p1.y == p2.y){
+            p1 = triangle.p2;
+        }
+        
+        p0 = projectPoint(p0)
+        p1 = projectPoint(p1)
+        p2 = projectPoint(p2)
+        
+        /* check for trivial case of bottom-flat triangle */
+        if (Int(p1.y) == Int(p2.y)) {
+            plotBottomFlatTriangle(p0, p1: p1, p2: p2);
+        } else if (Int(p0.y) == Int(p1.y)) { /* check for trivial case of top-flat triangle */
+            plotTopFlatTriangle(p0, p1: p1, p2: p2);
+        } else { /* general case - split the triangle in a topflat and bottom-flat one */
+            let p3 = Point(x: (p0.x + ((p1.y - p0.y) / (p2.y - p0.y)) * (p2.x - p0.x)), y: p1.y, z: p1.z);
+            plotBottomFlatTriangle(p0, p1: p1, p2: p3);
+            plotTopFlatTriangle(p1, p1: p3, p2: p2);
+        }
+        
+        
+        
     }
     
     func plotLine(p0:Point, p1:Point){
@@ -91,7 +186,7 @@ class RasterizationViewController: UIViewController {
         var error:Float = (deltaX > deltaY ? deltaX : -deltaY)/2.0;
         
         while (true) {
-            pixelData.plot(x0, y: y0, red: 255, green: 0, blue: 0, alpha: 255)
+            pixelData.plot(x0, y: y0, pixelColor:PixelColor(a: 255, r: 255, g: 0, b: 0))
             if (x0 == x1 && y0 == y1){
                 return;
             }
@@ -111,9 +206,22 @@ class RasterizationViewController: UIViewController {
     }
     
     func projectPoint(point:Point) -> Point{
-        let x:Float = ((point.x * Float(pixelData.width) + Float(pixelData.width)) / 2.0)
-        let y:Float = ((-point.y * Float(pixelData.height) + Float(pixelData.height)) / 2.0)
-        return Point(x: x, y: y, z: -point.z)
+        let p:Point = vertexShader(point);
+        let maxViewPortSize:Float = Float(max(pixelData.width, pixelData.height))
+        let x:Float = ((p.x * maxViewPortSize + maxViewPortSize) / 2.0)
+        let y:Float = ((-p.y * maxViewPortSize + maxViewPortSize) / 2.0)
+        //let x:Float = ((p.x * Float(pixelData.width) + Float(pixelData.width)) / 2.0)
+        //let y:Float = ((-p.y * Float(pixelData.height) + Float(pixelData.height)) / 2.0)
+        return Point(x: round(x), y: round(y), z: -p.z)
+    }
+    
+    func vertexShader(point:Point) -> Point{
+        return point;
+    }
+    
+    func fragmentShader(point:Point) -> PixelColor {
+        var value = 255 * ((point.z + 1.0)/2.0)
+        return PixelColor(a: 255, r:UInt8(value), g: 0, b: 0)
     }
     
     override func didReceiveMemoryWarning() {

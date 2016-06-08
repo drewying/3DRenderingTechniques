@@ -8,7 +8,7 @@
 
 import UIKit
 
-struct Pixel {
+struct PixelColor {
     var a:UInt8;
     var r:UInt8;
     var g:UInt8;
@@ -19,19 +19,19 @@ class PixelData: NSObject {
     
     let width:Int;
     let height:Int;
-    var pixelBuffer:[Pixel];
+    var pixelBuffer:[PixelColor];
     
     init(width:Int, height:Int) {
         self.width = width;
         self.height = height;
-        pixelBuffer = Array<Pixel>(count: width * height, repeatedValue: Pixel(a: 255, r: 0, g: 0, b: 0))
+        pixelBuffer = Array<PixelColor>(count: width * height, repeatedValue: PixelColor(a: 255, r: 0, g: 0, b: 0))
     }
     
-    func plot(x:Int, y:Int, red:UInt8, green:UInt8, blue:UInt8, alpha:UInt8){
-        if (x < 0 || y < 0){
+    func plot(x:Int, y:Int, pixelColor:PixelColor){
+        if (x < 0 || y < 0 || x >= width || y >= height){
             return;
         }
-        pixelBuffer[y * width + x] = Pixel(a: alpha, r: red, g: green, b: blue)
+        pixelBuffer[y * width + x] = pixelColor;
     }
     
     func getImageRepresentation() -> UIImage {
@@ -42,7 +42,7 @@ class PixelData: NSObject {
         
         var data = pixelBuffer // Copy to mutable []
         let providerRef = CGDataProviderCreateWithCFData(
-            NSData(bytes: &data, length: data.count * sizeof(Pixel))
+            NSData(bytes: &data, length: data.count * sizeof(PixelColor))
         )
         
         let cgim = CGImageCreate(
@@ -50,7 +50,7 @@ class PixelData: NSObject {
             height,
             bitsPerComponent,
             bitsPerPixel,
-            width * Int(sizeof(Pixel)),
+            width * Int(sizeof(PixelColor)),
             rgbColorSpace,
             bitmapInfo,
             providerRef,
