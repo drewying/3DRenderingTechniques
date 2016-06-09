@@ -79,89 +79,101 @@ class RasterizationViewController: UIViewController {
         let inverseSlope0:Float = (p2.x - p0.x) / (p2.y - p0.y)
         let inverseSlope1:Float = (p2.x - p1.x) / (p2.y - p1.y)
         
+        let inverseSlopeZ0:Float = (p2.z - p0.z) / (p2.y - p0.y)
+        let inverseSlopeZ1:Float = (p2.z - p1.z) / (p2.y - p1.y)
+        
         var currentX0:Float = p2.x
         var currentX1:Float = p2.x
         
+        var currentZ0:Float = p2.z
+        var currentZ1:Float = p2.z
+        
         for y in (Int(p0.y + 1)...Int(p2.y)).reverse(){
             
-            let start = Int(min(currentX0, currentX1))
-            let end = Int(max(currentX0, currentX1))
+            let xStart = Int(min(currentX0, currentX1))
+            let xEnd = Int(max(currentX0, currentX1))
             
-            for x in (start...end){
-                if (x >= 0 && y >= 0 && x < pixelData.width && y < pixelData.height){
-                    if (p1.z >= zBuffer[x][y]){
-                        let color:PixelColor = fragmentShader(Point(x: Float(x), y: Float(y), z: p1.z))
-                        pixelData.plot(x, y: y, pixelColor: color)
-                        zBuffer[x][y] = p1.z
-                    }
-                }
-                
-            }
+            let zStart = currentZ0
+            let zEnd = currentZ1
+            
+            plotHorizontalLine(xStart, xEnd: xEnd, y: y, zStart:zStart, zEnd:zEnd)
+            
             currentX0 -= inverseSlope0
             currentX1 -= inverseSlope1
+            
+            currentZ0 -= inverseSlopeZ0
+            currentZ1 -= inverseSlopeZ1
         }
     }
     
     func plotBottomFlatTriangle(p0:Point, p1:Point, p2:Point){
         let inverseSlope0:Float = (p1.x - p0.x) / (p1.y - p0.y)
         let inverseSlope1:Float = (p2.x - p0.x) / (p2.y - p0.y)
-    
+        
+        let inverseSlopeZ0:Float = (p1.z - p0.z) / (p1.y - p0.y)
+        let inverseSlopeZ1:Float = (p2.z - p0.z) / (p2.y - p0.y)
+        
         var currentX0:Float = p0.x
         var currentX1:Float = p0.x
-    
+        
+        var currentZ0:Float = p0.z
+        var currentZ1:Float = p0.z
+        
         for y in Int(p0.y)...Int(p1.y){
 
-            let start = Int(min(currentX0, currentX1))
-            let end = Int(max(currentX0, currentX1))
             
-            for x in (start...end){
-                if (x >= 0 && y >= 0 && x < pixelData.width && y < pixelData.height){
-                    if (p1.z >= zBuffer[x][y]){
-                        let color:PixelColor = fragmentShader(Point(x: Float(x), y: Float(y), z: p1.z))
-                        pixelData.plot(x, y: y, pixelColor: color)
-                        zBuffer[x][y] = p1.z
-                    }
-                }
-            }
+            let xStart = Int(min(currentX0, currentX1))
+            let xEnd = Int(max(currentX0, currentX1))
+            
+            let zStart = currentZ0
+            let zEnd = currentZ1
+            
+            plotHorizontalLine(xStart, xEnd: xEnd, y: y, zStart:zStart, zEnd:zEnd)
+            
             currentX0 += inverseSlope0
             currentX1 += inverseSlope1
+            
+            currentZ0 += inverseSlopeZ0
+            currentZ1 += inverseSlopeZ1
+            
         }
     }
    
+    func plotHorizontalLine(xStart:Int, xEnd:Int, y:Int, zStart:Float, zEnd:Float){
+        let inverseSlopeZ:Float = (zEnd - zStart) / Float(xEnd - xStart);
+        for x in (xStart...xEnd){
+            let z:Float = zStart + (Float(x - xStart) * inverseSlopeZ)
+            if (x >= 0 && y >= 0 && x < pixelData.width && y < pixelData.height){
+                if (z >= zBuffer[x][y]){
+                    let color:PixelColor = fragmentShader(Point(x: Float(x), y: Float(y), z: z))
+                    pixelData.plot(x, y: y, pixelColor: color)
+                    zBuffer[x][y] = z
+                }
+            }
+            
+        }
+    }
     
     func renderTriangle(triangle:Triangle){
         
-        //Sort the Points by the y vertex
-        var p0:Point = triangle.p0
-        if (triangle.p1.y > p0.y){
-            p0 = triangle.p1
-        }
-        if (triangle.p2.y > p0.y){
-            p0 = triangle.p2
-        }
-        
-        var p2:Point = triangle.p0;
-        if (triangle.p1.y < p2.y){
-            p2 = triangle.p1
-        }
-        if (triangle.p2.y < p2.y){
-            p2 = triangle.p2
-        }
-        
-        var p1:Point = triangle.p0
-        if (p1.y == p0.y || p1.y == p2.y){
-            p1 = triangle.p1;
-        }
-        if (p1.y == p0.y || p1.y == p2.y){
-            p1 = triangle.p2;
-        }
-        
         //Project the points into pixel coordinates
-        p0 = projectPoint(p0)
-        p1 = projectPoint(p1)
-        p2 = projectPoint(p2)
+        var points:[Point] = [projectPoint(triangle.p0), projectPoint(triangle.p1), projectPoint(triangle.p2)];
+        
+        //Sort points by the y coordinates
+        points.sortInPlace {
+            if Int($0.y) == Int($1.y){
+                return $0.x < $1.x
+            } else {
+                return $0.y < $1.y
+            }
+        }
         
         //Draw the projected Triangle to screen
+        let p0 = points[0]
+        let p1 = points[1]
+        let p2 = points[2]
+        
+        
         if (Int(p1.y) == Int(p2.y)) { //Check if we have a Bottom Flat Triangle
             plotBottomFlatTriangle(p0, p1: p1, p2: p2);
         } else if (Int(p0.y) == Int(p1.y)) { //Check if we have a Top Flat Triangle
@@ -192,49 +204,7 @@ class RasterizationViewController: UIViewController {
         var value = 255 * ((point.z + 1.0)/2.0)
         return PixelColor(a: 255, r:UInt8(value), g: 0, b: 0)
     }
-    
-    
-    /*func plotTriangleLines(triangle:Triangle){
-     plotLine(triangle.p0, p1: triangle.p1)
-     plotLine(triangle.p1, p1: triangle.p2)
-     plotLine(triangle.p2, p1: triangle.p0)
-     }
-     
-     func plotLine(p0:Point, p1:Point){
-     let projectedPoint0:Point = projectPoint(p0)
-     let projectedPoint1:Point = projectPoint(p1)
-     
-     var x0:Int = Int(projectedPoint0.x);
-     let x1:Int = Int(projectedPoint1.x);
-     
-     var y0:Int = Int(projectedPoint0.y);
-     let y1:Int = Int(projectedPoint1.y);
-     
-     let deltaX:Float = Float(abs(x1 - x0))
-     let incrementX:Int = x0 < x1 ? 1 : -1;
-     let deltaY:Float = Float(abs(y1 - y0))
-     let incrementY:Int = y0 < y1 ? 1 : -1;
-     var error:Float = (deltaX > deltaY ? deltaX : -deltaY)/2.0;
-     
-     while (true) {
-     pixelData.plot(x0, y: y0, pixelColor:PixelColor(a: 255, r: 255, g: 0, b: 0))
-     if (x0 == x1 && y0 == y1){
-     return;
-     }
-     
-     let error2:Float = error;
-     
-     if (error2 > -deltaX){
-     error -= deltaY;
-     x0 += incrementX;
-     }
-     
-     if (error2 < deltaY){
-     error += deltaX;
-     y0 += incrementY;
-     }
-     }
-     }*/
+
     
     
 }
