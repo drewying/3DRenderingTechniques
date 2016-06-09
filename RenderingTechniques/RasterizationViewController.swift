@@ -8,16 +8,10 @@
 
 import UIKit
 
-struct Point {
-    var x:Float
-    var y:Float
-    var z:Float
-}
-
 struct Triangle {
-    var p0:Point
-    var p1:Point
-    var p2:Point
+    var p0:Vector3D
+    var p1:Vector3D
+    var p2:Vector3D
 }
 
 class RasterizationViewController: UIViewController {
@@ -52,12 +46,12 @@ class RasterizationViewController: UIViewController {
             do {
                 let contents:String = try NSString(contentsOfFile: filepath, usedEncoding: nil) as String
                 let lines:[String] = contents.componentsSeparatedByString("\n")
-                var points:[Point] = Array<Point>()
+                var points:[Vector3D] = Array<Vector3D>()
                 
                 for line:String in lines{
                     if (line.hasPrefix("v ")){
                         let values:[String] = line.componentsSeparatedByString(" ")
-                        points.append(Point(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
+                        points.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
                     }
                     if (line.hasPrefix("f ")){
                         let values:[String] = line.componentsSeparatedByString(" ")
@@ -75,7 +69,7 @@ class RasterizationViewController: UIViewController {
         }
     }
 
-    func plotTopFlatTriangle(p0:Point, p1:Point, p2:Point){
+    func plotTopFlatTriangle(p0:Vector3D, p1:Vector3D, p2:Vector3D){
         let inverseSlope0:Float = (p2.x - p0.x) / (p2.y - p0.y)
         let inverseSlope1:Float = (p2.x - p1.x) / (p2.y - p1.y)
         
@@ -106,7 +100,7 @@ class RasterizationViewController: UIViewController {
         }
     }
     
-    func plotBottomFlatTriangle(p0:Point, p1:Point, p2:Point){
+    func plotBottomFlatTriangle(p0:Vector3D, p1:Vector3D, p2:Vector3D){
         let inverseSlope0:Float = (p1.x - p0.x) / (p1.y - p0.y)
         let inverseSlope1:Float = (p2.x - p0.x) / (p2.y - p0.y)
         
@@ -145,7 +139,7 @@ class RasterizationViewController: UIViewController {
             let z:Float = zStart + (Float(x - xStart) * inverseSlopeZ)
             if (x >= 0 && y >= 0 && x < pixelData.width && y < pixelData.height){
                 if (z >= zBuffer[x][y]){
-                    let color:PixelColor = fragmentShader(Point(x: Float(x), y: Float(y), z: z))
+                    let color:PixelColor = fragmentShader(Vector3D(x: Float(x), y: Float(y), z: z))
                     pixelData.plot(x, y: y, pixelColor: color)
                     zBuffer[x][y] = z
                 }
@@ -157,7 +151,7 @@ class RasterizationViewController: UIViewController {
     func renderTriangle(triangle:Triangle){
         
         //Project the points into pixel coordinates
-        var points:[Point] = [projectPoint(triangle.p0), projectPoint(triangle.p1), projectPoint(triangle.p2)];
+        var points:[Vector3D] = [projectPoint(triangle.p0), projectPoint(triangle.p1), projectPoint(triangle.p2)];
         
         //Sort points by the y coordinates
         points.sortInPlace {
@@ -179,7 +173,7 @@ class RasterizationViewController: UIViewController {
         } else if (Int(p0.y) == Int(p1.y)) { //Check if we have a Top Flat Triangle
             plotTopFlatTriangle(p0, p1: p1, p2: p2);
         } else { //Split the triangle into a top and a bottom and go crazy.
-            let p3 = Point(x: (p0.x + ((p1.y - p0.y) / (p2.y - p0.y)) * (p2.x - p0.x)), y: p1.y, z: p1.z);
+            let p3 = Vector3D(x: (p0.x + ((p1.y - p0.y) / (p2.y - p0.y)) * (p2.x - p0.x)), y: p1.y, z: p1.z);
             plotBottomFlatTriangle(p0, p1: p1, p2: p3);
             plotTopFlatTriangle(p1, p1: p3, p2: p2);
         }
@@ -188,20 +182,21 @@ class RasterizationViewController: UIViewController {
         
     }
     
-    func projectPoint(point:Point) -> Point{
-        let p:Point = vertexShader(point);
+    func projectPoint(point:Vector3D) -> Vector3D{
+        let p:Vector3D = vertexShader(point);
         let maxViewPortSize:Float = Float(max(pixelData.width, pixelData.height))
         let x:Float = ((p.x * maxViewPortSize + maxViewPortSize) / 2.0)
         let y:Float = ((-p.y * maxViewPortSize + maxViewPortSize) / 2.0)
-        return Point(x: round(x), y: round(y), z: -p.z)
+        return Vector3D(x: round(x), y: round(y), z: -p.z)
     }
     
-    func vertexShader(point:Point) -> Point{
-        return point;
+    func vertexShader(point:Vector3D) -> Vector3D{
+        let matrix:Matrix = Matrix.translate(Vector3D(x: 0.0, y: 0.25, z: 0.0)) * Matrix.scale(Vector3D(x: 0.5, y: 0.5, z: 0.5)) * Matrix.rotateY(0.5)
+        return point * matrix //matrix * point
     }
     
-    func fragmentShader(point:Point) -> PixelColor {
-        var value = 255 * ((point.z + 1.0)/2.0)
+    func fragmentShader(point:Vector3D) -> PixelColor {
+        let value = 255 * ((point.z + 1.0)/2.0)
         return PixelColor(a: 255, r:UInt8(value), g: 0, b: 0)
     }
 

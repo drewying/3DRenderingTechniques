@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BE1D0A052A00F1C929 /* Matrix.swift */; };
+		D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BF1D0A052A00F1C929 /* Vector3D.swift */; };
 		D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46661D0846CD0066A83D /* AppDelegate.swift */; };
 		D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466A1D0846CD0066A83D /* Main.storyboard */; };
 		D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466D1D0846CD0066A83D /* Assets.xcassets */; };
@@ -36,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D12805BE1D0A052A00F1C929 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
+		D12805BF1D0A052A00F1C929 /* Vector3D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector3D.swift; sourceTree = "<group>"; };
 		D1CD46631D0846CD0066A83D /* RenderingTechniques.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RenderingTechniques.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46661D0846CD0066A83D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D1CD466B1D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -107,6 +111,8 @@
 				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
 				D1CD46721D0846CD0066A83D /* Info.plist */,
 				D1CD46981D0862A50066A83D /* teapot.obj */,
+				D12805BE1D0A052A00F1C929 /* Matrix.swift */,
+				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
 				D1CD46941D0846F50066A83D /* RasterizationViewController.swift */,
 				D1CD46961D084B0A0066A83D /* PixelData.swift */,
 			);
@@ -263,8 +269,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */,
 				D1CD46971D084B0A0066A83D /* PixelData.swift in Sources */,
 				D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */,
+				D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */,
 				D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
