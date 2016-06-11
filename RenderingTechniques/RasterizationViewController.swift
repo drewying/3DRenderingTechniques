@@ -12,6 +12,10 @@ struct Triangle {
     var p0:Vector3D
     var p1:Vector3D
     var p2:Vector3D
+    
+    var n0:Vector3D
+    var n1:Vector3D
+    var n2:Vector3D
 }
 
 class RasterizationViewController: UIViewController {
@@ -21,11 +25,12 @@ class RasterizationViewController: UIViewController {
     var pixelData:PixelData = PixelData(width: 0, height: 0)
     var triangles:[Triangle] = Array<Triangle>()
     var zBuffer:[[Float]] = Array<Array<Float>>()
+    let lightPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: -1.0)
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         pixelData = PixelData(width: Int(mainImageView.bounds.size.width), height: Int(mainImageView.bounds.size.height))
-        zBuffer = Array<Array<Float>>(count: pixelData.width, repeatedValue: Array<Float>(count: pixelData.height, repeatedValue: -100.0))
+        zBuffer = Array<Array<Float>>(count: pixelData.width, repeatedValue: Array<Float>(count: pixelData.height, repeatedValue: FLT_MIN))
         
         loadTeapot()
         NSLog("Beginning Render")
@@ -43,22 +48,31 @@ class RasterizationViewController: UIViewController {
     
     func loadTeapot(){
         if let filepath = NSBundle.mainBundle().pathForResource("teapot", ofType: "obj") {
+        //if let filepath = NSBundle.mainBundle().pathForResource("cube", ofType: "obj") {
             do {
                 let contents:String = try NSString(contentsOfFile: filepath, usedEncoding: nil) as String
                 let lines:[String] = contents.componentsSeparatedByString("\n")
                 var points:[Vector3D] = Array<Vector3D>()
+                var normals:[Vector3D] = Array<Vector3D>()
                 
                 for line:String in lines{
                     if (line.hasPrefix("v ")){
                         let values:[String] = line.componentsSeparatedByString(" ")
                         points.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
                     }
+                    if (line.hasPrefix("vn ")){
+                        let values:[String] = line.componentsSeparatedByString(" ")
+                        normals.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
+                    }
                     if (line.hasPrefix("f ")){
                         let values:[String] = line.componentsSeparatedByString(" ")
                         let i0:Int = (values[1].substringToIndex((values[1].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
+                        let in0:Int = (values[1].substringFromIndex((values[1].rangeOfString("//")?.endIndex)!) as NSString).integerValue - 1
                         let i1:Int = (values[2].substringToIndex((values[2].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
+                        let in1:Int = (values[2].substringFromIndex((values[2].rangeOfString("//")?.endIndex)!) as NSString).integerValue - 1
                         let i2:Int = (values[3].substringToIndex((values[3].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
-                        triangles.append(Triangle(p0: points[i0], p1: points[i1], p2: points[i2]))
+                        let in2:Int = (values[3].substringFromIndex((values[3].rangeOfString("//")?.endIndex)!) as NSString).integerValue - 1
+                        triangles.append(Triangle(p0: points[i0], p1: points[i1], p2: points[i2], n0: normals[in0], n1: normals[in1], n2: normals[in2]))
                     }
                 }
             } catch {
@@ -68,84 +82,47 @@ class RasterizationViewController: UIViewController {
             print("Couldn't load teapot")
         }
     }
-
-    func plotTopFlatTriangle(p0:Vector3D, p1:Vector3D, p2:Vector3D){
-        let inverseSlope0:Float = (p2.x - p0.x) / (p2.y - p0.y)
-        let inverseSlope1:Float = (p2.x - p1.x) / (p2.y - p1.y)
-        
-        let inverseSlopeZ0:Float = (p2.z - p0.z) / (p2.y - p0.y)
-        let inverseSlopeZ1:Float = (p2.z - p1.z) / (p2.y - p1.y)
-        
-        var currentX0:Float = p2.x
-        var currentX1:Float = p2.x
-        
-        var currentZ0:Float = p2.z
-        var currentZ1:Float = p2.z
-        
-        for y in (Int(p0.y + 1)...Int(p2.y)).reverse(){
-            
-            let xStart = Int(min(currentX0, currentX1))
-            let xEnd = Int(max(currentX0, currentX1))
-            
-            let zStart = currentZ0
-            let zEnd = currentZ1
-            
-            plotHorizontalLine(xStart, xEnd: xEnd, y: y, zStart:zStart, zEnd:zEnd)
-            
-            currentX0 -= inverseSlope0
-            currentX1 -= inverseSlope1
-            
-            currentZ0 -= inverseSlopeZ0
-            currentZ1 -= inverseSlopeZ1
-        }
+   
+    func clamp(value:Float) -> Float{
+        return max(0.0, min(value, 1.0));
     }
     
-    func plotBottomFlatTriangle(p0:Vector3D, p1:Vector3D, p2:Vector3D){
-        let inverseSlope0:Float = (p1.x - p0.x) / (p1.y - p0.y)
-        let inverseSlope1:Float = (p2.x - p0.x) / (p2.y - p0.y)
-        
-        let inverseSlopeZ0:Float = (p1.z - p0.z) / (p1.y - p0.y)
-        let inverseSlopeZ1:Float = (p2.z - p0.z) / (p2.y - p0.y)
-        
-        var currentX0:Float = p0.x
-        var currentX1:Float = p0.x
-        
-        var currentZ0:Float = p0.z
-        var currentZ1:Float = p0.z
-        
-        for y in Int(p0.y)...Int(p1.y){
-
-            
-            let xStart = Int(min(currentX0, currentX1))
-            let xEnd = Int(max(currentX0, currentX1))
-            
-            let zStart = currentZ0
-            let zEnd = currentZ1
-            
-            plotHorizontalLine(xStart, xEnd: xEnd, y: y, zStart:zStart, zEnd:zEnd)
-            
-            currentX0 += inverseSlope0
-            currentX1 += inverseSlope1
-            
-            currentZ0 += inverseSlopeZ0
-            currentZ1 += inverseSlopeZ1
-            
-        }
+    func interpolate(min:Float, max:Float, delta:Float) -> Float{
+        return min + (max - min) * clamp(delta);
     }
-   
-    func plotHorizontalLine(xStart:Int, xEnd:Int, y:Int, zStart:Float, zEnd:Float){
-        let inverseSlopeZ:Float = (zEnd - zStart) / Float(xEnd - xStart);
-        for x in (xStart...xEnd){
-            let z:Float = zStart + (Float(x - xStart) * inverseSlopeZ)
-            if (x >= 0 && y >= 0 && x < pixelData.width && y < pixelData.height){
-                if (z >= zBuffer[x][y]){
-                    let color:PixelColor = fragmentShader(Vector3D(x: Float(x), y: Float(y), z: z))
-                    pixelData.plot(x, y: y, pixelColor: color)
-                    zBuffer[x][y] = z
-                }
+    
+    func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D){
+        let leftSlope = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
+        let rightSlope = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
+        
+        //Calculate the left and start
+        var xStart = Int(interpolate(p0.x, max: p1.x, delta: leftSlope));
+        var xEnd = Int(interpolate(p2.x, max: p3.x, delta: rightSlope));
+        
+        var z1:Float = interpolate(p0.z, max: p1.z, delta: leftSlope);
+        var z2:Float = interpolate(p2.z, max: p3.z, delta: rightSlope);
+        
+        if (xEnd < xStart){
+            //return
+            var temp = xStart
+            xStart = xEnd
+            xEnd = temp
+            var ztemp = z1
+            z1 = z2
+            z2 = ztemp
+        }
+        
+        for x in xStart ..< xEnd {
+            let horizontalSlope = Float(x - xStart) / Float(xEnd - xStart);
+            let z = interpolate(z1, max: z2, delta: horizontalSlope);
+            if (z > zBuffer[x][y]){
+                let color:PixelColor = fragmentShader(Vector3D(x: Float(x), y: Float(y), z: z), shadowFactor: 0.0)
+                pixelData.plot(x, y: y, pixelColor: color)
+                zBuffer[x][y] = z
             }
             
         }
+        
     }
     
     func renderTriangle(triangle:Triangle){
@@ -163,21 +140,68 @@ class RasterizationViewController: UIViewController {
         }
         
         //Draw the projected Triangle to screen
-        let p0 = points[0]
-        let p1 = points[1]
-        let p2 = points[2]
         
+        var projectedTriangle = triangle
+        projectedTriangle.p0 = points[0]
+        projectedTriangle.p1 = points[1]
+        projectedTriangle.p2 = points[2]
         
-        if (Int(p1.y) == Int(p2.y)) { //Check if we have a Bottom Flat Triangle
-            plotBottomFlatTriangle(p0, p1: p1, p2: p2);
-        } else if (Int(p0.y) == Int(p1.y)) { //Check if we have a Top Flat Triangle
-            plotTopFlatTriangle(p0, p1: p1, p2: p2);
-        } else { //Split the triangle into a top and a bottom and go crazy.
-            let p3 = Vector3D(x: (p0.x + ((p1.y - p0.y) / (p2.y - p0.y)) * (p2.x - p0.x)), y: p1.y, z: p1.z);
-            plotBottomFlatTriangle(p0, p1: p1, p2: p3);
-            plotTopFlatTriangle(p1, p1: p3, p2: p2);
+        let p0:Vector3D = projectedTriangle.p0
+        let p1:Vector3D = projectedTriangle.p1
+        let p2:Vector3D = projectedTriangle.p2
+        
+        var topSlope:Float = 0
+        if (p1.y - p0.y > 0){
+            topSlope = (p1.x - p0.x) / (p1.y - p0.y);
         }
         
+        var bottomSlope:Float = 0
+        if (p2.y - p0.y > 0){
+           bottomSlope = (p2.x - p0.x) / (p2.y - p0.y);
+        }
+        
+        // First case where triangles are like that:
+        // P1
+        // -
+        // --
+        // - -
+        // -  -
+        // -   - P2
+        // -  -
+        // - -
+        // -
+        // P3
+        
+        if (topSlope > bottomSlope)
+        {
+            for y in Int(p0.y)...Int(p2.y) {
+                if (Float(y) < p1.y) {
+                    plotScanLine(y, p0: p0, p1: p2, p2: p0, p3: p1);
+                } else {
+                    plotScanLine(y, p0: p0, p1: p2, p2: p1, p3: p2);
+                }
+            }
+        }
+            // First case where triangles are like that:
+            //       P1
+            //        -
+            //       --
+            //      - -
+            //     -  -
+            // P2 -   -
+            //     -  -
+            //      - -
+            //        -
+            //       P3
+        else {
+            for y in Int(p0.y)...Int(p2.y) {
+                if (Float(y) < p1.y) {
+                    plotScanLine(y, p0: p0, p1: p1, p2: p0, p3: p2);
+                } else {
+                    plotScanLine(y, p0: p1, p1: p2, p2: p0, p3: p2);
+                }
+            }
+        }
         
         
     }
@@ -191,12 +215,14 @@ class RasterizationViewController: UIViewController {
     }
     
     func vertexShader(point:Vector3D) -> Vector3D{
-        let matrix:Matrix = Matrix.translate(Vector3D(x: 0.0, y: 0.25, z: 0.0)) * Matrix.scale(Vector3D(x: 0.5, y: 0.5, z: 0.5)) * Matrix.rotateY(0.5)
-        return point * matrix //matrix * point
+        let matrix:Matrix =  Matrix.translate(Vector3D(x: 0.0, y: 0.25, z: 0.0)) * Matrix.scale(Vector3D(x: 0.5, y: 0.5, z: 0.5)) //* Matrix.rotateX(-0.785) * Matrix.rotateY(0.785)
+        return matrix * point
     }
     
-    func fragmentShader(point:Vector3D) -> PixelColor {
-        let value = 255 * ((point.z + 1.0)/2.0)
+    func fragmentShader(point:Vector3D, shadowFactor:Float) -> PixelColor {
+        let shadow = min(1.0, max(0.0, shadowFactor))
+        //let value = 255 * shadow
+        let value = 255 * max(0.0, min(1.0, ((point.z + 1.0)/2.0)))
         return PixelColor(a: 255, r:UInt8(value), g: 0, b: 0)
     }
 
