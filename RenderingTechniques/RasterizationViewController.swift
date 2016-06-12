@@ -126,7 +126,6 @@ class RasterizationViewController: UIViewController {
             let l = interpolate(lStart, max: lEnd, distance: horizontalSlope);
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
                 if (z >= zBuffer[x][y]){
-                
                     let color:Color8 = fragmentShader(Vector3D(x: Float(x), y: Float(y), z: z), shadowFactor: l)
                     renderView.plot(x, y: y, color: color)
                      zBuffer[x][y] = z

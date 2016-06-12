@@ -192,8 +192,5 @@ func * (left: Matrix, right: Vector3D) -> Vector3D {
     t += (right.z * left.x[3][2])
     t += left.x[3][3];
     
-    var returnVector:Vector3D = Vector3D(x:x,y:y,z:z);
-    returnVector = returnVector / t;
-    
-    return returnVector;
+    return Vector3D(x:x,y:y,z:z) / t
 }
