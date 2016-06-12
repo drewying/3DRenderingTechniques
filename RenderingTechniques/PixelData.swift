@@ -34,6 +34,10 @@ class PixelData: NSObject {
         pixelBuffer[y * width + x] = pixelColor;
     }
     
+    func clear() {
+        pixelBuffer = Array<PixelColor>(count: width * height, repeatedValue: PixelColor(a: 255, r: 0, g: 0, b: 0))
+    }
+    
     func getImageRepresentation() -> UIImage {
         let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedFirst.rawValue)

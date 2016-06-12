@@ -17,21 +17,21 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="PAh-gv-98P">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6wM-g8-sWh" customClass="RenderView" customModule="RenderingTechniques" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="20" width="600" height="580"/>
-                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                            </imageView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="PAh-gv-98P" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="91m-XW-krg"/>
-                            <constraint firstItem="PAh-gv-98P" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="O0X-bW-wX5"/>
-                            <constraint firstAttribute="trailing" secondItem="PAh-gv-98P" secondAttribute="trailing" id="hLA-x6-pru"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="PAh-gv-98P" secondAttribute="bottom" id="vV6-O3-D4Z"/>
+                            <constraint firstItem="6wM-g8-sWh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Ne6-lO-SbS"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="6wM-g8-sWh" secondAttribute="bottom" id="baL-rx-OSu"/>
+                            <constraint firstItem="6wM-g8-sWh" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="dr1-g4-wra"/>
+                            <constraint firstAttribute="trailing" secondItem="6wM-g8-sWh" secondAttribute="trailing" id="zuN-XK-vE3"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="mainImageView" destination="PAh-gv-98P" id="Z60-Ld-m73"/>
+                        <outlet property="renderView" destination="6wM-g8-sWh" id="MKE-yy-MuS"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
