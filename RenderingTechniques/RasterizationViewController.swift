@@ -25,6 +25,7 @@ class RasterizationViewController: UIViewController {
     var zBuffer:[[Float]] = Array<Array<Float>>()
     var timer: CADisplayLink! = nil
     let lightPosition:Vector3D = Vector3D(x: 0.0, y: 0.3, z: -1.0)
+    let cameraPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
     var currentRotation:Float = 0.0
     
     override func viewDidLoad() {
@@ -75,15 +76,19 @@ class RasterizationViewController: UIViewController {
     }
     
     func renderLoop(){
-        NSLog("Begin Render")
+        let startTime = NSDate()
         currentRotation += 0.02
         zBuffer = Array<Array<Float>>(count: renderView.width, repeatedValue: Array<Float>(count: renderView.height, repeatedValue: -FLT_MAX))
         renderView.clear()
         for triangle:Triangle in triangles{
-            renderTriangle(triangle)
+            //if ((triangle.p0 - cameraPosition) ⋅ ((triangle.p1 - triangle.p0) × (triangle.p2 - triangle.p0))) >= 0.0{
+                renderTriangle(triangle)
+            //}
+            
         }
         renderView.render()
-        //NSLog("End Render")
+        print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
+        
     }
    
     func clamp(value:Float) -> Float{
@@ -95,23 +100,23 @@ class RasterizationViewController: UIViewController {
     }
     
     func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, n0:Vector3D, n1:Vector3D, n2:Vector3D, n3:Vector3D){
-        let leftSlope = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
-        let rightSlope = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
+        let leftDistance = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
+        let rightDistance = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
         
         //Calculate the left and start
-        var xStart = Int(interpolate(p0.x, max: p1.x, distance: leftSlope));
-        var xEnd = Int(interpolate(p2.x, max: p3.x, distance: rightSlope));
+        var xStart = Int(interpolate(p0.x, max: p1.x, distance: leftDistance));
+        var xEnd = Int(interpolate(p2.x, max: p3.x, distance: rightDistance));
         
-        var zStart:Float = interpolate(p0.z, max: p1.z, distance: leftSlope);
-        var zEnd:Float = interpolate(p2.z, max: p3.z, distance: rightSlope);
+        var zStart:Float = interpolate(p0.z, max: p1.z, distance: leftDistance);
+        var zEnd:Float = interpolate(p2.z, max: p3.z, distance: rightDistance);
         
         let l0 = n0.normalized() ⋅ lightPosition
         let l1 = n1.normalized() ⋅ lightPosition
         let l2 = n2.normalized() ⋅ lightPosition
         let l3 = n3.normalized() ⋅ lightPosition
         
-        var lStart:Float = interpolate(l0, max: l1, distance: leftSlope);
-        var lEnd:Float = interpolate(l2, max: l3, distance: rightSlope);
+        var lStart:Float = interpolate(l0, max: l1, distance: leftDistance);
+        var lEnd:Float = interpolate(l2, max: l3, distance: rightDistance);
         
         if (xEnd < xStart){
             //Swap start with end variables
@@ -121,9 +126,9 @@ class RasterizationViewController: UIViewController {
         }
         
         for x in xStart ..< xEnd {
-            let horizontalSlope = Float(x - xStart) / Float(xEnd - xStart);
-            let z = interpolate(zStart, max: zEnd, distance: horizontalSlope);
-            let l = interpolate(lStart, max: lEnd, distance: horizontalSlope);
+            let horizontalDistance = Float(x - xStart) / Float(xEnd - xStart);
+            let z = interpolate(zStart, max: zEnd, distance: horizontalDistance);
+            let l = interpolate(lStart, max: lEnd, distance: horizontalDistance);
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
                 if (z >= zBuffer[x][y]){
                     let color:Color8 = fragmentShader(Vector3D(x: Float(x), y: Float(y), z: z), shadowFactor: l)
