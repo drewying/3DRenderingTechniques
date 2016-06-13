@@ -24,8 +24,8 @@ class RasterizationViewController: UIViewController {
     var triangles:[Triangle] = Array<Triangle>()
     var zBuffer:[[Float]] = Array<Array<Float>>()
     var timer: CADisplayLink! = nil
-    let lightPosition:Vector3D = Vector3D(x: 0.0, y: 0.3, z: -1.0)
-    let cameraPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
+    let lightPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: -2.0)
+    let cameraPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: -1.0)
     var currentRotation:Float = 0.0
     
     override func viewDidLoad() {
@@ -39,8 +39,8 @@ class RasterizationViewController: UIViewController {
     }
     
     func loadTeapot(){
-        if let filepath = NSBundle.mainBundle().pathForResource("teapot", ofType: "obj") {
-        //if let filepath = NSBundle.mainBundle().pathForResource("cube", ofType: "obj") {
+        //if let filepath = NSBundle.mainBundle().pathForResource("teapot", ofType: "obj") {
+        if let filepath = NSBundle.mainBundle().pathForResource("cube", ofType: "obj") {
             do {
                 let contents:String = try NSString(contentsOfFile: filepath, usedEncoding: nil) as String
                 let lines:[String] = contents.componentsSeparatedByString("\n")
@@ -76,15 +76,14 @@ class RasterizationViewController: UIViewController {
     }
     
     func renderLoop(){
-        let startTime = NSDate()
+        let startTime:NSDate = NSDate()
         currentRotation += 0.02
         zBuffer = Array<Array<Float>>(count: renderView.width, repeatedValue: Array<Float>(count: renderView.height, repeatedValue: -FLT_MAX))
         renderView.clear()
         for triangle:Triangle in triangles{
-            //if ((triangle.p0 - cameraPosition) ⋅ ((triangle.p1 - triangle.p0) × (triangle.p2 - triangle.p0))) >= 0.0{
+            //if ((cameraPosition) ⋅ ((triangle.p1 - triangle.p0) × (triangle.p2 - triangle.p0)).normalized()) >= 0.0{
                 renderTriangle(triangle)
             //}
-            
         }
         renderView.render()
         print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
@@ -143,39 +142,12 @@ class RasterizationViewController: UIViewController {
     
     func renderTriangle(triangle:Triangle){
         
-        //Project the points into pixel coordinates
-        /*var points:[Vector3D] = [projectPoint(triangle.p0), projectPoint(triangle.p1), projectPoint(triangle.p2)];
-        
-        //Sort points by the y coordinates
-        points.sortInPlace {
-            if Int($0.y) == Int($1.y){
-                return $0.x < $1.x
-            } else {
-                return $0.y < $1.y
-            }
-        }
-        
-        //Draw the projected Triangle to screen
-        
-        var projectedTriangle = triangle
-        projectedTriangle.p0 = points[0]
-        projectedTriangle.p1 = points[1]
-        projectedTriangle.p2 = points[2]
-        
-        let p0:Vector3D = projectedTriangle.p0
-        let p1:Vector3D = projectedTriangle.p1
-        let p2:Vector3D = projectedTriangle.p2
-        
-        let n0:Vector3D = projectedTriangle.n0
-        let n1:Vector3D = projectedTriangle.n1
-        let n2:Vector3D = projectedTriangle.n2*/
-        
-        var p0 = projectPoint(triangle.p0)
-        var p1 = projectPoint(triangle.p1)
-        var p2 = projectPoint(triangle.p2)
-        var n0 = vertexShader(triangle.n0)
-        var n1 = vertexShader(triangle.n1)
-        var n2 = vertexShader(triangle.n2)
+        var p0 = projectPoint(transformPoint(triangle.p0))
+        var p1 = projectPoint(transformPoint(triangle.p1))
+        var p2 = projectPoint(transformPoint(triangle.p2))
+        var n0 = transformPoint(triangle.n0)
+        var n1 = transformPoint(triangle.n1)
+        var n2 = transformPoint(triangle.n2)
         
         let points:[(Vector3D, Vector3D)] = [(p0,n0), (p1,n1), (p2,n2)].sort {
             return $0.0.y < $1.0.y
@@ -200,16 +172,16 @@ class RasterizationViewController: UIViewController {
         }
         
         // First case where triangles are like that:
-        // P1
+        // P0
         // -
         // --
         // - -
         // -  -
-        // -   - P2
+        // -   - P1
         // -  -
         // - -
         // -
-        // P3
+        // P2
         
         if (topSlope > bottomSlope)
         {
@@ -222,16 +194,16 @@ class RasterizationViewController: UIViewController {
             }
         }
             // First case where triangles are like that:
-            //       P1
+            //       P0
             //        -
             //       --
             //      - -
             //     -  -
-            // P2 -   -
+            // P1 -   -
             //     -  -
             //      - -
             //        -
-            //       P3
+            //       P2
         else {
             for y in Int(p0.y)...Int(p2.y) {
                 if (Float(y) < p1.y) { //Plot top half
@@ -246,14 +218,13 @@ class RasterizationViewController: UIViewController {
     }
     
     func projectPoint(point:Vector3D) -> Vector3D{
-        let p:Vector3D = vertexShader(point);
         let maxViewPortSize:Float = Float(max(renderView.width, renderView.height))
-        let x:Float = ((p.x * maxViewPortSize + maxViewPortSize) / 2.0)
-        let y:Float = ((-p.y * maxViewPortSize + maxViewPortSize) / 2.0)
-        return Vector3D(x: round(x), y: round(y), z: -p.z)
+        let x:Float = ((point.x * maxViewPortSize + maxViewPortSize) / 2.0)
+        let y:Float = ((-point.y * maxViewPortSize + maxViewPortSize) / 2.0)
+        return Vector3D(x: round(x), y: round(y), z: -point.z)
     }
     
-    func vertexShader(point:Vector3D) -> Vector3D{
+    func transformPoint(point:Vector3D) -> Vector3D{
         let matrix:Matrix =  Matrix.translate(Vector3D(x: 0.0, y: 0.25, z: 0.0)) * Matrix.scale(Vector3D(x: 0.5, y: 0.5, z: 0.5)) * Matrix.rotateX(-0.35) * Matrix.rotateY(currentRotation)
         return matrix * point
     }
