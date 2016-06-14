@@ -8,159 +8,169 @@
 
 import UIKit
 
+
+//This matrix assumes a LH coordinate system
+
 struct Matrix{
-    var x:[[Float]] = [
-        [0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0]
+    var m:[Float] = [
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0
     ];
     
     static func identityMatrix() -> Matrix{
-        var m = Matrix();
-        m.x = [
-            [1.0,0.0,0.0,0.0],
-            [0.0,1.0,0.0,0.0],
-            [0.0,0.0,1.0,0.0],
-            [0.0,0.0,0.0,1.0]
+        var matrix = Matrix();
+        matrix.m = [
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
         ];
-        return m;
+        return matrix
     }
     
     static func zeroMatrix() -> Matrix{
-        var m = Matrix();
-        m.x = [
-            [0.0,0.0,0.0,0.0],
-            [0.0,0.0,0.0,0.0],
-            [0.0,0.0,0.0,0.0],
-            [0.0,0.0,0.0,0.0]
+        var matrix = Matrix();
+        matrix.m = [
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0
         ];
-        return m;
+        return matrix;
+    }
+    
+    static func perspective(fov:Float, aspectRatio:Float, zNear:Float, zFar:Float) -> Matrix{
+        var result = zeroMatrix()
+        let tan = 1.0/tanf(fov * 0.5)
+        result.m[0] = tan/aspectRatio
+        result.m[5] = tan
+        result.m[10] = -zFar / (zNear - zFar)
+        result.m[11] = 1.0
+        result.m[14] = (zNear * zFar) / (zNear - zFar)
+        return result
+    }
+    
+    static func lookAt(cameraPosition:Vector3D, cameraTarget:Vector3D, cameraUp:Vector3D) -> Matrix{
+        let zAxis = (cameraPosition - cameraTarget).normalized()
+        let xAxis = (cameraUp × zAxis).normalized()
+        let yAxis = zAxis × xAxis
+        
+        let x = -(xAxis ⋅ cameraPosition)
+        let y = -(yAxis ⋅ cameraPosition)
+        let z = -(zAxis ⋅ cameraPosition)
+        
+        
+        var result:Matrix = Matrix()
+        result.m = [
+            xAxis.x, yAxis.x, zAxis.x, 0.0,
+            xAxis.y, yAxis.y, zAxis.y, 0.0,
+            xAxis.z, yAxis.z, zAxis.z, 0.0,
+                  x,       y,       z, 1.0
+        ]
+        return result
     }
     
     static func scale(vector:Vector3D) -> Matrix{
-        var returnMatrix = zeroMatrix();
-        returnMatrix.x[0][0] = vector.x;
-        returnMatrix.x[1][1] = vector.y;
-        returnMatrix.x[2][2] = vector.z;
-        returnMatrix.x[3][3] = 1.0;
-        return returnMatrix;
+        var result = zeroMatrix();
+        result.m[0] = vector.x;
+        result.m[5] = vector.y;
+        result.m[10] = vector.z;
+        result.m[15] = 1.0;
+        return result
     }
     
     static func translate(vector:Vector3D) -> Matrix{
-        var returnMatrix = identityMatrix();
-        returnMatrix.x[0][3] = vector.x;
-        returnMatrix.x[1][3] = vector.y;
-        returnMatrix.x[2][3] = vector.z;
-        return returnMatrix;
-    }
-    
-    static func rotate(axis:Vector3D, angle:Float) -> Matrix{
-        let axisN:Vector3D = axis.normalized();
-        
-        var returnMatrix = Matrix();
-        
-        let x:Float = axisN.x;
-        let y:Float = axisN.y;
-        let z:Float = axisN.z;
-        let cosine:Float = cos(angle);
-        let sine:Float = sin(angle);
-        let t:Float = 1.0 - cosine;
-        
-        returnMatrix.x[0][0] = t * x * x + cosine
-        returnMatrix.x[1][0] = t * x * y - sine * z;
-        returnMatrix.x[2][0] = t * x * z + sine * y;
-        returnMatrix.x[3][0] = 0.0;
-        
-        returnMatrix.x[0][1] = t * x * y + sine * z;
-        returnMatrix.x[1][1] = t * y * y + cosine;
-        returnMatrix.x[2][1] = t * y * z - sine * x;
-        returnMatrix.x[3][1] = 0.0;
-        
-        returnMatrix.x[0][2] = t * x * z - sine * y;
-        returnMatrix.x[1][2] = t * y * z + sine * x;
-        returnMatrix.x[2][2] = t * z * z + cosine;
-        returnMatrix.x[3][2] = 0.0;
-        
-        returnMatrix.x[0][3] = 0.0;
-        returnMatrix.x[1][3] = 0.0;
-        returnMatrix.x[2][3] = 0.0;
-        returnMatrix.x[3][3] = 1.0;
-        
-        return returnMatrix;
+        var result = identityMatrix()
+        result.m[12] = vector.x
+        result.m[13] = vector.y
+        result.m[14] = vector.z
+        return result
     }
     
     static func rotateX(angle:Float) -> Matrix {
-        var returnMatrix = identityMatrix();
-        let cosine:Float = cos(angle);
-        let sine:Float = sin(angle);
+        let cosine:Float = cos(angle)
+        let sine:Float = sin(angle)
     
-        returnMatrix.x[1][1] = cosine;
-        returnMatrix.x[1][2] = -sine;
-        returnMatrix.x[2][1] = sine;
-        returnMatrix.x[2][2] = cosine;
+        var result = zeroMatrix()
+        result.m[0] = 1.0;
+        result.m[15] = 1.0;
+        result.m[5] = cosine
+        result.m[10] = cosine
+        result.m[9] = -sine
+        result.m[6] = sine
     
-        return returnMatrix;
+        return result
     }
     
     static func rotateY(angle:Float) -> Matrix {
-        var returnMatrix = identityMatrix();
         let cosine:Float = cos(angle);
         let sine:Float = sin(angle);
     
-        returnMatrix.x[0][0] = cosine;
-        returnMatrix.x[0][2] = sine;
-        returnMatrix.x[2][0] = -sine;
-        returnMatrix.x[2][2] = cosine;
+        var result = zeroMatrix()
+        result.m[5] = 1.0
+        result.m[15] = 1.0
+        result.m[0] = cosine
+        result.m[2] = -sine
+        result.m[8] = sine
+        result.m[10] = cosine
         
-        return returnMatrix
+        return result
     }
     
     static func rotateZ(angle:Float) -> Matrix {
-        var returnMatrix = identityMatrix();
         let cosine:Float = cos(angle);
         let sine:Float = sin(angle);
     
-        returnMatrix.x[0][0] = cosine;
-        returnMatrix.x[0][1] = -sine;
-        returnMatrix.x[1][0] = sine;
-        returnMatrix.x[1][1] = cosine;
+        var result = zeroMatrix()
+        result.m[10] = 1.0
+        result.m[15] = 1.0
+        result.m[0] = cosine
+        result.m[1] = sine
+        result.m[4] = -sine
+        result.m[5] = cosine
     
-        return returnMatrix;
+        return result
     }
     
-    static func transformPoint(left:Matrix, right:Vector3D) -> Vector3D {
-        return left * right;
+    static func transformVector(left:Matrix, right:Vector3D) -> Vector3D {
+        let x:Float = right.x * left.m[0] + right.y * left.m[4] + right.z * left.m[6] + left.m[8]
+        let y:Float = right.x * left.m[1] + right.y * left.m[5] + right.z * left.m[7] + left.m[9]
+        let z:Float = right.x * left.m[2] + right.y * left.m[6] + right.z * left.m[8] + left.m[10]
+        return Vector3D(x:x, y:y, z:z)
     }
     
-    static func transformVector(left:Matrix, right:Vector3D) -> Vector3D{
+    static func transformPoint(left:Matrix, right:Vector3D) -> Vector3D{
         
-        var x = (right.x * left.x[0][0] + right.y * left.x[0][1] + right.z * left.x[0][2]);
-        x += left.x[0][3];
-        var y = (right.x * left.x[1][0] + right.y * left.x[1][1] + right.z * left.x[1][2]);
-        y += left.x[1][3]
-        var z = (right.x * left.x[2][0] + right.y * left.x[2][1] + right.z * left.x[2][2]);
-        z += left.x[2][3]
-        var t = (right.x * left.x[3][0] + right.y * left.x[3][1] + right.z * left.x[3][2]);
-        t += left.x[3][3]
-        let returnVector = Vector3D(x:x, y:y, z:z);
-        return returnVector / t;
+        let x:Float = right.x * left.m[0] + right.y * left.m[4] + right.z * left.m[8] + left.m[12]
+        let y:Float = right.x * left.m[1] + right.y * left.m[5] + right.z * left.m[9] + left.m[13]
+        let z:Float = right.x * left.m[2] + right.y * left.m[6] + right.z * left.m[10] + left.m[14]
+        let w:Float = right.x * left.m[3] + right.y * left.m[7] + right.z * left.m[11] + left.m[15]
+        return Vector3D(x:x/w, y:y/w, z:z/w)
     }
 
 }
 
 func * (left: Matrix, right: Matrix) -> Matrix {
-    var m = Matrix();
-    for i in 0...3{
-        for j in 0...3{
-            var subt:Float = 0;
-            for k in 0...3{
-                subt += left.x[i][k] * right.x[k][j];
-                m.x[i][j] = subt;
-            }
-        }
-    }
-    return m;
+    var result:Matrix = Matrix();
+    result.m[0] = left.m[0] * right.m[0] + left.m[1] * right.m[4] + left.m[2] * right.m[8] + left.m[3] * right.m[12]
+    result.m[1] = left.m[0] * right.m[1] + left.m[1] * right.m[5] + left.m[2] * right.m[9] + left.m[3] * right.m[13]
+    result.m[2] = left.m[0] * right.m[2] + left.m[1] * right.m[6] + left.m[2] * right.m[10] + left.m[3] * right.m[14]
+    result.m[3] = left.m[0] * right.m[3] + left.m[1] * right.m[7] + left.m[2] * right.m[11] + left.m[3] * right.m[15]
+    result.m[4] = left.m[4] * right.m[0] + left.m[5] * right.m[4] + left.m[6] * right.m[8] + left.m[7] * right.m[12]
+    result.m[5] = left.m[4] * right.m[1] + left.m[5] * right.m[5] + left.m[6] * right.m[9] + left.m[7] * right.m[13]
+    result.m[6] = left.m[4] * right.m[2] + left.m[5] * right.m[6] + left.m[6] * right.m[10] + left.m[7] * right.m[14]
+    result.m[7] = left.m[4] * right.m[3] + left.m[5] * right.m[7] + left.m[6] * right.m[11] + left.m[7] * right.m[15]
+    result.m[8] = left.m[8] * right.m[0] + left.m[9] * right.m[4] + left.m[10] * right.m[8] + left.m[11] * right.m[12]
+    result.m[9] = left.m[8] * right.m[1] + left.m[9] * right.m[5] + left.m[10] * right.m[9] + left.m[11] * right.m[13]
+    result.m[10] = left.m[8] * right.m[2] + left.m[9] * right.m[6] + left.m[10] * right.m[10] + left.m[11] * right.m[14]
+    result.m[11] = left.m[8] * right.m[3] + left.m[9] * right.m[7] + left.m[10] * right.m[11] + left.m[11] * right.m[15]
+    result.m[12] = left.m[12] * right.m[0] + left.m[13] * right.m[4] + left.m[14] * right.m[8] + left.m[15] * right.m[12]
+    result.m[13] = left.m[12] * right.m[1] + left.m[13] * right.m[5] + left.m[14] * right.m[9] + left.m[15] * right.m[13]
+    result.m[14] = left.m[12] * right.m[2] + left.m[13] * right.m[6] + left.m[14] * right.m[10] + left.m[15] * right.m[14]
+    result.m[15] = left.m[12] * right.m[3] + left.m[13] * right.m[7] + left.m[14] * right.m[11] + left.m[15] * right.m[15]
+    return result
 }
 
 func * (left: Vector3D, right: Matrix) -> Vector3D {
@@ -168,29 +178,5 @@ func * (left: Vector3D, right: Matrix) -> Vector3D {
 }
 
 func * (left: Matrix, right: Vector3D) -> Vector3D {
-    var x:Float
-    x = (right.x * left.x[0][0])
-    x += (right.y * left.x[0][1])
-    x += (right.z * left.x[0][2])
-    x += left.x[0][3];
-    
-    var y:Float;
-    y = (right.x * left.x[1][0])
-    y += (right.y * left.x[1][1])
-    y += (right.z * left.x[1][2])
-    y += left.x[1][3];
-    
-    var z:Float;
-    z = (right.x * left.x[2][0])
-    z += (right.y * left.x[2][1])
-    z += (right.z * left.x[2][2])
-    z += left.x[2][3];
-    
-    var t:Float;
-    t = (right.x * left.x[3][0])
-    t += (right.y * left.x[3][1])
-    t += (right.z * left.x[3][2])
-    t += left.x[3][3];
-    
-    return Vector3D(x:x,y:y,z:z) / t
+    return Matrix.transformPoint(left, right: right)
 }
