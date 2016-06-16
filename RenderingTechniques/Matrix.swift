@@ -49,6 +49,12 @@ struct Matrix{
         result.m[10] = -zFar / (zNear - zFar)
         result.m[11] = 1.0
         result.m[14] = (zNear * zFar) / (zNear - zFar)
+        
+        /*result.m[0] = tan * aspectRatio
+        result.m[5] = tan
+        result.m[10] = (zFar + zNear) / (zFar - zNear)
+        result.m[11] = 1.0
+        result.m[14] = (2.0 * zNear * zFar) / (zNear - zFar);*/
         return result
     }
     
