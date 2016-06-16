@@ -31,7 +31,7 @@ class RasterizationViewController: UIViewController {
     
     
     //Matrices
-    var worldMatrix:Matrix = Matrix.identityMatrix()
+    var modelMatrix:Matrix = Matrix.identityMatrix()
     var projectionMatrix:Matrix = Matrix.identityMatrix()
     var viewMatrix:Matrix = Matrix.identityMatrix()
     
@@ -42,11 +42,6 @@ class RasterizationViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        
-        viewMatrix = Matrix.lookAt(cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
-        
-        projectionMatrix = Matrix.perspective(0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
-        
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
@@ -90,16 +85,22 @@ class RasterizationViewController: UIViewController {
     
     func renderLoop(){
         let startTime:NSDate = NSDate()
-        worldMatrix = Matrix.rotateY(currentRotation) * Matrix.rotateX(0.392) * Matrix.translate(Vector3D(x: 0.0, y: -0.5, z: 0.0))
-        
-        currentRotation += 0.02
+        updateMatrices()
         zBuffer = Array<Array<Float>>(count: renderView.width, repeatedValue: Array<Float>(count: renderView.height, repeatedValue: FLT_MAX))
         renderView.clear()
         for triangle:Triangle in triangles{
             renderTriangle(triangle)
         }
         renderView.render()
+        currentRotation += 0.02
         print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
+        
+    }
+    
+    func updateMatrices(){
+        modelMatrix = Matrix.rotateY(-currentRotation) * Matrix.rotateX(0.392) * Matrix.translate(Vector3D(x: 0.0, y: -0.4, z: 0.0))
+        viewMatrix = Matrix.lookAt(cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
+        projectionMatrix = Matrix.perspective(0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
         
     }
    
@@ -148,23 +149,33 @@ class RasterizationViewController: UIViewController {
         
     }
     
+    func calculateLightingFactor(point:Vector3D, normal:Vector3D) -> Float{
+        let lightDistance = (lightPosition - point).length()
+        let lightVector = (lightPosition - point).normalized()
+        var lightFactor = max((lightVector ⋅ normal), 0.25)
+        //lightFactor *= (1.0 / (1.0 + (0.25 * lightDistance * lightDistance)))
+        return lightFactor
+    }
+    
     func renderTriangle(triangle:Triangle){
         
-        var p0 = triangle.p0 * (worldMatrix * viewMatrix)
-        var p1 = triangle.p1 * (worldMatrix * viewMatrix)
-        var p2 = triangle.p2 * (worldMatrix * viewMatrix)
+        var p0 = triangle.p0 * (modelMatrix * viewMatrix)
+        var p1 = triangle.p1 * (modelMatrix * viewMatrix)
+        var p2 = triangle.p2 * (modelMatrix * viewMatrix)
         
         if ((p0 - cameraPosition) ⋅ ((p1 - p0) × (p2 - p0)) >= 0){
             return;
         }
         
-        let n0 = Matrix.transformVector(worldMatrix * viewMatrix, right: triangle.n0)
-        let n1 = Matrix.transformVector(worldMatrix * viewMatrix, right: triangle.n1)
-        let n2 = Matrix.transformVector(worldMatrix * viewMatrix, right: triangle.n2)
+        let normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
+        let n0 = Matrix.transformPoint(normalMatrix, right: triangle.n0).normalized()
+        let n1 = Matrix.transformPoint(normalMatrix, right: triangle.n1).normalized()
+        let n2 = Matrix.transformPoint(normalMatrix, right: triangle.n2).normalized()
         
-        var l0 = n0.normalized() ⋅ (lightPosition - (triangle.p0 * worldMatrix * viewMatrix * projectionMatrix)).normalized()
-        var l1 = n1.normalized() ⋅ (lightPosition - (triangle.p1 * worldMatrix * viewMatrix * projectionMatrix)).normalized()
-        var l2 = n2.normalized() ⋅ (lightPosition - (triangle.p2 * worldMatrix * viewMatrix * projectionMatrix)).normalized()
+        //Calculate Lighting
+        var l0:Float = calculateLightingFactor(p0, normal: n0)
+        var l1:Float = calculateLightingFactor(p1, normal: n1)
+        var l2:Float = calculateLightingFactor(p2, normal: n2)
         
         p0 = projectPoint(p0 * projectionMatrix)
         p1 = projectPoint(p1 * projectionMatrix)
@@ -250,8 +261,8 @@ class RasterizationViewController: UIViewController {
         y = (1 - y) / 2 * Float(renderView.height)*/
  
         
-       var x = point.x * Float(renderView.width) + Float(renderView.width) / 2.0;
-       var y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
+       let x = point.x * Float(renderView.width) + Float(renderView.width) / 2.0;
+       let y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
  
         
         return Vector3D(x: x, y: y, z: point.z)
@@ -259,13 +270,7 @@ class RasterizationViewController: UIViewController {
     
     func fragmentShader(point:Vector3D, shadowFactor:Float) -> Color8 {
         let value = 255 * clamp(shadowFactor)
-        //if (point.y == 94 && point.x == 167){
-        //    print("Break")
-        //}
-        //if (UInt8(value) > 0){
-        //    print("Break")
-        //}
-        return Color8(a: 255, r:UInt8(value)/3, g: UInt8(value)/2, b: UInt8(value))
+        return Color8(a: 255, r:UInt8(value)/3, g: UInt8(value)/2, b: UInt8(value)/2)
     }
 
     

@@ -30,7 +30,7 @@ class RenderView: UIView {
     var pixelBuffer:[Color8] = [Color8]()
     
     func clear(){
-        pixelBuffer = Array<Color8>(count: width * height, repeatedValue: Color8(a: 255, r: 0, g: 0, b: 0))
+        pixelBuffer = Array<Color8>(count: width * height, repeatedValue: Color8(a: 255, r: 65, g: 65, b: 65))
     }
     
     func plot(x:Int, y:Int, color:Color8){

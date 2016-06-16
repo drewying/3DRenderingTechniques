@@ -155,6 +155,87 @@ struct Matrix{
         let w:Float = right.x * left.m[3] + right.y * left.m[7] + right.z * left.m[11] + left.m[15]
         return Vector3D(x:x/w, y:y/w, z:z/w)
     }
+    
+    static func transpose(matrix:Matrix) -> Matrix{
+        var result:Matrix = Matrix();
+        result.m[0] = matrix.m[0];
+        result.m[1] = matrix.m[4];
+        result.m[2] = matrix.m[8];
+        result.m[3] = matrix.m[12];
+        result.m[4] = matrix.m[1];
+        result.m[5] = matrix.m[5];
+        result.m[6] = matrix.m[9];
+        result.m[7] = matrix.m[13];
+        result.m[8] = matrix.m[2];
+        result.m[9] = matrix.m[6];
+        result.m[10] = matrix.m[10];
+        result.m[11] = matrix.m[14];
+        result.m[12] = matrix.m[3];
+        result.m[13] = matrix.m[7];
+        result.m[14] = matrix.m[11];
+        result.m[15] = matrix.m[15];
+        return result;
+    }
+    
+    static func inverse(matrix:Matrix) -> Matrix{
+        var result:Matrix = Matrix()
+        var l1 = matrix.m[0];
+        var l2 = matrix.m[1];
+        var l3 = matrix.m[2];
+        var l4 = matrix.m[3];
+        var l5 = matrix.m[4];
+        var l6 = matrix.m[5];
+        var l7 = matrix.m[6];
+        var l8 = matrix.m[7];
+        var l9 = matrix.m[8];
+        var l10 = matrix.m[9];
+        var l11 = matrix.m[10];
+        var l12 = matrix.m[11];
+        var l13 = matrix.m[12];
+        var l14 = matrix.m[13];
+        var l15 = matrix.m[14];
+        var l16 = matrix.m[15];
+        var l17 = (l11 * l16) - (l12 * l15);
+        var l18 = (l10 * l16) - (l12 * l14);
+        var l19 = (l10 * l15) - (l11 * l14);
+        var l20 = (l9 * l16) - (l12 * l13);
+        var l21 = (l9 * l15) - (l11 * l13);
+        var l22 = (l9 * l14) - (l10 * l13);
+        var l23 = ((l6 * l17) - (l7 * l18)) + (l8 * l19);
+        var l24 = -(((l5 * l17) - (l7 * l20)) + (l8 * l21));
+        var l25 = ((l5 * l18) - (l6 * l20)) + (l8 * l22);
+        var l26 = -(((l5 * l19) - (l6 * l21)) + (l7 * l22));
+        var l27 = 1.0 / ((((l1 * l23) + (l2 * l24)) + (l3 * l25)) + (l4 * l26));
+        var l28 = (l7 * l16) - (l8 * l15);
+        var l29 = (l6 * l16) - (l8 * l14);
+        var l30 = (l6 * l15) - (l7 * l14);
+        var l31 = (l5 * l16) - (l8 * l13);
+        var l32 = (l5 * l15) - (l7 * l13);
+        var l33 = (l5 * l14) - (l6 * l13);
+        var l34 = (l7 * l12) - (l8 * l11);
+        var l35 = (l6 * l12) - (l8 * l10);
+        var l36 = (l6 * l11) - (l7 * l10);
+        var l37 = (l5 * l12) - (l8 * l9);
+        var l38 = (l5 * l11) - (l7 * l9);
+        var l39 = (l5 * l10) - (l6 * l9);
+        result.m[0] = l23 * l27;
+        result.m[4] = l24 * l27;
+        result.m[8] = l25 * l27;
+        result.m[12] = l26 * l27;
+        result.m[1] = -(((l2 * l17) - (l3 * l18)) + (l4 * l19)) * l27;
+        result.m[5] = (((l1 * l17) - (l3 * l20)) + (l4 * l21)) * l27;
+        result.m[9] = -(((l1 * l18) - (l2 * l20)) + (l4 * l22)) * l27;
+        result.m[13] = (((l1 * l19) - (l2 * l21)) + (l3 * l22)) * l27;
+        result.m[2] = (((l2 * l28) - (l3 * l29)) + (l4 * l30)) * l27;
+        result.m[6] = -(((l1 * l28) - (l3 * l31)) + (l4 * l32)) * l27;
+        result.m[10] = (((l1 * l29) - (l2 * l31)) + (l4 * l33)) * l27;
+        result.m[14] = -(((l1 * l30) - (l2 * l32)) + (l3 * l33)) * l27;
+        result.m[3] = -(((l2 * l34) - (l3 * l35)) + (l4 * l36)) * l27;
+        result.m[7] = (((l1 * l34) - (l3 * l37)) + (l4 * l38)) * l27;
+        result.m[11] = -(((l1 * l35) - (l2 * l37)) + (l4 * l39)) * l27;
+        result.m[15] = (((l1 * l36) - (l2 * l38)) + (l3 * l39)) * l27;
+        return result
+    }
 
 }
 
