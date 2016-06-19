@@ -67,3 +67,7 @@ class RenderView: UIView {
     }
 
 }
+
+func * (left: Color8, right: Float) -> Color8{
+    return Color8(a: 255, r: UInt8(Float(left.r) * right), g: UInt8(Float(left.g) * right), b: UInt8(Float(left.b) * right))
+}

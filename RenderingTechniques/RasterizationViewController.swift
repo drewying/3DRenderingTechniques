@@ -153,7 +153,7 @@ class RasterizationViewController: UIViewController {
         let lightDistance = (lightPosition - point).length()
         let lightVector = (lightPosition - point).normalized()
         var lightFactor = max((lightVector ⋅ normal), 0.25)
-        //lightFactor *= (1.0 / (1.0 + (0.25 * lightDistance * lightDistance)))
+        lightFactor *= (1.0 / (1.0 + (0.25 * lightDistance * lightDistance)))
         return lightFactor
     }
     
