@@ -8,13 +8,29 @@
 
 import UIKit
 
+enum Material {
+    case DIFFUSE
+    case REFLECTIVE
+    case REFRACTIVE
+}
+
 struct Ray {
     let origin:Vector3D;
     let direction:Vector3D;
+    
+    func reflectRay(origin:Vector3D, normal:Vector3D) -> Ray {
+        let cosine = direction ⋅ normal
+        return Ray(origin: origin, direction: self.direction - (normal * 2.0 * cosine))
+    }
+    
+    func refractRay(normal:Vector3D) -> Ray {
+        return self
+    }
 }
 
 protocol SceneObject{
     var color:Color8 { get set }
+    var material:Material { get set }
     func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool
 }
 
@@ -24,6 +40,7 @@ struct Box : SceneObject {
     let maxPoint:Vector3D
     let normal:Vector3D
     var color:Color8
+    var material: Material
     
     func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
         
@@ -41,6 +58,10 @@ struct Box : SceneObject {
         
         if (tNear > tFar){
             return false
+        }
+        
+        if (tNear <= 0.001 && tFar <= 0.001){
+            return false;
         }
         
         if (tNear <= 0.001) {
@@ -61,6 +82,7 @@ struct Sphere : SceneObject {
     let center:Vector3D
     let radius:Float
     var color:Color8
+    var material: Material
     
     func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
         let v:Vector3D = center - ray.origin
@@ -93,9 +115,9 @@ struct Sphere : SceneObject {
 class RaytracerViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
     
-    let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -1.0)
+    let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -0.5)
     let cameraUp = Vector3D.up()
-    let lightPosition = Vector3D(x: 0.0, y: 0.0, z: -1.0)
+    let lightPosition = Vector3D(x: 0.0, y: 0.0, z: -0.5)
     var sceneObjects:[SceneObject] = Array<SceneObject>()
 
     override func viewDidLoad() {
@@ -152,8 +174,18 @@ class RaytracerViewController: UIViewController {
             if (sceneObject.checkRayIntersection(ray, t: &currentDistance, normal: &normal, hitPosition: &hitPosition)){
                 if (currentDistance < maxDistance){
                     maxDistance = currentDistance;
-                    outColor = sceneObject.color * calculateLightingFactor(hitPosition, normal: normal)
-                    
+                    switch sceneObject.material {
+                    case Material.DIFFUSE:
+                        outColor = sceneObject.color * calculateLightingFactor(hitPosition, normal: normal)
+                        break
+                    case Material.REFLECTIVE:
+                        let reflectedRay = ray.reflectRay(hitPosition, normal: normal)
+                        outColor = castRay(reflectedRay)
+                        break
+                    case Material.REFRACTIVE:
+                        outColor = Color8(a: 255, r: 0, g: 0, b: 0)
+                        break
+                    }
                 }
             }
         }
@@ -182,41 +214,47 @@ class RaytracerViewController: UIViewController {
     }
     
     func setupScene(){
-        let s:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.2, color: Color8(a: 255, r: 0, g: 255, b: 0))
-        let s1:Sphere = Sphere(center: Vector3D(x: 0.3, y: 0.0, z: 0.0), radius: 0.1, color: Color8(a: 255, r: 255, g: 0, b: 0))
+        let s:Sphere = Sphere(center: Vector3D(x: -0.2, y: 0.0, z: 0.0), radius: 0.2, color: Color8(a: 255, r: 0, g: 255, b: 0), material:Material.REFLECTIVE )
+        let s1:Sphere = Sphere(center: Vector3D(x: 0.3, y: 0.0, z: 0.0), radius: 0.1, color: Color8(a: 255, r: 255, g: 0, b: 0), material:Material.DIFFUSE )
         
 
         let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 1.0, y: 0.0, z: 0.0),
-                               color: Color8(a: 255, r: 192, g: 0, b: 0))
+                               color: Color8(a: 255, r: 192, g: 0, b: 0),
+                               material:Material.DIFFUSE)
         
         let rightWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                 maxPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                                 normal: Vector3D(x: -1.0, y: 0.0, z: 0.0),
-                                color: Color8(a: 255, r: 0, g: 0, b: 192))
+                                color: Color8(a: 255, r: 0, g: 0, b: 192),
+                                material:Material.DIFFUSE)
         
-        let backWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
-                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
+        let backWall:Box = Box(minPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
+                               maxPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: 1.0),
-                               color: Color8(a: 255, r: 192, g: 192, b: 192))
+                               color: Color8(a: 255, r: 192, g: 192, b: 192),
+                               material:Material.DIFFUSE)
         
         let frontWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: -1.0),
-                               color: Color8(a: 255, r: 192, g: 192, b: 192))
+                               color: Color8(a: 255, r: 192, g: 192, b: 192),
+                               material:Material.DIFFUSE)
         
         let topWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
                                 maxPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                 normal: Vector3D(x: 0.0, y: -1.0, z: 0.0),
-                                color: Color8(a: 255, r: 192, g: 192, b: 192))
+                                color: Color8(a: 255, r: 192, g: 192, b: 192),
+                                material:Material.DIFFUSE)
         
         let bottomWall:Box = Box(minPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
                               normal: Vector3D(x: 0.0, y: 1.0, z: 0.0),
-                              color: Color8(a: 255, r: 192, g: 192, b: 192))
+                              color: Color8(a: 255, r: 192, g: 192, b: 192),
+                              material:Material.DIFFUSE)
         
-        sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, s, s1]
+        sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, s, s1]
         
     }
 
