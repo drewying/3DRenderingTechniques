@@ -65,39 +65,47 @@ struct Vector3D{
 }
 
 prefix func - (vector: Vector3D) -> Vector3D {
-    return Vector3D(x:-vector.x, y:-vector.y, z:-vector.z);
+    return Vector3D(x:-vector.x, y:-vector.y, z:-vector.z)
 }
 
 func + (left: Vector3D, right: Vector3D) -> Vector3D{
-    return Vector3D(x:left.x + right.x, y:left.y + right.y, z: left.z + right.z);
+    return Vector3D(x:left.x + right.x, y:left.y + right.y, z: left.z + right.z)
 }
 
 func + (left: Vector3D, right: Float) -> Vector3D{
-    return Vector3D(x:left.x + right, y:left.y + right, z: left.z + right);
+    return Vector3D(x:left.x + right, y:left.y + right, z: left.z + right)
 }
 
 func - (left: Vector3D, right: Vector3D) -> Vector3D{
-    return Vector3D(x:left.x - right.x, y:left.y - right.y, z: left.z - right.z);
+    return Vector3D(x:left.x - right.x, y:left.y - right.y, z: left.z - right.z)
 }
 
 func - (left: Vector3D, right: Float) -> Vector3D{
-    return Vector3D(x:left.x - right, y:left.y - right, z: left.z - right);
+    return Vector3D(x:left.x - right, y:left.y - right, z: left.z - right)
 }
 
 func * (left: Vector3D, right: Vector3D) -> Vector3D{
-    return Vector3D(x:left.x * right.x, y:left.y * right.y, z: left.z * right.z);
+    return Vector3D(x:left.x * right.x, y:left.y * right.y, z: left.z * right.z)
 }
 
 func * (left: Vector3D, right: Float) -> Vector3D{
-    return Vector3D(x:left.x * right, y:left.y * right, z: left.z * right);
+    return Vector3D(x:left.x * right, y:left.y * right, z: left.z * right)
 }
 
 func / (left: Vector3D, right: Vector3D) -> Vector3D{
-    return Vector3D(x:left.x / right.x, y:left.y / right.y, z: left.z / right.z);
+    return Vector3D(x:left.x / right.x, y:left.y / right.y, z: left.z / right.z)
 }
 
 func / (left: Vector3D, right: Float) -> Vector3D{
-    return Vector3D(x:left.x / right, y:left.y / right, z: left.z / right);
+    return Vector3D(x:left.x / right, y:left.y / right, z: left.z / right)
+}
+
+func min (left: Vector3D, right: Vector3D) -> Vector3D{
+    return Vector3D(x: min(left.x, right.x), y: min(left.y, right.y), z: min(left.z, right.z))
+}
+
+func max (left: Vector3D, right: Vector3D) -> Vector3D{
+    return Vector3D(x: max(left.x, right.x), y: max(left.y, right.y), z: max(left.z, right.z))
 }
 
 infix operator × { associativity left precedence 160 }
