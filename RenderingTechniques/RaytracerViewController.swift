@@ -23,8 +23,38 @@ struct Ray {
         return Ray(origin: origin, direction: self.direction - (normal * 2.0 * cosine))
     }
     
-    func refractRay(normal:Vector3D) -> Ray {
-        return self
+    func refractRay(origin:Vector3D, normal:Vector3D) -> Ray {
+        let nl:Vector3D = direction ⋅ normal < 0 ? normal : normal * -1.0;
+        let into:Float = nl ⋅ normal
+        let refractiveIndexAir:Float = 1;
+        let refractiveIndexGlass:Float = 1.5;
+        let refractiveIndexRatio = pow(refractiveIndexAir / refractiveIndexGlass, Float(into > 0) - Float(into < 0));
+        let cosI:Float = direction ⋅ nl
+        let cos2t:Float = 1.0 - refractiveIndexRatio * refractiveIndexRatio * (1 - cosI * cosI);
+        if (cos2t < 0) {
+            //Perfect Refraction. Let's reflect
+            return reflectRay(origin, normal: normal)
+        }
+        
+        let v = (Float(into > 0) - Float(into < 0) * (cosI * refractiveIndexRatio + sqrt(cos2t)))
+        var refractedDirection:Vector3D = direction * (refractiveIndexRatio) - (normal * v)
+        refractedDirection = refractedDirection.normalized();
+        
+        //Snells law of refraction
+        let a = refractiveIndexGlass - refractiveIndexAir;
+        let b = refractiveIndexGlass + refractiveIndexAir;
+        let R0 = a * a / (b * b);
+        let c = 1 - (into > 0 ? -cosI : (refractedDirection ⋅ normal))
+        _ = R0 + (1 - R0) * pow(c, 5);
+        
+        //Prob check?
+        //var P = reflection + 0.5 * Re;
+        
+        //if (random  < P){
+        //    return Ray(hit.getHitPosition(), incident - normal * (2 * Dot(incident, normal)));
+        //} else{
+            return Ray(origin: origin, direction: refractedDirection);
+        //}
     }
 }
 
@@ -183,7 +213,8 @@ class RaytracerViewController: UIViewController {
                         outColor = castRay(reflectedRay)
                         break
                     case Material.REFRACTIVE:
-                        outColor = Color8(a: 255, r: 0, g: 0, b: 0)
+                        let refractedRay:Ray = ray.refractRay(hitPosition, normal: normal)
+                        outColor = castRay(refractedRay)
                         break
                     }
                 }
@@ -214,8 +245,10 @@ class RaytracerViewController: UIViewController {
     }
     
     func setupScene(){
-        let s:Sphere = Sphere(center: Vector3D(x: -0.2, y: 0.0, z: 0.0), radius: 0.2, color: Color8(a: 255, r: 0, g: 255, b: 0), material:Material.REFLECTIVE )
-        let s1:Sphere = Sphere(center: Vector3D(x: 0.3, y: 0.0, z: 0.0), radius: 0.1, color: Color8(a: 255, r: 255, g: 0, b: 0), material:Material.DIFFUSE )
+        
+        let s:Sphere = Sphere(center: Vector3D(x: -0.5, y: 0.0, z: 0.5), radius: 0.25, color: Color8(a: 255, r: 0, g: 255, b: 0), material:Material.REFLECTIVE )
+        let s1:Sphere = Sphere(center: Vector3D(x: 0.5, y: 0.0, z: 0.5), radius: 0.25, color: Color8(a: 255, r: 255, g: 0, b: 0), material:Material.REFRACTIVE )
+
         
 
         let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
