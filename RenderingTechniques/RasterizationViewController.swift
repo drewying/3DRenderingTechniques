@@ -104,7 +104,7 @@ class RasterizationViewController: UIViewController {
         
     }
     
-    func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, l0:Float, l1:Float, l2:Float, l3:Float){
+    func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, c0:Color8, c1:Color8, c2:Color8, c3:Color8){
         let leftDistance = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
         let rightDistance = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
         
@@ -115,23 +115,25 @@ class RasterizationViewController: UIViewController {
         var zStart:Float = interpolate(p0.z, max: p1.z, distance: leftDistance);
         var zEnd:Float = interpolate(p2.z, max: p3.z, distance: rightDistance);
         
-        var lStart:Float = interpolate(l0, max: l1, distance: leftDistance);
-        var lEnd:Float = interpolate(l2, max: l3, distance: rightDistance);
+        var cStart:Color8 = interpolate(c0, max: c1, distance: leftDistance);
+        var cEnd:Color8 = interpolate(c2, max: c3, distance: rightDistance);
         
         if (xEnd < xStart){
             //Swap start with end variables
             xStart += xEnd; xEnd = xStart - xEnd; xStart -= xEnd
             zStart += zEnd; zEnd = zStart - zEnd; zStart -= zEnd
-            lStart += lEnd; lEnd = lStart - lEnd; lStart -= lEnd
+            
+            var tempColor = cStart
+            cStart = cEnd
+            cEnd = tempColor
         }
         
         for x in xStart ..< xEnd {
             let horizontalDistance = Float(x - xStart) / Float(xEnd - xStart);
             let z = interpolate(zStart, max: zEnd, distance: horizontalDistance);
-            let l = interpolate(lStart, max: lEnd, distance: horizontalDistance);
+            let color = interpolate(cStart, max: cEnd, distance: horizontalDistance);
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
                 if (z < zBuffer[x][y]){
-                    let color:Color8 = fragmentShader(Vector3D(x: Float(x), y: Float(y), z: z), shadowFactor: l)
                     renderView.plot(x, y: y, color: color)
                     zBuffer[x][y] = z
                 }
@@ -157,24 +159,32 @@ class RasterizationViewController: UIViewController {
         let n2 = Matrix.transformPoint(normalMatrix, right: triangle.n2).normalized()
         
         //Calculate Lighting
-        var l0:Float = calculateLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0)
-        var l1:Float = calculateLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1)
-        var l2:Float = calculateLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2)
+        //var l0:Float = calculateLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0)
+        //var l1:Float = calculateLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1)
+        //var l2:Float = calculateLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2)
+        
+        let diffuseColor:Color8 = Color8(a: 255, r: 85, g: 128, b: 128)
+        let ambientColor:Color8 = Color8(a: 255, r: 30, g: 30, b: 30)
+        let lightColor:Color8 = Color8(a: 255, r: 255, g: 255, b: 255)
+        
+        var c0:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 200.0, lightColor: lightColor)
+        var c1:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 200.0, lightColor: lightColor)
+        var c2:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 200.0, lightColor: lightColor)
         
         p0 = projectPoint(p0 * projectionMatrix)
         p1 = projectPoint(p1 * projectionMatrix)
         p2 = projectPoint(p2 * projectionMatrix)
         
-        let points:[(Vector3D, Float)] = [(p0,l0), (p1,l1), (p2,l2)].sort {
+        let points:[(Vector3D, Color8)] = [(p0,c0), (p1,c1), (p2,c2)].sort {
             return $0.0.y < $1.0.y
         }
         
         p0 = points[0].0
         p1 = points[1].0
         p2 = points[2].0
-        l0 = points[0].1
-        l1 = points[1].1
-        l2 = points[2].1
+        c0 = points[0].1
+        c1 = points[1].1
+        c2 = points[2].1
         
         
         var topSlope:Float = 0
@@ -203,9 +213,9 @@ class RasterizationViewController: UIViewController {
         {
             for y in Int(p0.y)...Int(p2.y) {
                 if (Float(y) < p1.y) {
-                    plotScanLine(y, p0: p0, p1: p2, p2: p0, p3: p1, l0: l0, l1: l2, l2: l0, l3: l1);
+                    plotScanLine(y, p0: p0, p1: p2, p2: p0, p3: p1, c0: c0, c1: c2, c2: c0, c3: c1);
                 } else {
-                    plotScanLine(y, p0: p0, p1: p2, p2: p1, p3: p2, l0: l0, l1: l2, l2: l1, l3: l2);
+                    plotScanLine(y, p0: p0, p1: p2, p2: p1, p3: p2, c0: c0, c1: c2, c2: c1, c3: c2);
                 }
             }
         }
@@ -223,9 +233,9 @@ class RasterizationViewController: UIViewController {
         else {
             for y in Int(p0.y)...Int(p2.y) {
                 if (Float(y) < p1.y) { //Plot top half
-                    plotScanLine(y, p0: p0, p1: p1, p2: p0, p3: p2, l0: l0, l1: l1, l2: l0, l3: l2);
+                    plotScanLine(y, p0: p0, p1: p1, p2: p0, p3: p2, c0: c0, c1: c1, c2: c0, c3: c2);
                 } else { //Plot bottom half
-                    plotScanLine(y, p0: p1, p1: p2, p2: p0, p3: p2, l0: l1, l1: l2, l2: l0, l3: l2);
+                    plotScanLine(y, p0: p1, p1: p2, p2: p0, p3: p2, c0: c1, c1: c2, c2: c0, c3: c2);
                 }
             }
         }

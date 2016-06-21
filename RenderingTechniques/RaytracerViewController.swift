@@ -152,8 +152,8 @@ class RaytracerViewController: UIViewController {
     let lightPosition = Vector3D(x: 0.0, y: 0.0, z: -0.0)
     var sceneObjects:[SceneObject] = Array<SceneObject>()
 
-    var mirrorSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.25, color: Color8(a: 255, r: 0, g: 0, b: 0), material:Material.REFLECTIVE )
-    var glassSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.25, color: Color8(a: 255, r: 0, g: 0, b: 0), material:Material.REFRACTIVE )
+    var mirrorSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.25, color: Color8(a: 255, r: 255, g: 255, b: 255), material:Material.REFLECTIVE )
+    var glassSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.25, color: Color8(a: 255, r: 255, g: 255, b: 255), material:Material.REFRACTIVE )
     let diffuseSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.25), radius: 0.2, color: Color8(a: 255, r: 0, g: 255, b: 0), material:Material.DIFFUSE )
     
     var currentRotation:Float = 0.0
@@ -166,11 +166,7 @@ class RaytracerViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-        NSOperationQueue.mainQueue().addOperationWithBlock({
-            self.renderView.width /= 2
-            self.renderView.height /= 2
-        })
+    
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
@@ -180,10 +176,10 @@ class RaytracerViewController: UIViewController {
         renderView.clear()
         drawScreen()
         renderView.render()
-        //glassSphere.center = Vector3D(x: 0.5, y: 0.0, z:0.0) * Matrix.rotateY(currentRotation) * Matrix.translate(Vector3D(x: 0.0, y: 0.0, z: 0.5))
-        //mirrorSphere.center = Vector3D(x: -0.5, y: 0.0, z:0.0) * Matrix.rotateY(currentRotation) * Matrix.translate(Vector3D(x: 0.0, y: 0.0, z: 0.5))
-        //sceneObjects[6] = glassSphere
-        //sceneObjects[7] = mirrorSphere
+        glassSphere.center = Vector3D(x: 0.5, y: 0.0, z:0.0) * Matrix.rotateY(currentRotation) * Matrix.translate(Vector3D(x: 0.0, y: 0.0, z: 0.5))
+        mirrorSphere.center = Vector3D(x: -0.5, y: 0.0, z:0.0) * Matrix.rotateY(currentRotation) * Matrix.translate(Vector3D(x: 0.0, y: 0.0, z: 0.5))
+        sceneObjects[6] = glassSphere
+        sceneObjects[7] = mirrorSphere
         currentRotation += 0.2
         print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
     }
@@ -207,42 +203,34 @@ class RaytracerViewController: UIViewController {
         }
     }
     
-    func castRay(ray:Ray) -> Color8{
-        var outColor = Color8(a: 255, r: 0, g: 0, b: 0)
-        var maxDistance:Float = FLT_MAX
+    func castRay(ray:Ray) -> Color8 {
+    
         var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
         var hitPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-        
+        var currentDistance = FLT_MAX
+    
+        var closestSceneObject:SceneObject = sceneObjects[0]
         for sceneObject in sceneObjects {
-            var currentDistance:Float = FLT_MAX
-            if (sceneObject.checkRayIntersection(ray, t: &currentDistance, normal: &normal, hitPosition: &hitPosition)){
-                if (currentDistance < maxDistance){
-                    maxDistance = currentDistance;
-                    switch sceneObject.material {
-                    case Material.DIFFUSE:
-                        outColor = sceneObject.color * calculateLightingFactor(hitPosition, normal: normal)
-                        break
-                    case Material.REFLECTIVE:
-                        let reflectedRay = ray.reflectRay(hitPosition, normal: normal)
-                        outColor = castRay(reflectedRay)
-                        break
-                    case Material.REFRACTIVE:
-                        let refractedRay:Ray = ray.refractRay(hitPosition, normal: normal)
-                        outColor = castRay(refractedRay)
-                        break
-                    }
+            var distance:Float = FLT_MAX
+            if (sceneObject.checkRayIntersection(ray, t: &distance, normal: &normal, hitPosition: &hitPosition)){
+                if (distance < currentDistance){
+                    currentDistance = distance
+                    closestSceneObject = sceneObject
                 }
             }
         }
-        return outColor
-    }
-    
-    func calculateLightingFactor(point:Vector3D, normal:Vector3D) -> Float{
-        let lightDistance = (lightPosition - point).length()
-        let lightVector = (lightPosition - point).normalized()
-        var lightFactor = max((lightVector ⋅ normal), 0.25)
-        lightFactor *= (1.0 / (1.0 + (0.25 * lightDistance * lightDistance)))
-        return lightFactor
+        
+        switch closestSceneObject.material {
+            case Material.DIFFUSE:
+                return closestSceneObject.color * calculateLightingFactor(lightPosition, targetPosition: hitPosition, targetNormal: normal) //calculatePhongLightingFactor(lightPosition, targetPosition: hitPosition, targetNormal: normal, diffuseColor: closestSceneObject.color, ambientColor: Color8(a: 255, r: 30, g: 30, b: 30), shininess: 200.0, lightColor: Color8(a: 255, r: 255, g: 255, b: 255))
+            case Material.REFLECTIVE:
+                let reflectedRay = ray.reflectRay(hitPosition, normal: normal)
+                return castRay(reflectedRay)
+            case Material.REFRACTIVE:
+                let refractedRay:Ray = ray.refractRay(hitPosition, normal: normal)
+                return castRay(refractedRay)
+        }
+        
     }
     
     func makeRay(x:Float, y:Float) -> Ray{
@@ -296,7 +284,7 @@ class RaytracerViewController: UIViewController {
                               color: Color8(a: 255, r: 192, g: 192, b: 192),
                               material:Material.DIFFUSE)
         
-        sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere, diffuseSphere]
+        sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere]
         
     }
 

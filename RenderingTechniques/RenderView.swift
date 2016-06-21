@@ -75,5 +75,16 @@ class RenderView: UIView {
 }
 
 func * (left: Color8, right: Float) -> Color8{
-    return Color8(a: 255, r: UInt8(Float(left.r) * right), g: UInt8(Float(left.g) * right), b: UInt8(Float(left.b) * right))
+    let r:Float = max(min(Float(left.r) * right, 255.0), 0.0)
+    let g:Float = max(min(Float(left.g) * right, 255.0), 0.0)
+    let b:Float = max(min(Float(left.b) * right, 255.0), 0.0)
+    return Color8(a: 255, r: UInt8(r), g: UInt8(g), b: UInt8(b))
+}
+
+func + (left: Color8, right: Color8) -> Color8{
+    let r:Float = max(min(Float(left.r) + Float(right.r), 255.0), 0.0)
+    let g:Float = max(min(Float(left.g) + Float(right.g), 255.0), 0.0)
+    let b:Float = max(min(Float(left.b) + Float(right.b), 255.0), 0.0)
+    
+    return Color8(a: 255, r: UInt8(r), g: UInt8(g), b: UInt8(b))
 }
