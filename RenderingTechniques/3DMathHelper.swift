@@ -52,7 +52,7 @@ func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3
         let viewDirection = (-targetPosition).normalized()
         let halfDirection = (lightDirection + viewDirection).normalized()
         let specularAngle:Float = max((halfDirection ⋅ targetNormal), 0.0)
-        specularLightingCompnent = pow(specularAngle, shininess/4.0)
+        specularLightingCompnent = pow(specularAngle, shininess)
     }
     
     return diffuseColor * diffuseLightingComponent + lightColor * specularLightingCompnent
