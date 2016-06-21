@@ -33,7 +33,7 @@ struct Ray {
         let cos2t:Float = 1.0 - refractiveIndexRatio * refractiveIndexRatio * (1 - cosI * cosI);
         if (cos2t < 0) {
             //Perfect Refraction. Let's reflect
-            return reflectRay(origin, normal: normal)
+            //return reflectRay(origin, normal: normal)
         }
         
         let v = (Float(into > 0) - Float(into < 0) * (cosI * refractiveIndexRatio + sqrt(cos2t)))
@@ -109,7 +109,7 @@ struct Box : SceneObject {
 }
 
 struct Sphere : SceneObject {
-    let center:Vector3D
+    var center:Vector3D
     let radius:Float
     var color:Color8
     var material: Material
@@ -145,53 +145,67 @@ struct Sphere : SceneObject {
 class RaytracerViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
     
-    let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -0.5)
+    var timer: CADisplayLink! = nil
+    
+    let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -0.9)
     let cameraUp = Vector3D.up()
-    let lightPosition = Vector3D(x: 0.0, y: 0.0, z: -0.5)
+    let lightPosition = Vector3D(x: 0.0, y: 0.0, z: -0.0)
     var sceneObjects:[SceneObject] = Array<SceneObject>()
 
+    var mirrorSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.25, color: Color8(a: 255, r: 0, g: 0, b: 0), material:Material.REFLECTIVE )
+    var glassSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.0), radius: 0.25, color: Color8(a: 255, r: 0, g: 0, b: 0), material:Material.REFRACTIVE )
+    let diffuseSphere:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 0.25), radius: 0.2, color: Color8(a: 255, r: 0, g: 255, b: 0), material:Material.DIFFUSE )
+    
+    var currentRotation:Float = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupScene()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        setupScene()
-        renderLoop()
+        
+        NSOperationQueue.mainQueue().addOperationWithBlock({
+            self.renderView.width /= 2
+            self.renderView.height /= 2
+        })
+        timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
+        timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
     
     func renderLoop() {
+        let startTime:NSDate = NSDate()
         renderView.clear()
-        
+        drawScreen()
+        renderView.render()
+        //glassSphere.center = Vector3D(x: 0.5, y: 0.0, z:0.0) * Matrix.rotateY(currentRotation) * Matrix.translate(Vector3D(x: 0.0, y: 0.0, z: 0.5))
+        //mirrorSphere.center = Vector3D(x: -0.5, y: 0.0, z:0.0) * Matrix.rotateY(currentRotation) * Matrix.translate(Vector3D(x: 0.0, y: 0.0, z: 0.5))
+        //sceneObjects[6] = glassSphere
+        //sceneObjects[7] = mirrorSphere
+        currentRotation += 0.2
+        print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
+    }
+    
+    func drawScreen(){
+        let fieldOfView:Float = 1.57 //90 degrees in Radians
+        let scale:Float = tanf(fieldOfView * 0.5)
+        let aspectRatio:Float = Float(renderView.width)/Float(renderView.height)
+        let dx = 1.0 / Float(renderView.width)
+        let dy = 1.0 / Float(renderView.height)
         
         for x:Int in 0 ..< renderView.width {
             for y:Int in 0 ..< renderView.height {
-                let fieldOfView:Float = 1.57 //90 degrees in Radians
-                let scale:Float = tanf(fieldOfView * 0.5)
-                
-                let aspectRatio:Float = Float(renderView.width)/Float(renderView.height)
-                
-                
-    
-                let dx = 1.0 / Float(renderView.width)
-                let dy = 1.0 / Float(renderView.height)
-                //let cameraX = (2 * (Float(x) + 0.5) * dx - 1) * scale
-                //let cameraY = (1 - 2 * (Float(y) + 0.5) * dy) * scale * 1 / aspectRatio
-                
                 let cameraX = (2 * (Float(x) + 0.5) * dx - 1) * aspectRatio * scale;
                 let cameraY = (1 - 2 * (Float(y) + 0.5) * dy) * scale;
-                //var cameraX = (-0.5 + Float(x)  * dx) * scale
-                //var cameraY = (-0.5 + Float(y)  * dy) * scale * 1 / aspectRatio
-                
                 
                 let ray:Ray = makeRay(cameraX, y: cameraY)
                 let color = castRay(ray)
                 renderView.plot(x, y: y, color: color)
             }
         }
-        renderView.render()
     }
-    
     
     func castRay(ray:Ray) -> Color8{
         var outColor = Color8(a: 255, r: 0, g: 0, b: 0)
@@ -245,12 +259,7 @@ class RaytracerViewController: UIViewController {
     }
     
     func setupScene(){
-        
-        let s:Sphere = Sphere(center: Vector3D(x: -0.5, y: 0.0, z: 0.5), radius: 0.25, color: Color8(a: 255, r: 0, g: 255, b: 0), material:Material.REFLECTIVE )
-        let s1:Sphere = Sphere(center: Vector3D(x: 0.5, y: 0.0, z: 0.5), radius: 0.25, color: Color8(a: 255, r: 255, g: 0, b: 0), material:Material.REFRACTIVE )
-
-        
-
+    
         let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 1.0, y: 0.0, z: 0.0),
@@ -287,7 +296,7 @@ class RaytracerViewController: UIViewController {
                               color: Color8(a: 255, r: 192, g: 192, b: 192),
                               material:Material.DIFFUSE)
         
-        sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, s, s1]
+        sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere, diffuseSphere]
         
     }
 

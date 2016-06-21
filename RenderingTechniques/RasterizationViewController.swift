@@ -103,14 +103,6 @@ class RasterizationViewController: UIViewController {
         projectionMatrix = Matrix.perspective(0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
         
     }
-   
-    func clamp(value:Float) -> Float{
-        return max(0.0, min(value, 1.0));
-    }
-    
-    func interpolate(min:Float, max:Float, distance:Float) -> Float{
-        return min + (max - min) * clamp(distance);
-    }
     
     func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, l0:Float, l1:Float, l2:Float, l3:Float){
         let leftDistance = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
@@ -148,15 +140,7 @@ class RasterizationViewController: UIViewController {
         }
         
     }
-    
-    func calculateLightingFactor(point:Vector3D, normal:Vector3D) -> Float{
-        let lightDistance = (lightPosition - point).length()
-        let lightVector = (lightPosition - point).normalized()
-        var lightFactor = max((lightVector ⋅ normal), 0.25)
-        lightFactor *= (1.0 / (1.0 + (0.25 * lightDistance * lightDistance)))
-        return lightFactor
-    }
-    
+        
     func renderTriangle(triangle:Triangle){
         
         var p0 = triangle.p0 * (modelMatrix * viewMatrix)
@@ -173,9 +157,9 @@ class RasterizationViewController: UIViewController {
         let n2 = Matrix.transformPoint(normalMatrix, right: triangle.n2).normalized()
         
         //Calculate Lighting
-        var l0:Float = calculateLightingFactor(p0, normal: n0)
-        var l1:Float = calculateLightingFactor(p1, normal: n1)
-        var l2:Float = calculateLightingFactor(p2, normal: n2)
+        var l0:Float = calculateLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0)
+        var l1:Float = calculateLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1)
+        var l2:Float = calculateLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2)
         
         p0 = projectPoint(p0 * projectionMatrix)
         p1 = projectPoint(p1 * projectionMatrix)

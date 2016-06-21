@@ -18,16 +18,22 @@ struct Color8 {
 
 class RenderView: UIView {
     
-    var width:Int {
+    var width:Int = 0 /*{
         return Int(bounds.size.width)
-    }
+    }*/
     
-    var height:Int {
+    var height:Int = 0 /*{
         return Int(bounds.size.height)
-    }
+    }*/
     
     
     var pixelBuffer:[Color8] = [Color8]()
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.width = Int(bounds.size.width)
+        self.height = Int(bounds.size.height)
+    }
     
     func clear(){
         pixelBuffer = Array<Color8>(count: width * height, repeatedValue: Color8(a: 255, r: 65, g: 65, b: 65))

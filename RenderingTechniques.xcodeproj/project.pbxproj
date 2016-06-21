@@ -11,6 +11,7 @@
 		D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BF1D0A052A00F1C929 /* Vector3D.swift */; };
 		D12805C41D0B546100F1C929 /* cube.obj in Resources */ = {isa = PBXBuildFile; fileRef = D12805C31D0B546100F1C929 /* cube.obj */; };
 		D12805C91D1233B1002AF7EB /* RaytracerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */; };
+		D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */; };
 		D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AB43C41D0C80A8008C1A80 /* RenderView.swift */; };
 		D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46661D0846CD0066A83D /* AppDelegate.swift */; };
 		D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466A1D0846CD0066A83D /* Main.storyboard */; };
@@ -44,6 +45,7 @@
 		D12805BF1D0A052A00F1C929 /* Vector3D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector3D.swift; sourceTree = "<group>"; };
 		D12805C31D0B546100F1C929 /* cube.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.obj; sourceTree = "<group>"; };
 		D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaytracerViewController.swift; sourceTree = "<group>"; };
+		D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = 3DMathHelper.swift; sourceTree = "<group>"; };
 		D1AB43C41D0C80A8008C1A80 /* RenderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderView.swift; sourceTree = "<group>"; };
 		D1CD46631D0846CD0066A83D /* RenderingTechniques.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RenderingTechniques.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46661D0846CD0066A83D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				D1CD46941D0846F50066A83D /* RasterizationViewController.swift */,
 				D1AB43C41D0C80A8008C1A80 /* RenderView.swift */,
 				D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */,
+				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
 			);
 			path = RenderingTechniques;
 			sourceTree = "<group>";
@@ -278,6 +281,7 @@
 			files = (
 				D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */,
 				D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */,
+				D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */,
 				D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */,
 				D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */,
 				D12805C91D1233B1002AF7EB /* RaytracerViewController.swift in Sources */,
