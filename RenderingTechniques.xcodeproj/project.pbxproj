@@ -13,6 +13,7 @@
 		D12805C91D1233B1002AF7EB /* RaytracerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */; };
 		D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */; };
 		D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AB43C41D0C80A8008C1A80 /* RenderView.swift */; };
+		D1C3E8BD1D1A5007005AE039 /* RaycasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C3E8BC1D1A5007005AE039 /* RaycasterViewController.swift */; };
 		D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46661D0846CD0066A83D /* AppDelegate.swift */; };
 		D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466A1D0846CD0066A83D /* Main.storyboard */; };
 		D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466D1D0846CD0066A83D /* Assets.xcassets */; };
@@ -47,6 +48,7 @@
 		D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaytracerViewController.swift; sourceTree = "<group>"; };
 		D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = 3DMathHelper.swift; sourceTree = "<group>"; };
 		D1AB43C41D0C80A8008C1A80 /* RenderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderView.swift; sourceTree = "<group>"; };
+		D1C3E8BC1D1A5007005AE039 /* RaycasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaycasterViewController.swift; sourceTree = "<group>"; };
 		D1CD46631D0846CD0066A83D /* RenderingTechniques.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RenderingTechniques.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46661D0846CD0066A83D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D1CD466B1D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 				D1AB43C41D0C80A8008C1A80 /* RenderView.swift */,
 				D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */,
 				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
+				D1C3E8BC1D1A5007005AE039 /* RaycasterViewController.swift */,
 			);
 			path = RenderingTechniques;
 			sourceTree = "<group>";
@@ -284,6 +287,7 @@
 				D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */,
 				D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */,
 				D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */,
+				D1C3E8BD1D1A5007005AE039 /* RaycasterViewController.swift in Sources */,
 				D12805C91D1233B1002AF7EB /* RaytracerViewController.swift in Sources */,
 				D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */,
 			);
