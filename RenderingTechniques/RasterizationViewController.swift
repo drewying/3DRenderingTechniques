@@ -27,7 +27,7 @@ class RasterizationViewController: UIViewController {
     var timer: CADisplayLink! = nil
     let lightPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 5.0)
     let cameraPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 5.0)
-    var currentRotation:Float = 0.0//Float(M_PI)
+    var currentRotation:Float = 0.0
     
     
     //Matrices

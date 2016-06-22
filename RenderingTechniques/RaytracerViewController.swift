@@ -217,37 +217,29 @@ struct Ray {
     }
     
     func refractRay(origin:Vector3D, normal:Vector3D) -> Ray {
-        let nl:Vector3D = direction ⋅ normal < 0 ? normal : normal * -1.0;
-        let into:Float = nl ⋅ normal
-        let refractiveIndexAir:Float = 1;
-        let refractiveIndexGlass:Float = 1.5;
-        let refractiveIndexRatio = pow(refractiveIndexAir / refractiveIndexGlass, Float(into > 0) - Float(into < 0));
-        let cosI:Float = direction ⋅ nl
-        let cos2t:Float = 1.0 - refractiveIndexRatio * refractiveIndexRatio * (1 - cosI * cosI);
-        if (cos2t < 0) {
-            //Perfect Refraction. Let's reflect
-            //return reflectRay(origin, normal: normal)
+        let theta1 = abs(direction ⋅ normal);
+        
+        var internalIndex:Float = 1.0
+        var externalIndex:Float = 1.5
+        
+        if (theta1 >= 0.0) {
+            internalIndex = 1.5
+            externalIndex = 1.0
         }
         
-        let v = (Float(into > 0) - Float(into < 0) * (cosI * refractiveIndexRatio + sqrt(cos2t)))
-        var refractedDirection:Vector3D = direction * (refractiveIndexRatio) - (normal * v)
-        refractedDirection = refractedDirection.normalized();
-        
-        //Snells law of refraction
-        let a = refractiveIndexGlass - refractiveIndexAir;
-        let b = refractiveIndexGlass + refractiveIndexAir;
-        let R0 = a * a / (b * b);
-        let c = 1 - (into > 0 ? -cosI : (refractedDirection ⋅ normal))
-        _ = R0 + (1 - R0) * pow(c, 5);
-        
-        //Prob check?
-        //var P = reflection + 0.5 * Re;
-        
-        //if (random  < P){
-        //    return Ray(hit.getHitPosition(), incident - normal * (2 * Dot(incident, normal)));
-        //} else{
-        return Ray(origin: origin, direction: refractedDirection);
-        //}
+        let eta:Float = externalIndex/internalIndex;
+        let theta2:Float = sqrt(1.0 - (eta * eta) * (1.0 - (theta1 * theta1)));
+        let rs:Float = (externalIndex * theta1 - internalIndex * theta2) / (externalIndex*theta1 + internalIndex * theta2);
+        let rp:Float = (internalIndex * theta1 - externalIndex * theta2) / (internalIndex*theta1 + externalIndex * theta2);
+        let reflectance:Float = (rs*rs + rp*rp);
+        // reflection
+        let reflectionProbability:Float = 0.1;
+        if(Float(arc4random()) / Float(UINT32_MAX) < reflectance + reflectionProbability) {
+            return reflectRay(origin, normal: normal)
+        }
+        // refraction
+        let refractDirection = ((direction + (normal * theta1)) * eta) + (normal * -theta2)
+        return Ray(origin: origin, direction: refractDirection)
     }
 }
 
