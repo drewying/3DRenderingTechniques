@@ -11,15 +11,9 @@ import Foundation
 
 
 struct Vector3D{
-    var x:Float = 0.0;
-    var y:Float = 0.0;
-    var z:Float = 0.0;
-    
-    init(x:Float, y:Float, z:Float){
-        self.x = x;
-        self.y = y;
-        self.z = z;
-    }
+    let x:Float
+    let y:Float
+    let z:Float
     
     func normalized() -> Vector3D{
         let len = length();

@@ -207,7 +207,7 @@ class RaytracerViewController: UIViewController {
     }
     
     func castRay(ray:Ray) -> Color8 {
-    
+        
         var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
         var hitPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
         var currentDistance = FLT_MAX
