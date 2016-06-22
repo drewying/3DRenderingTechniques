@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BE1D0A052A00F1C929 /* Matrix.swift */; };
 		D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BF1D0A052A00F1C929 /* Vector3D.swift */; };
-		D12805C41D0B546100F1C929 /* cube.obj in Resources */ = {isa = PBXBuildFile; fileRef = D12805C31D0B546100F1C929 /* cube.obj */; };
 		D12805C91D1233B1002AF7EB /* RaytracerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */; };
 		D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */; };
 		D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AB43C41D0C80A8008C1A80 /* RenderView.swift */; };
@@ -44,7 +43,6 @@
 /* Begin PBXFileReference section */
 		D12805BE1D0A052A00F1C929 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
 		D12805BF1D0A052A00F1C929 /* Vector3D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector3D.swift; sourceTree = "<group>"; };
-		D12805C31D0B546100F1C929 /* cube.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.obj; sourceTree = "<group>"; };
 		D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaytracerViewController.swift; sourceTree = "<group>"; };
 		D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = 3DMathHelper.swift; sourceTree = "<group>"; };
 		D1AB43C41D0C80A8008C1A80 /* RenderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderView.swift; sourceTree = "<group>"; };
@@ -90,6 +88,45 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D1C3E8BE1D1A74A3005AE039 /* 3DMath */ = {
+			isa = PBXGroup;
+			children = (
+				D12805BE1D0A052A00F1C929 /* Matrix.swift */,
+				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
+				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
+			);
+			name = 3DMath;
+			sourceTree = "<group>";
+		};
+		D1C3E8BF1D1A74B8005AE039 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				D1CD46941D0846F50066A83D /* RasterizationViewController.swift */,
+				D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */,
+				D1C3E8BC1D1A5007005AE039 /* RaycasterViewController.swift */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		D1C3E8C01D1A74C6005AE039 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D1AB43C41D0C80A8008C1A80 /* RenderView.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		D1C3E8C11D1A74D4005AE039 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				D1CD466A1D0846CD0066A83D /* Main.storyboard */,
+				D1CD466D1D0846CD0066A83D /* Assets.xcassets */,
+				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
+				D1CD46981D0862A50066A83D /* teapot.obj */,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
 		D1CD465A1D0846CC0066A83D = {
 			isa = PBXGroup;
 			children = (
@@ -113,20 +150,12 @@
 		D1CD46651D0846CD0066A83D /* RenderingTechniques */ = {
 			isa = PBXGroup;
 			children = (
+				D1C3E8C11D1A74D4005AE039 /* Assets */,
+				D1C3E8C01D1A74C6005AE039 /* Views */,
+				D1C3E8BF1D1A74B8005AE039 /* ViewControllers */,
+				D1C3E8BE1D1A74A3005AE039 /* 3DMath */,
 				D1CD46661D0846CD0066A83D /* AppDelegate.swift */,
-				D1CD466A1D0846CD0066A83D /* Main.storyboard */,
-				D1CD466D1D0846CD0066A83D /* Assets.xcassets */,
-				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
 				D1CD46721D0846CD0066A83D /* Info.plist */,
-				D1CD46981D0862A50066A83D /* teapot.obj */,
-				D12805C31D0B546100F1C929 /* cube.obj */,
-				D12805BE1D0A052A00F1C929 /* Matrix.swift */,
-				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
-				D1CD46941D0846F50066A83D /* RasterizationViewController.swift */,
-				D1AB43C41D0C80A8008C1A80 /* RenderView.swift */,
-				D12805C81D1233B1002AF7EB /* RaytracerViewController.swift */,
-				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
-				D1C3E8BC1D1A5007005AE039 /* RaycasterViewController.swift */,
 			);
 			path = RenderingTechniques;
 			sourceTree = "<group>";
@@ -254,7 +283,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D1CD46991D0862A50066A83D /* teapot.obj in Resources */,
-				D12805C41D0B546100F1C929 /* cube.obj in Resources */,
 				D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */,
 				D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */,
 				D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */,

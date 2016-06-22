@@ -36,17 +36,21 @@ class RaycasterViewController: UIViewController {
         print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
+        timer.invalidate()
     }
     
     func drawColumn(x:Int){
        
         let direction:Vector3D = Vector3D(x: -1.0, y: 0.0, z: 0.0) * Matrix.rotateZ(currentRotation)
-        let plane:Vector3D = Vector3D(x: 0.0, y: 0.78, z:0.0) * Matrix.rotateZ(currentRotation)
+        let plane:Vector3D = Vector3D(x: 0.0, y: 0.5, z: 0.0) * Matrix.rotateZ(currentRotation)
         
         let cameraX:Float = 2.0 * Float(x) / Float(renderView.width) - 1.0;
         let rayOrigin:Vector3D = Vector3D(x: 3.5, y: 3.5, z: 0.0)

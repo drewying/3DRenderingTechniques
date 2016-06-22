@@ -8,142 +8,6 @@
 
 import UIKit
 
-enum Material {
-    case DIFFUSE
-    case REFLECTIVE
-    case REFRACTIVE
-}
-
-struct Ray {
-    let origin:Vector3D;
-    let direction:Vector3D;
-    
-    func reflectRay(origin:Vector3D, normal:Vector3D) -> Ray {
-        let cosine = direction ⋅ normal
-        return Ray(origin: origin, direction: self.direction - (normal * 2.0 * cosine))
-    }
-    
-    func refractRay(origin:Vector3D, normal:Vector3D) -> Ray {
-        let nl:Vector3D = direction ⋅ normal < 0 ? normal : normal * -1.0;
-        let into:Float = nl ⋅ normal
-        let refractiveIndexAir:Float = 1;
-        let refractiveIndexGlass:Float = 1.5;
-        let refractiveIndexRatio = pow(refractiveIndexAir / refractiveIndexGlass, Float(into > 0) - Float(into < 0));
-        let cosI:Float = direction ⋅ nl
-        let cos2t:Float = 1.0 - refractiveIndexRatio * refractiveIndexRatio * (1 - cosI * cosI);
-        if (cos2t < 0) {
-            //Perfect Refraction. Let's reflect
-            //return reflectRay(origin, normal: normal)
-        }
-        
-        let v = (Float(into > 0) - Float(into < 0) * (cosI * refractiveIndexRatio + sqrt(cos2t)))
-        var refractedDirection:Vector3D = direction * (refractiveIndexRatio) - (normal * v)
-        refractedDirection = refractedDirection.normalized();
-        
-        //Snells law of refraction
-        let a = refractiveIndexGlass - refractiveIndexAir;
-        let b = refractiveIndexGlass + refractiveIndexAir;
-        let R0 = a * a / (b * b);
-        let c = 1 - (into > 0 ? -cosI : (refractedDirection ⋅ normal))
-        _ = R0 + (1 - R0) * pow(c, 5);
-        
-        //Prob check?
-        //var P = reflection + 0.5 * Re;
-        
-        //if (random  < P){
-        //    return Ray(hit.getHitPosition(), incident - normal * (2 * Dot(incident, normal)));
-        //} else{
-            return Ray(origin: origin, direction: refractedDirection);
-        //}
-    }
-}
-
-protocol SceneObject{
-    var color:Color8 { get set }
-    var material:Material { get set }
-    var shininess:Float { get set }
-    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool
-}
-
-struct Box : SceneObject {
-    
-    let minPoint:Vector3D
-    let maxPoint:Vector3D
-    let normal:Vector3D
-    var color:Color8
-    var shininess: Float
-    var material: Material
-    
-    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
-        
-        if (normal ⋅ ray.direction > 0){
-            return false
-        }
-        
-        let tMin:Vector3D = (minPoint - ray.origin) / ray.direction
-        let tMax:Vector3D = (maxPoint - ray.origin) / ray.direction
-        let t1:Vector3D = min(tMin, right: tMax)
-        let t2:Vector3D = max(tMin, right: tMax)
-        let tNear:Float = max(max(t1.x, t1.y), t1.z)
-        let tFar:Float = min(min(t2.x, t2.y), t2.z)
-        
-        
-        if (tNear > tFar){
-            return false
-        }
-        
-        if (tNear <= 0.001 && tFar <= 0.001){
-            return false;
-        }
-        
-        if (tNear <= 0.001) {
-            t = tNear;
-        } else{
-            t = tFar;
-        }
-        
-        normal = self.normal.normalized()
-        hitPosition = ray.origin + ray.direction * t
-        
-        return true
-        
-    }
-}
-
-struct Sphere : SceneObject {
-    var center:Vector3D
-    let radius:Float
-    var color:Color8
-    var shininess: Float
-    var material: Material
-    
-    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
-        let v:Vector3D = center - ray.origin
-        let b:Float = v ⋅ ray.direction
-        let discriminant:Float = b * b - (v ⋅ v) + radius * radius;
-        if (discriminant < 0) {
-            return false
-        }
-        
-        let d:Float = sqrt(discriminant);
-        let tFar:Float = b + d;
-        let tNear:Float = b - d;
-        
-        if (tFar <= 0.001 && tNear <= 0.001) {
-            return false;
-        }
-        
-        if (tNear <= 0.001) {
-            t = tFar
-        } else {
-            t = tNear
-        }
-        
-        hitPosition = ray.origin + ray.direction * t;
-        normal = (hitPosition - center).normalized()
-        return true
-    }
-}
 
 class RaytracerViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
@@ -163,15 +27,18 @@ class RaytracerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupScene()
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
+        timer.invalidate()
     }
     
     func renderLoop() {
@@ -332,4 +199,141 @@ class RaytracerViewController: UIViewController {
         
     }
 
+}
+
+enum Material {
+    case DIFFUSE
+    case REFLECTIVE
+    case REFRACTIVE
+}
+
+struct Ray {
+    let origin:Vector3D;
+    let direction:Vector3D;
+    
+    func reflectRay(origin:Vector3D, normal:Vector3D) -> Ray {
+        let cosine = direction ⋅ normal
+        return Ray(origin: origin, direction: self.direction - (normal * 2.0 * cosine))
+    }
+    
+    func refractRay(origin:Vector3D, normal:Vector3D) -> Ray {
+        let nl:Vector3D = direction ⋅ normal < 0 ? normal : normal * -1.0;
+        let into:Float = nl ⋅ normal
+        let refractiveIndexAir:Float = 1;
+        let refractiveIndexGlass:Float = 1.5;
+        let refractiveIndexRatio = pow(refractiveIndexAir / refractiveIndexGlass, Float(into > 0) - Float(into < 0));
+        let cosI:Float = direction ⋅ nl
+        let cos2t:Float = 1.0 - refractiveIndexRatio * refractiveIndexRatio * (1 - cosI * cosI);
+        if (cos2t < 0) {
+            //Perfect Refraction. Let's reflect
+            //return reflectRay(origin, normal: normal)
+        }
+        
+        let v = (Float(into > 0) - Float(into < 0) * (cosI * refractiveIndexRatio + sqrt(cos2t)))
+        var refractedDirection:Vector3D = direction * (refractiveIndexRatio) - (normal * v)
+        refractedDirection = refractedDirection.normalized();
+        
+        //Snells law of refraction
+        let a = refractiveIndexGlass - refractiveIndexAir;
+        let b = refractiveIndexGlass + refractiveIndexAir;
+        let R0 = a * a / (b * b);
+        let c = 1 - (into > 0 ? -cosI : (refractedDirection ⋅ normal))
+        _ = R0 + (1 - R0) * pow(c, 5);
+        
+        //Prob check?
+        //var P = reflection + 0.5 * Re;
+        
+        //if (random  < P){
+        //    return Ray(hit.getHitPosition(), incident - normal * (2 * Dot(incident, normal)));
+        //} else{
+        return Ray(origin: origin, direction: refractedDirection);
+        //}
+    }
+}
+
+protocol SceneObject{
+    var color:Color8 { get set }
+    var material:Material { get set }
+    var shininess:Float { get set }
+    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool
+}
+
+struct Box : SceneObject {
+    
+    let minPoint:Vector3D
+    let maxPoint:Vector3D
+    let normal:Vector3D
+    var color:Color8
+    var shininess: Float
+    var material: Material
+    
+    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
+        
+        if (normal ⋅ ray.direction > 0){
+            return false
+        }
+        
+        let tMin:Vector3D = (minPoint - ray.origin) / ray.direction
+        let tMax:Vector3D = (maxPoint - ray.origin) / ray.direction
+        let t1:Vector3D = min(tMin, right: tMax)
+        let t2:Vector3D = max(tMin, right: tMax)
+        let tNear:Float = max(max(t1.x, t1.y), t1.z)
+        let tFar:Float = min(min(t2.x, t2.y), t2.z)
+        
+        
+        if (tNear > tFar){
+            return false
+        }
+        
+        if (tNear <= 0.001 && tFar <= 0.001){
+            return false;
+        }
+        
+        if (tNear <= 0.001) {
+            t = tNear;
+        } else{
+            t = tFar;
+        }
+        
+        normal = self.normal.normalized()
+        hitPosition = ray.origin + ray.direction * t
+        
+        return true
+        
+    }
+}
+
+struct Sphere : SceneObject {
+    var center:Vector3D
+    let radius:Float
+    var color:Color8
+    var shininess: Float
+    var material: Material
+    
+    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
+        let v:Vector3D = center - ray.origin
+        let b:Float = v ⋅ ray.direction
+        let discriminant:Float = b * b - (v ⋅ v) + radius * radius;
+        if (discriminant < 0) {
+            return false
+        }
+        
+        let d:Float = sqrt(discriminant);
+        let tFar:Float = b + d;
+        let tNear:Float = b - d;
+        
+        if (tFar <= 0.001 && tNear <= 0.001) {
+            return false;
+        }
+        
+        if (tNear <= 0.001) {
+            t = tFar
+        } else {
+            t = tNear
+        }
+        
+        hitPosition = ray.origin + ray.direction * t;
+        normal = (hitPosition - center).normalized()
+        return true
+    }
 }

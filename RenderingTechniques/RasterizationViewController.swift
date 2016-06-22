@@ -41,14 +41,34 @@ class RasterizationViewController: UIViewController {
         loadTeapot()
     }
     
-    override func viewDidLayoutSubviews() {
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
     
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
+        timer.invalidate()
+    }
+    
+    func renderLoop(){
+        let startTime:NSDate = NSDate()
+        updateMatrices()
+        zBuffer = Array<Array<Float>>(count: renderView.width, repeatedValue: Array<Float>(count: renderView.height, repeatedValue: FLT_MAX))
+        renderView.clear()
+        for triangle:Triangle in triangles{
+            renderTriangle(triangle)
+        }
+        renderView.render()
+        currentRotation += 0.02
+        print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
+        
+    }
+    
     func loadTeapot(){
         if let filepath = NSBundle.mainBundle().pathForResource("teapot", ofType: "obj") {
-        //if let filepath = NSBundle.mainBundle().pathForResource("cube", ofType: "obj") {
+            //if let filepath = NSBundle.mainBundle().pathForResource("cube", ofType: "obj") {
             do {
                 let contents:String = try NSString(contentsOfFile: filepath, usedEncoding: nil) as String
                 let lines:[String] = contents.componentsSeparatedByString("\n")
@@ -83,20 +103,6 @@ class RasterizationViewController: UIViewController {
         }
     }
     
-    func renderLoop(){
-        let startTime:NSDate = NSDate()
-        updateMatrices()
-        zBuffer = Array<Array<Float>>(count: renderView.width, repeatedValue: Array<Float>(count: renderView.height, repeatedValue: FLT_MAX))
-        renderView.clear()
-        for triangle:Triangle in triangles{
-            renderTriangle(triangle)
-        }
-        renderView.render()
-        currentRotation += 0.02
-        print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
-        
-    }
-    
     func updateMatrices(){
         modelMatrix = Matrix.rotateY(-currentRotation) * Matrix.rotateX(0.392) * Matrix.translate(Vector3D(x: 0.0, y: -0.4, z: 0.0))
         viewMatrix = Matrix.lookAt(cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
@@ -123,7 +129,7 @@ class RasterizationViewController: UIViewController {
             xStart += xEnd; xEnd = xStart - xEnd; xStart -= xEnd
             zStart += zEnd; zEnd = zStart - zEnd; zStart -= zEnd
             
-            var tempColor = cStart
+            let tempColor = cStart
             cStart = cEnd
             cEnd = tempColor
         }

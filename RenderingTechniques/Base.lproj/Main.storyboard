@@ -1,44 +1,137 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="ZTZ-Qo-RDc">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
-        <!--Raycaster View Controller-->
-        <scene sceneID="tne-QT-ifu">
+        <!--Tab Bar Controller-->
+        <scene sceneID="kRm-n6-9AM">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="RaycasterViewController" customModule="RenderingTechniques" customModuleProvider="target" sceneMemberID="viewController">
+                <tabBarController id="ZTZ-Qo-RDc" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="orl-Zb-C4L">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="Glz-ut-i5C" kind="relationship" relationship="viewControllers" id="sPv-EH-xl8"/>
+                        <segue destination="yfd-ho-PbU" kind="relationship" relationship="viewControllers" id="dcQ-HX-bBb"/>
+                        <segue destination="WFG-lv-B8d" kind="relationship" relationship="viewControllers" id="8UX-VV-CiX"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iAr-fi-PyQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-852" y="-387"/>
+        </scene>
+        <!--Rasterization-->
+        <scene sceneID="FFg-FV-NjV">
+            <objects>
+                <viewController id="Glz-ut-i5C" customClass="RasterizationViewController" customModule="RenderingTechniques" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
-                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                        <viewControllerLayoutGuide type="top" id="6DS-GV-DQg"/>
+                        <viewControllerLayoutGuide type="bottom" id="1WP-RL-aNM"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                    <view key="view" contentMode="scaleToFill" id="NPc-U5-zBo">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6wM-g8-sWh" customClass="RenderView" customModule="RenderingTechniques" customModuleProvider="target">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iGT-FG-VDT" customClass="RenderView" customModule="RenderingTechniques" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="20" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="6wM-g8-sWh" secondAttribute="height" multiplier="1:1" id="qZm-BK-bVh"/>
+                                    <constraint firstAttribute="width" secondItem="iGT-FG-VDT" secondAttribute="height" multiplier="1:1" id="LRY-Zm-eAz"/>
                                 </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="6wM-g8-sWh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Ne6-lO-SbS"/>
-                            <constraint firstItem="6wM-g8-sWh" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="dr1-g4-wra"/>
-                            <constraint firstAttribute="trailing" secondItem="6wM-g8-sWh" secondAttribute="trailing" id="zuN-XK-vE3"/>
+                            <constraint firstAttribute="trailing" secondItem="iGT-FG-VDT" secondAttribute="trailing" id="BtK-bI-3ej"/>
+                            <constraint firstItem="iGT-FG-VDT" firstAttribute="leading" secondItem="NPc-U5-zBo" secondAttribute="leading" id="Qb0-jJ-X91"/>
+                            <constraint firstItem="iGT-FG-VDT" firstAttribute="top" secondItem="6DS-GV-DQg" secondAttribute="bottom" id="pHF-0H-i4s"/>
                         </constraints>
                     </view>
+                    <tabBarItem key="tabBarItem" title="Rasterization" id="WX3-TK-MGF"/>
                     <connections>
-                        <outlet property="renderView" destination="6wM-g8-sWh" id="MKE-yy-MuS"/>
+                        <outlet property="renderView" destination="iGT-FG-VDT" id="m3c-Ax-NlL"/>
                     </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xco-Si-fam" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="136" y="-1105"/>
+        </scene>
+        <!--Raycasting-->
+        <scene sceneID="J6B-rM-hlz">
+            <objects>
+                <viewController id="WFG-lv-B8d" customClass="RaycasterViewController" customModule="RenderingTechniques" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="dof-dE-sCW"/>
+                        <viewControllerLayoutGuide type="bottom" id="XhA-SM-EGH"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="AZX-T7-ofB">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zXh-6l-wBP" customClass="RenderView" customModule="RenderingTechniques" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="20" width="600" height="600"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="zXh-6l-wBP" secondAttribute="height" multiplier="1:1" id="gZj-fa-n1s"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="zXh-6l-wBP" firstAttribute="leading" secondItem="AZX-T7-ofB" secondAttribute="leading" id="SIo-6R-A4J"/>
+                            <constraint firstAttribute="trailing" secondItem="zXh-6l-wBP" secondAttribute="trailing" id="hD8-qX-cql"/>
+                            <constraint firstItem="zXh-6l-wBP" firstAttribute="top" secondItem="dof-dE-sCW" secondAttribute="bottom" id="lOZ-SE-UGj"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Raycasting" id="LCO-G1-zQY"/>
+                    <connections>
+                        <outlet property="renderView" destination="zXh-6l-wBP" id="ZaK-Ll-URg"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9Yn-eS-TTp" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="136" y="322"/>
+        </scene>
+        <!--Raytracing-->
+        <scene sceneID="417-85-Ivw">
+            <objects>
+                <viewController id="yfd-ho-PbU" customClass="RaytracerViewController" customModule="RenderingTechniques" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="KyG-Lh-laL"/>
+                        <viewControllerLayoutGuide type="bottom" id="WMY-sl-Afs"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Vtc-C8-lBp">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bke-5x-bFJ" customClass="RenderView" customModule="RenderingTechniques" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="20" width="600" height="600"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="Bke-5x-bFJ" secondAttribute="height" multiplier="1:1" id="2hE-Gq-Gc1"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Bke-5x-bFJ" firstAttribute="leading" secondItem="Vtc-C8-lBp" secondAttribute="leading" id="MvJ-o5-kVM"/>
+                            <constraint firstItem="Bke-5x-bFJ" firstAttribute="top" secondItem="KyG-Lh-laL" secondAttribute="bottom" id="ZCV-DJ-3LQ"/>
+                            <constraint firstAttribute="trailing" secondItem="Bke-5x-bFJ" secondAttribute="trailing" id="cHb-K4-5gV"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Raytracing" id="XXN-4f-XQN"/>
+                    <connections>
+                        <outlet property="renderView" destination="Bke-5x-bFJ" id="Kl8-Q1-wab"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="brF-61-6eY" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="136" y="-431"/>
         </scene>
     </scenes>
 </document>
