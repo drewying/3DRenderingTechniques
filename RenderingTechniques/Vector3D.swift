@@ -86,6 +86,10 @@ func * (left: Vector3D, right: Float) -> Vector3D{
     return Vector3D(x:left.x * right, y:left.y * right, z: left.z * right)
 }
 
+func * (left: Float, right: Vector3D) -> Vector3D{
+    return right * left
+}
+
 func / (left: Vector3D, right: Vector3D) -> Vector3D{
     return Vector3D(x:left.x / right.x, y:left.y / right.y, z: left.z / right.z)
 }

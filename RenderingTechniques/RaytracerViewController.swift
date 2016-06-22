@@ -108,35 +108,6 @@ class RaytracerViewController: UIViewController {
         
     }
     
-    /*func castRay(ray:Ray) -> Color8{
-        var outColor = Color8(a: 255, r: 0, g: 0, b: 0)
-        var maxDistance:Float = FLT_MAX
-        var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-        var hitPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-        
-        for sceneObject in sceneObjects {
-            var currentDistance:Float = FLT_MAX
-            if (sceneObject.checkRayIntersection(ray, t: &currentDistance, normal: &normal, hitPosition: &hitPosition)){
-                if (currentDistance < maxDistance){
-                    maxDistance = currentDistance;
-                    switch sceneObject.material {
-                    case Material.DIFFUSE:
-                        outColor = sceneObject.color * calculateLightingFactor(lightPosition, targetPosition:hitPosition, targetNormal: normal)
-                        break
-                    case Material.REFLECTIVE:
-                        let reflectedRay = ray.reflectRay(hitPosition, normal: normal)
-                        outColor = castRay(reflectedRay)
-                        break
-                    case Material.REFRACTIVE:
-                        let refractedRay:Ray = ray.refractRay(hitPosition, normal: normal)
-                        outColor = castRay(refractedRay)
-                        break
-                    }
-                }
-            }
-        }
-        return outColor
-    }*/
     
     func makeRay(x:Float, y:Float) -> Ray{
         

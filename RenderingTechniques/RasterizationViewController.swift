@@ -25,7 +25,7 @@ class RasterizationViewController: UIViewController {
     var triangles:[Triangle] = Array<Triangle>()
     var zBuffer:[[Float]] = Array<Array<Float>>()
     var timer: CADisplayLink! = nil
-    let lightPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 5.0)
+    let lightPosition:Vector3D = Vector3D(x: 1.0, y: 1.0, z: 1.0)
     let cameraPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 5.0)
     var currentRotation:Float = 0.0
     
@@ -104,7 +104,7 @@ class RasterizationViewController: UIViewController {
     }
     
     func updateMatrices(){
-        modelMatrix = Matrix.rotateY(-currentRotation) * Matrix.rotateX(0.392) * Matrix.translate(Vector3D(x: 0.0, y: -0.4, z: 0.0))
+        modelMatrix = Matrix.rotateY(-currentRotation) * Matrix.rotateX(0.65) * Matrix.translate(Vector3D(x: 0.0, y: -0.4, z: 0.0))
         viewMatrix = Matrix.lookAt(cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
         projectionMatrix = Matrix.perspective(0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
         
@@ -169,13 +169,13 @@ class RasterizationViewController: UIViewController {
         //var l1:Float = calculateLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1)
         //var l2:Float = calculateLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2)
         
-        let diffuseColor:Color8 = Color8(a: 255, r: 85, g: 128, b: 128)
+        let diffuseColor:Color8 = Color8(a: 255, r: 128, g: 0, b: 0)
         let ambientColor:Color8 = Color8(a: 255, r: 30, g: 30, b: 30)
         let lightColor:Color8 = Color8(a: 255, r: 255, g: 255, b: 255)
         
-        var c0:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 200.0, lightColor: lightColor)
-        var c1:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 200.0, lightColor: lightColor)
-        var c2:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 200.0, lightColor: lightColor)
+        var c0:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        var c1:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        var c2:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
         
         p0 = projectPoint(p0 * projectionMatrix)
         p1 = projectPoint(p1 * projectionMatrix)
