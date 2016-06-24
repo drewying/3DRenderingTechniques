@@ -250,21 +250,8 @@ class RasterizationViewController: UIViewController {
     }
     
     func projectPoint(point:Vector3D) -> Vector3D{
-        
-        /*var x = point.x / -point.z;
-        var y = point.y / -point.z;
-        var z = -point.z;
-        
-        x *= 2
-        y *= 2
-        x = (x + 1) / 2 * Float(renderView.width)
-        y = (1 - y) / 2 * Float(renderView.height)*/
- 
-        
-       let x = point.x * Float(renderView.width) + Float(renderView.width) / 2.0;
-       let y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
- 
-        
+        let x = point.x * Float(renderView.width) + Float(renderView.width) / 2.0;
+        let y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
         return Vector3D(x: x, y: y, z: point.z)
     }
     

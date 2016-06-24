@@ -11,16 +11,29 @@ import UIKit
 class RaycasterViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
     var timer: CADisplayLink! = nil
+    var stoneWallTextureData:CFData!
+    var redBrickTextureData:CFData!
+    let textureWidth:Int = 64
+    let textureHeight:Int = 64
     
     let worldMap:[[Int]] =
-        [[1,1,1,1,1,1,1],
-        [1,1,0,0,0,1,1],
+       [[1,1,2,2,2,1,1],
+        [1,0,2,0,2,1,1],
         [1,0,0,0,0,0,1],
         [1,0,0,0,0,0,1],
         [1,0,0,0,0,0,1],
-        [1,1,0,0,0,1,1],
-        [1,1,1,1,1,1,1]]
+        [2,2,0,0,0,2,2],
+        [2,2,1,1,1,2,2]]
     var currentRotation:Float = 0.0
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let wallImage:UIImage = UIImage(named: "greystone.png")!
+        stoneWallTextureData = CGDataProviderCopyData(CGImageGetDataProvider(wallImage.CGImage))!
+        let redWallImage:UIImage = UIImage(named: "redbrick.png")!
+        redBrickTextureData = CGDataProviderCopyData(CGImageGetDataProvider(redWallImage.CGImage))!
+    }
     
     func renderLoop(){
         let startTime:NSDate = NSDate()
@@ -32,7 +45,7 @@ class RaycasterViewController: UIViewController {
         }
         
         renderView.render()
-        currentRotation += 0.02
+        currentRotation += 0.01
         print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
     }
     
@@ -121,11 +134,40 @@ class RaycasterViewController: UIViewController {
         let yStartPixel = -lineHeight / 2 + renderView.height / 2;
         let yEndPixel = lineHeight / 2 + renderView.height / 2;
         
-        let color:Color8 = Color8(a: 255, r: 192, g: 100, b: 50) * (isSideHit ? 0.5 : 1.0)
+        //Calculate the point on the wall that was hit
+        var wallHitPositionX:Float = 0.0
+        if (!isSideHit){
+            wallHitPositionX = rayOrigin.y + wallDistance * rayDirection.y;
+        } else {
+            wallHitPositionX = rayOrigin.x + wallDistance * rayDirection.x;
+        }
+        
+        wallHitPositionX -= floor((wallHitPositionX));
+        
+        
+        let textureData = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
+        
+        let wallHitPositionStartY:Float = Float(renderView.height) / 2.0 - Float(lineHeight) / 2.0
+        
         for y in yStartPixel ..< yEndPixel {
-            renderView.plot(x, y: y, color: color)
+
+            let wallHitPositionY:Float = (Float(y) - wallHitPositionStartY) / Float(lineHeight)
+            let color = getColorOfTexture(textureData, x: Int(wallHitPositionX * Float(textureWidth)), y: Int(wallHitPositionY * Float(textureHeight)))
+
+            renderView.plot(x, y: y, color: color * (isSideHit ? 0.5 : 1.0))
         }
         
     }
     
+    func getColorOfTexture(texture:CFData, x:Int, y:Int) -> Color8 {
+        let data = CFDataGetBytePtr(texture)
+        let pixelInfo: Int = ((textureWidth * y) + x) * 4
+        
+        let r = data[pixelInfo]
+        let g = data[pixelInfo+1]
+        let b = data[pixelInfo+2]
+        let a = data[pixelInfo+3]
+        
+        return Color8(a: a, r: r, g: g, b: b)
+    }
 }

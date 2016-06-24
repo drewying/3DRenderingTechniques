@@ -21,6 +21,8 @@
 		D1CD46871D0846CD0066A83D /* RenderingTechniquesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */; };
 		D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizationViewController.swift */; };
 		D1CD46991D0862A50066A83D /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1CD46981D0862A50066A83D /* teapot.obj */; };
+		D1EE203A1D1CDD6400414FC0 /* greystone.png in Resources */ = {isa = PBXBuildFile; fileRef = D1EE20391D1CDD6400414FC0 /* greystone.png */; };
+		D1EE203C1D1CDD6F00414FC0 /* redbrick.png in Resources */ = {isa = PBXBuildFile; fileRef = D1EE203B1D1CDD6F00414FC0 /* redbrick.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +63,8 @@
 		D1CD46881D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D1CD46941D0846F50066A83D /* RasterizationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RasterizationViewController.swift; sourceTree = "<group>"; };
 		D1CD46981D0862A50066A83D /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
+		D1EE20391D1CDD6400414FC0 /* greystone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = greystone.png; sourceTree = "<group>"; };
+		D1EE203B1D1CDD6F00414FC0 /* redbrick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = redbrick.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +123,8 @@
 		D1C3E8C11D1A74D4005AE039 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				D1EE203B1D1CDD6F00414FC0 /* redbrick.png */,
+				D1EE20391D1CDD6400414FC0 /* greystone.png */,
 				D1CD466A1D0846CD0066A83D /* Main.storyboard */,
 				D1CD466D1D0846CD0066A83D /* Assets.xcassets */,
 				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
@@ -285,7 +291,9 @@
 				D1CD46991D0862A50066A83D /* teapot.obj in Resources */,
 				D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */,
 				D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */,
+				D1EE203C1D1CDD6F00414FC0 /* redbrick.png in Resources */,
 				D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */,
+				D1EE203A1D1CDD6400414FC0 /* greystone.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
