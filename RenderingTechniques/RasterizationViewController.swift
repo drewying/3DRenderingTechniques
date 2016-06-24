@@ -30,6 +30,7 @@ class RasterizationViewController: UIViewController {
     var currentRotation:Float = 0.0
     
     
+    @IBOutlet weak var fpsLabel: UILabel!
     //Matrices
     var modelMatrix:Matrix = Matrix.identityMatrix()
     var projectionMatrix:Matrix = Matrix.identityMatrix()
@@ -62,7 +63,7 @@ class RasterizationViewController: UIViewController {
         }
         renderView.render()
         currentRotation += 0.02
-        print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
+        self.fpsLabel.text = String(format: "%.1 FPS", 1.0 / Float(-startTime.timeIntervalSinceNow))
         
     }
     

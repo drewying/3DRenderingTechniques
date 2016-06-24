@@ -44,16 +44,25 @@
                                     <constraint firstAttribute="width" secondItem="iGT-FG-VDT" secondAttribute="height" multiplier="1:1" id="LRY-Zm-eAz"/>
                                 </constraints>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="30 FPS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nxu-Xn-6QV">
+                                <rect key="frame" x="513" y="650" width="72" height="27"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="iGT-FG-VDT" secondAttribute="trailing" id="BtK-bI-3ej"/>
                             <constraint firstItem="iGT-FG-VDT" firstAttribute="leading" secondItem="NPc-U5-zBo" secondAttribute="leading" id="Qb0-jJ-X91"/>
+                            <constraint firstItem="nxu-Xn-6QV" firstAttribute="top" secondItem="iGT-FG-VDT" secondAttribute="bottom" constant="30" id="drw-av-5f4"/>
+                            <constraint firstAttribute="trailing" secondItem="nxu-Xn-6QV" secondAttribute="trailing" constant="15" id="jj4-2D-u8E"/>
                             <constraint firstItem="iGT-FG-VDT" firstAttribute="top" secondItem="6DS-GV-DQg" secondAttribute="bottom" id="pHF-0H-i4s"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Rasterization" id="WX3-TK-MGF"/>
                     <connections>
+                        <outlet property="fpsLabel" destination="nxu-Xn-6QV" id="gUp-jD-fgj"/>
                         <outlet property="renderView" destination="iGT-FG-VDT" id="m3c-Ax-NlL"/>
                     </connections>
                 </viewController>
@@ -80,16 +89,25 @@
                                     <constraint firstAttribute="width" secondItem="zXh-6l-wBP" secondAttribute="height" multiplier="1:1" id="gZj-fa-n1s"/>
                                 </constraints>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="30 FPS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FHC-s4-a6N">
+                                <rect key="frame" x="498" y="635" width="72" height="27"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="FHC-s4-a6N" firstAttribute="top" secondItem="zXh-6l-wBP" secondAttribute="bottom" constant="15" id="40x-eU-fHK"/>
                             <constraint firstItem="zXh-6l-wBP" firstAttribute="leading" secondItem="AZX-T7-ofB" secondAttribute="leading" id="SIo-6R-A4J"/>
+                            <constraint firstAttribute="trailing" secondItem="FHC-s4-a6N" secondAttribute="trailing" constant="30" id="VOA-54-YvF"/>
                             <constraint firstAttribute="trailing" secondItem="zXh-6l-wBP" secondAttribute="trailing" id="hD8-qX-cql"/>
                             <constraint firstItem="zXh-6l-wBP" firstAttribute="top" secondItem="dof-dE-sCW" secondAttribute="bottom" id="lOZ-SE-UGj"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Raycasting" id="LCO-G1-zQY"/>
                     <connections>
+                        <outlet property="fpsLabel" destination="FHC-s4-a6N" id="mTE-ym-ari"/>
                         <outlet property="renderView" destination="zXh-6l-wBP" id="ZaK-Ll-URg"/>
                     </connections>
                 </viewController>
@@ -116,16 +134,25 @@
                                     <constraint firstAttribute="width" secondItem="Bke-5x-bFJ" secondAttribute="height" multiplier="1:1" id="2hE-Gq-Gc1"/>
                                 </constraints>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="30 FPS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hty-ae-lDa">
+                                <rect key="frame" x="498" y="635" width="72" height="27"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="Bke-5x-bFJ" firstAttribute="leading" secondItem="Vtc-C8-lBp" secondAttribute="leading" id="MvJ-o5-kVM"/>
+                            <constraint firstItem="Hty-ae-lDa" firstAttribute="top" secondItem="Bke-5x-bFJ" secondAttribute="bottom" constant="15" id="UKv-R0-ThL"/>
                             <constraint firstItem="Bke-5x-bFJ" firstAttribute="top" secondItem="KyG-Lh-laL" secondAttribute="bottom" id="ZCV-DJ-3LQ"/>
                             <constraint firstAttribute="trailing" secondItem="Bke-5x-bFJ" secondAttribute="trailing" id="cHb-K4-5gV"/>
+                            <constraint firstAttribute="trailing" secondItem="Hty-ae-lDa" secondAttribute="trailing" constant="30" id="v7i-b9-fTE"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Raytracing" id="XXN-4f-XQN"/>
                     <connections>
+                        <outlet property="fpsLabel" destination="Hty-ae-lDa" id="XbK-Zm-nVC"/>
                         <outlet property="renderView" destination="Bke-5x-bFJ" id="Kl8-Q1-wab"/>
                     </connections>
                 </viewController>

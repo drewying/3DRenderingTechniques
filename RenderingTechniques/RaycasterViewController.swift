@@ -26,6 +26,7 @@ class RaycasterViewController: UIViewController {
         [2,2,1,1,1,2,2]]
     var currentRotation:Float = 0.0
     
+    @IBOutlet weak var fpsLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,7 +47,7 @@ class RaycasterViewController: UIViewController {
         
         renderView.render()
         currentRotation += 0.01
-        print(String(1.0 / Float(-startTime.timeIntervalSinceNow)) + " FPS")
+        self.fpsLabel.text = String(format: "%.1 FPS", 1.0 / Float(-startTime.timeIntervalSinceNow))
     }
     
     override func viewDidAppear(animated: Bool) {
