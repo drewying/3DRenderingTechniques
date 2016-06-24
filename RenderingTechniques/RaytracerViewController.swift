@@ -80,14 +80,13 @@ class RaytracerViewController: UIViewController {
             for y:Int in 0 ..< renderView.height {
                 let cameraX = (2 * (Float(x) + 0.5) * dx - 1) * aspectRatio * scale
                 let cameraY = (1 - 2 * (Float(y) + 0.5) * dy) * scale * -1
-                //var cameraX = -0.5 + Float(x)  * dx * aspectRatio * scale
-                //var cameraY = -0.5 + Float(y)  * dy * scale
                 let ray:Ray = makeRay(cameraX, y: cameraY)
                 
                 
                 let newColor = traceRay(ray, bounceIteration: 0)
                 let currentColor = colorBuffer[y * renderView.width + x]
-                let mixedColor = ((currentColor * Float(samplenumber)) + newColor)  *  (1.0/Float(samplenumber + 1)) //interpolate(currentColor, max: newColor, distance: Float(samplenumber) / Float(samplenumber + 1))
+                let mixedColor = ((currentColor * Float(samplenumber)) + newColor)  *  (1.0/Float(samplenumber + 1))
+                //interpolate(currentColor, max: newColor, distance: Float(samplenumber) / Float(samplenumber + 1))
                 colorBuffer[y * renderView.width + x] = mixedColor
                 
                 let r:UInt8 = UInt8(min(mixedColor.r * 255.0, 255.0))
@@ -102,69 +101,39 @@ class RaytracerViewController: UIViewController {
     
     func traceRay(ray:Ray, bounceIteration:Int) -> ColorF {
 
-        
-        if (bounceIteration > 3){
+        //We've bounced the ray around the scene 5 times. Return.
+        if (bounceIteration > 4){
             return ColorF(r: 0.0, g: 0.0, b: 0.0)
         }
         
-        var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-        var hitPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-        var currentDistance = FLT_MAX
-        
-        var closestSceneObject:SceneObject = sceneObjects[0]
-        var closestHitPosition:Vector3D = hitPosition
-        var closestNormal:Vector3D = normal;
+        //Go through each sceneObject and find the closest sceneObject the ray intersects
+        var closestObject:SceneObject = sceneObjects[0]
+        var closestHitRecord:HitRecord = HitRecord.noHit()
         
         for sceneObject in sceneObjects {
-            var distance:Float = FLT_MAX
-            if (sceneObject.checkRayIntersection(ray, t: &distance, normal: &normal, hitPosition: &hitPosition)){
-                if (distance < currentDistance){
-                    currentDistance = distance
-                    closestSceneObject = sceneObject
-                    closestNormal = normal
-                    closestHitPosition = hitPosition
-                }
+            let hitRecord:HitRecord = sceneObject.checkRayIntersection(ray)
+            if (hitRecord.hitSuccess && hitRecord.hitDistance < closestHitRecord.hitDistance){
+                closestHitRecord = hitRecord
+                closestObject = sceneObject
             }
         }
         
+        //Create a new ray to gather more information about the scene
         var nextRay = ray;
-        
-        switch closestSceneObject.material {
+        switch closestObject.material {
         case Material.DIFFUSE:
-            nextRay = ray.bounceRay(closestHitPosition, normal: closestNormal)
+            nextRay = ray.bounceRay(closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
             break
         case Material.REFLECTIVE:
-            nextRay = ray.reflectRay(closestHitPosition, normal: closestNormal)
+            nextRay = ray.reflectRay(closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
             break
         case Material.REFRACTIVE:
-            nextRay = ray.refractRay(closestHitPosition, normal: closestNormal)
+            nextRay = ray.refractRay(closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
             break
         }
     
-        return traceRay(nextRay, bounceIteration: bounceIteration + 1) * closestSceneObject.color + closestSceneObject.emission
-    }
-    
-    func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D, diffuseColor:ColorF, ambientColor:ColorF, shininess:Float, lightColor:ColorF) -> ColorF{
-        
-        var diffuseLightingComponent:Float = 0.0
-        var specularLightingCompnent:Float = 0.0
-        
-        let lightDirection = (lightPosition - targetPosition).normalized()
-        
-        let reflectDirection = (-lightDirection) - 2.0 * (targetNormal ⋅ (-lightDirection)) * targetNormal
-        
-        
-        let viewDirection = (-targetPosition).normalized()
-        
-        diffuseLightingComponent = max((lightDirection ⋅ targetNormal), 0)
-        
-        if (diffuseLightingComponent > 0.0){
-            let specularAngle = max((reflectDirection ⋅ viewDirection), 0.0)
-            specularLightingCompnent = pow(specularAngle, shininess)
-        }
-        
-        return diffuseColor * diffuseLightingComponent + lightColor * specularLightingCompnent
-        
+        //Gather color and lighting data about both this hit as well as the next one
+        return traceRay(nextRay, bounceIteration: bounceIteration + 1) * closestObject.color + closestObject.emission
     }
     
     func makeRay(x:Float, y:Float) -> Ray{
@@ -184,33 +153,29 @@ class RaytracerViewController: UIViewController {
         let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 1.0, y: 0.0, z: 0.0),
-                               color: ColorF(r: 0.75, g: 0, b: 0),
+                               color: ColorF(r: 0.9, g: 0.5, b: 0.5),
                                emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
-                               shininess:100.0,
                                material:Material.DIFFUSE)
         
         let rightWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                 maxPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                                 normal: Vector3D(x: -1.0, y: 0.0, z: 0.0),
-                                color: ColorF(r: 0, g: 0, b: 0.75),
+                                color: ColorF(r: 0.5, g: 0.5, b: 0.9),
                                 emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
-                                shininess:100.0,
                                 material:Material.DIFFUSE)
         
         let backWall:Box = Box(minPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
                                maxPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: 1.0),
-                               color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                               color: ColorF(r: 0.9, g: 0.9, b: 0.9),
                                emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
-                               shininess:100.0,
                                material:Material.DIFFUSE)
         
         let frontWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: -1.0),
-                               color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                               color: ColorF(r: 0.9, g: 0.9, b: 0.9),
                                emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
-                               shininess:100.0,
                                material:Material.DIFFUSE)
         
         let topWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
@@ -218,19 +183,26 @@ class RaytracerViewController: UIViewController {
                                 normal: Vector3D(x: 0.0, y: -1.0, z: 0.0),
                                 color: ColorF(r: 0.0, g: 0.0, b: 0.0),
                                 emission: ColorF(r: 1.6, g: 1.47, b: 1.29),
-                                shininess:100.0,
                                 material:Material.DIFFUSE)
         
         let bottomWall:Box = Box(minPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
                               normal: Vector3D(x: 0.0, y: 1.0, z: 0.0),
-                              color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                              color: ColorF(r: 0.9, g: 0.9, b: 0.9),
                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
-                              shininess:100.0,
                               material:Material.DIFFUSE)
         
-        let mirrorSphere:Sphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7), radius: 0.3, color: ColorF(r: 1.0, g: 1.0, b: 1.0), emission: ColorF(r: 0.0, g: 0.0, b: 0.0), shininess:100.0, material:Material.REFLECTIVE )
-        let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.7, z: 0.3), radius: 0.3, color: ColorF(r: 1.0, g: 1.0, b: 1.0), emission: ColorF(r: 0.0, g: 0.0, b: 0.0), shininess:100.0, material:Material.REFRACTIVE )
+        let mirrorSphere:Sphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7),
+                                         radius: 0.3,
+                                         color: ColorF(r: 0.8, g: 0.8, b: 0.8),
+                                         emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                                         material:Material.REFLECTIVE )
+        
+        let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.7, z: 0.3),
+                                        radius: 0.3,
+                                        color: ColorF(r: 1.0, g: 1.0, b: 1.0),
+                                        emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                                        material:Material.REFRACTIVE )
         
         sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere]
         
@@ -289,12 +261,12 @@ struct Ray {
         let rs:Float = (externalIndex * theta1 - internalIndex * theta2) / (externalIndex*theta1 + internalIndex * theta2);
         let rp:Float = (internalIndex * theta1 - externalIndex * theta2) / (internalIndex*theta1 + externalIndex * theta2);
         let reflectance:Float = (rs*rs + rp*rp);
-        // reflection
+        // Check for perfect refraction (Reflection)
         let reflectionProbability:Float = 0.1;
         if(Float(arc4random()) / Float(UINT32_MAX) < reflectance + reflectionProbability) {
             return reflectRay(origin, normal: normal)
         }
-        // refraction
+       
         let refractDirection = ((direction + (normal * theta1)) * eta) + (normal * -theta2)
         return Ray(origin: origin, direction: refractDirection.normalized())
     }
@@ -304,14 +276,18 @@ protocol SceneObject{
     var emission:ColorF {get set}
     var color:ColorF { get set }
     var material:Material { get set }
-    var shininess:Float { get set }
-    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool
+    func checkRayIntersection(ray:Ray) -> HitRecord
 }
 
 struct HitRecord {
+    let hitSuccess:Bool
     let hitPosition:Vector3D
     let hitNormal:Vector3D
     let hitDistance:Float
+    
+    static func noHit() -> HitRecord{
+        return HitRecord(hitSuccess: false, hitPosition: Vector3D(x: 0, y: 0, z: 0), hitNormal: Vector3D(x: 0, y: 0, z: 0), hitDistance: FLT_MAX)
+    }
 }
 
 struct Box : SceneObject {
@@ -321,13 +297,12 @@ struct Box : SceneObject {
     let normal:Vector3D
     var color:ColorF
     var emission: ColorF
-    var shininess: Float
     var material: Material
     
-    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
+    func checkRayIntersection(ray:Ray) -> HitRecord {
         
         if (normal ⋅ ray.direction > 0){
-            return false
+            return HitRecord.noHit()
         }
         
         let tMin:Vector3D = (minPoint - ray.origin) / ray.direction
@@ -339,23 +314,18 @@ struct Box : SceneObject {
         
         
         if (tNear > tFar){
-            return false
+            return HitRecord.noHit()
         }
         
         if (tNear <= 0.001 && tFar <= 0.001){
-            return false;
+            return HitRecord.noHit()
         }
         
-        if (tNear <= 0.001) {
-            t = tNear;
-        } else{
-            t = tFar;
-        }
+        let hitDistance = (tNear <= 0.001 ? tNear : tFar)
+        let hitNormal = self.normal.normalized()
+        let hitPosition = ray.origin + ray.direction * hitDistance
         
-        normal = self.normal.normalized()
-        hitPosition = ray.origin + ray.direction * t
-        
-        return true
+        return HitRecord(hitSuccess: true, hitPosition: hitPosition, hitNormal: hitNormal, hitDistance: hitDistance)
         
     }
 }
@@ -365,15 +335,15 @@ struct Sphere : SceneObject {
     let radius:Float
     var color:ColorF
     var emission: ColorF
-    var shininess: Float
     var material: Material
     
-    func checkRayIntersection(ray:Ray, inout t:Float, inout normal:Vector3D, inout hitPosition:Vector3D) -> Bool {
+    func checkRayIntersection(ray:Ray) -> HitRecord {
         let v:Vector3D = center - ray.origin
         let b:Float = v ⋅ ray.direction
         let discriminant:Float = b * b - (v ⋅ v) + radius * radius;
+        
         if (discriminant < 0) {
-            return false
+            return HitRecord.noHit()
         }
         
         let d:Float = sqrt(discriminant);
@@ -381,17 +351,13 @@ struct Sphere : SceneObject {
         let tNear:Float = b - d;
         
         if (tFar <= 0.001 && tNear <= 0.001) {
-            return false;
+            return HitRecord.noHit()
         }
         
-        if (tNear <= 0.001) {
-            t = tFar
-        } else {
-            t = tNear
-        }
+        let hitDistance = (tNear <= 0.001 ? tFar : tNear)
+        let hitPosition = ray.origin + ray.direction * hitDistance
+        let hitNormal = (hitPosition - center).normalized()
         
-        hitPosition = ray.origin + ray.direction * t;
-        normal = (hitPosition - center).normalized()
-        return true
+        return HitRecord(hitSuccess: true, hitPosition: hitPosition, hitNormal: hitNormal, hitDistance: hitDistance)
     }
 }
