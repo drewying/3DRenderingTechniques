@@ -16,6 +16,10 @@ func interpolate(min:Float, max:Float, distance:Float) -> Float{
     return min + (max - min) * clamp(distance);
 }
 
+func mix(left:Vector3D, right:Vector3D, mixValue:Float) -> Vector3D{
+    return left * (1 - mixValue) + right * mixValue
+}
+
 func interpolate(min:Vector3D, max:Vector3D, distance:Float) -> Vector3D{
     let x:Float = interpolate(min.x, max: max.x, distance: distance)
     let y:Float = interpolate(min.y, max: max.y, distance: distance)
