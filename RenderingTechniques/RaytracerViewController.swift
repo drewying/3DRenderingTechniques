@@ -100,50 +100,14 @@ class RaytracerViewController: UIViewController {
         }
     }
     
-    func traceRay(r:Ray, bounceIteration:Int) -> ColorF {
+    func traceRay(ray:Ray, bounceIteration:Int) -> ColorF {
 
-        var ray = r
-        var accumulatedColor = ColorF(r: 0.0, g: 0.0, b: 0.0)
-        var indirectLightingColor = ColorF(r: 1.0, g: 1.0, b: 1.0)
         
-        for _ in 0...4 {
-            var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-            var hitPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
-            var currentDistance = FLT_MAX
-            
-            var closestSceneObject:SceneObject = sceneObjects[0]
-            var closestHitPosition:Vector3D = hitPosition
-            var closestNormal:Vector3D = normal;
-            
-            for sceneObject in sceneObjects {
-                var distance:Float = FLT_MAX
-                if (sceneObject.checkRayIntersection(ray, t: &distance, normal: &normal, hitPosition: &hitPosition)){
-                    if (distance < currentDistance){
-                        currentDistance = distance
-                        closestSceneObject = sceneObject
-                        closestNormal = normal
-                        closestHitPosition = hitPosition
-                    }
-                }
-            }
-            
-            
-            
-            switch closestSceneObject.material {
-                case Material.DIFFUSE:
-                    ray = ray.bounceRay(closestHitPosition, normal: closestNormal)
-                    break
-                case Material.REFLECTIVE:
-                    ray = ray.reflectRay(closestHitPosition, normal: closestNormal)
-                    break
-                case Material.REFRACTIVE:
-                    ray = ray.refractRay(closestHitPosition, normal: closestNormal)
-                    break
-            }
+        if (bounceIteration > 3){
+            return ColorF(r: 0.0, g: 0.0, b: 0.0)
         }
-        return accumulatedColor
         
-        /*var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
+        var normal:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
         var hitPosition:Vector3D = Vector3D(x: 0.0, y: 0.0, z: 0.0)
         var currentDistance = FLT_MAX
         
@@ -163,28 +127,21 @@ class RaytracerViewController: UIViewController {
             }
         }
         
+        var nextRay = ray;
+        
         switch closestSceneObject.material {
-        case Material.LIGHTSOURCE:
-            ray = ray.bounceRay(closestHitPosition, normal: closestNormal)
         case Material.DIFFUSE:
-            ray = ray.bounceRay(closestHitPosition, normal: closestNormal)
+            nextRay = ray.bounceRay(closestHitPosition, normal: closestNormal)
             break
         case Material.REFLECTIVE:
-            ray = ray.reflectRay(closestHitPosition, normal: closestNormal)
+            nextRay = ray.reflectRay(closestHitPosition, normal: closestNormal)
             break
         case Material.REFRACTIVE:
-            ray = ray.refractRay(closestHitPosition, normal: closestNormal)
+            nextRay = ray.refractRay(closestHitPosition, normal: closestNormal)
             break
         }
-        
-        let directColor = calculateLightingFactor(lightPosition, targetPosition: closestHitPosition, targetNormal: closestNormal, diffuseColor: closestSceneObject.color, ambientColor: ColorF(r: 0.0, g: 0.0, b: 0.0), shininess: 100, lightColor: ColorF(r: 3.0, g: 3.0, b: 3.0))
-        
-        let indirectColor:ColorF = closestSceneObject.color * traceRay(ray, bounceIteration: bounceIteration + 1)
-        
-        //let cos_a_max:Float = sqrt(1.0 - clamp(0.5 * 0.5 / ((lightPosition - ray.origin) ⋅ (lightPosition - ray.origin))));
-        //let weight = 2.0 * (1.0 - cos_a_max);
-        
-        return indirectColor + directColor * weight*/
+    
+        return traceRay(nextRay, bounceIteration: bounceIteration + 1) * closestSceneObject.color + closestSceneObject.emission
     }
     
     func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D, diffuseColor:ColorF, ambientColor:ColorF, shininess:Float, lightColor:ColorF) -> ColorF{
@@ -224,11 +181,11 @@ class RaytracerViewController: UIViewController {
     }
     
     func setupScene(){
-    
         let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 1.0, y: 0.0, z: 0.0),
                                color: ColorF(r: 0.75, g: 0, b: 0),
+                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
                                shininess:100.0,
                                material:Material.DIFFUSE)
         
@@ -236,6 +193,7 @@ class RaytracerViewController: UIViewController {
                                 maxPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                                 normal: Vector3D(x: -1.0, y: 0.0, z: 0.0),
                                 color: ColorF(r: 0, g: 0, b: 0.75),
+                                emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
                                 shininess:100.0,
                                 material:Material.DIFFUSE)
         
@@ -243,6 +201,7 @@ class RaytracerViewController: UIViewController {
                                maxPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: 1.0),
                                color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
                                shininess:100.0,
                                material:Material.DIFFUSE)
         
@@ -250,13 +209,15 @@ class RaytracerViewController: UIViewController {
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: -1.0),
                                color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
                                shininess:100.0,
                                material:Material.DIFFUSE)
         
         let topWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
                                 maxPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                 normal: Vector3D(x: 0.0, y: -1.0, z: 0.0),
-                                color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                                color: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                                emission: ColorF(r: 1.6, g: 1.47, b: 1.29),
                                 shininess:100.0,
                                 material:Material.DIFFUSE)
         
@@ -264,12 +225,12 @@ class RaytracerViewController: UIViewController {
                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
                               normal: Vector3D(x: 0.0, y: 1.0, z: 0.0),
                               color: ColorF(r: 0.75, g: 0.75, b: 0.75),
+                              emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
                               shininess:100.0,
                               material:Material.DIFFUSE)
         
-        let lightSource:Sphere = Sphere(center: Vector3D(x: 0.0, y: 10.99, z: 0.0), radius: 10.0, color: ColorF(r: 3.0, g: 3.0, b: 3.0), shininess:0.0, material:Material.LIGHTSOURCE )
-        let mirrorSphere:Sphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7), radius: 0.3, color: ColorF(r: 1.0, g: 1.0, b: 1.0), shininess:100.0, material:Material.REFLECTIVE )
-        let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.7, z: 0.3), radius: 0.3, color: ColorF(r: 1.0, g: 1.0, b: 1.0), shininess:100.0, material:Material.REFRACTIVE )
+        let mirrorSphere:Sphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7), radius: 0.3, color: ColorF(r: 1.0, g: 1.0, b: 1.0), emission: ColorF(r: 0.0, g: 0.0, b: 0.0), shininess:100.0, material:Material.REFLECTIVE )
+        let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.7, z: 0.3), radius: 0.3, color: ColorF(r: 1.0, g: 1.0, b: 1.0), emission: ColorF(r: 0.0, g: 0.0, b: 0.0), shininess:100.0, material:Material.REFRACTIVE )
         
         sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere]
         
@@ -281,7 +242,6 @@ enum Material {
     case DIFFUSE
     case REFLECTIVE
     case REFRACTIVE
-    case LIGHTSOURCE
 }
 
 struct Ray {
@@ -359,8 +319,8 @@ struct Box : SceneObject {
     let minPoint:Vector3D
     let maxPoint:Vector3D
     let normal:Vector3D
-    var emission: ColorF
     var color:ColorF
+    var emission: ColorF
     var shininess: Float
     var material: Material
     
@@ -403,8 +363,8 @@ struct Box : SceneObject {
 struct Sphere : SceneObject {
     var center:Vector3D
     let radius:Float
-    var emission: ColorF
     var color:ColorF
+    var emission: ColorF
     var shininess: Float
     var material: Material
     
