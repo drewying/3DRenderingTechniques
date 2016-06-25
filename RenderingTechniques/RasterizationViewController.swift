@@ -111,7 +111,7 @@ class RasterizationViewController: UIViewController {
         
     }
     
-    func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, c0:Color8, c1:Color8, c2:Color8, c3:Color8){
+    func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, c0:Color, c1:Color, c2:Color, c3:Color){
         let leftDistance = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
         let rightDistance = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
         
@@ -122,8 +122,8 @@ class RasterizationViewController: UIViewController {
         var zStart:Float = interpolate(p0.z, max: p1.z, distance: leftDistance);
         var zEnd:Float = interpolate(p2.z, max: p3.z, distance: rightDistance);
         
-        var cStart:Color8 = interpolate(c0, max: c1, distance: leftDistance);
-        var cEnd:Color8 = interpolate(c2, max: c3, distance: rightDistance);
+        var cStart:Color = interpolate(c0, max: c1, distance: leftDistance);
+        var cEnd:Color = interpolate(c2, max: c3, distance: rightDistance);
         
         if (xEnd < xStart){
             //Swap start with end variables
@@ -170,19 +170,19 @@ class RasterizationViewController: UIViewController {
         //var l1:Float = calculateLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1)
         //var l2:Float = calculateLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2)
         
-        let diffuseColor:Color8 = Color8(a: 255, r: 128, g: 0, b: 0)
-        let ambientColor:Color8 = Color8(a: 255, r: 30, g: 30, b: 30)
-        let lightColor:Color8 = Color8(a: 255, r: 255, g: 255, b: 255)
+        let diffuseColor:Color = Color(r: 0.5, g: 0, b: 0)
+        let ambientColor:Color = Color(r: 0.12, g: 0.12, b: 0.12)
+        let lightColor:Color = Color(r: 1.0, g: 1.0, b: 1.0)
         
-        var c0:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
-        var c1:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
-        var c2:Color8 = calculatePhongLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        var c0:Color = calculatePhongLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        var c1:Color = calculatePhongLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        var c2:Color = calculatePhongLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
         
         p0 = projectPoint(p0 * projectionMatrix)
         p1 = projectPoint(p1 * projectionMatrix)
         p2 = projectPoint(p2 * projectionMatrix)
         
-        let points:[(Vector3D, Color8)] = [(p0,c0), (p1,c1), (p2,c2)].sort {
+        let points:[(Vector3D, Color)] = [(p0,c0), (p1,c1), (p2,c2)].sort {
             return $0.0.y < $1.0.y
         }
         
@@ -255,12 +255,5 @@ class RasterizationViewController: UIViewController {
         let y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
         return Vector3D(x: x, y: y, z: point.z)
     }
-    
-    func fragmentShader(point:Vector3D, shadowFactor:Float) -> Color8 {
-        let value = 255 * clamp(shadowFactor)
-        return Color8(a: 255, r:UInt8(value)/3, g: UInt8(value)/2, b: UInt8(value)/2)
-    }
-
-    
     
 }

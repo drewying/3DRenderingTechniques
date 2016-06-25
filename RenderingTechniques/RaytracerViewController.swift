@@ -8,24 +8,6 @@
 
 import UIKit
 
-struct ColorF {
-    let r:Float
-    let g:Float
-    let b:Float
-}
-
-func * (left: ColorF, right: ColorF) -> ColorF{
-    return ColorF(r: left.r * right.r, g: left.g * right.g, b: left.b * right.b)
-}
-
-func * (left: ColorF, right: Float) -> ColorF{
-    return ColorF(r: left.r * right, g: left.g * right, b: left.b * right)
-}
-
-func + (left: ColorF, right: ColorF) -> ColorF{
-    return ColorF(r: left.r + right.r, g: left.g + right.g, b: left.b + right.b)
-}
-
 class RaytracerViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
     
@@ -39,7 +21,7 @@ class RaytracerViewController: UIViewController {
     
     @IBOutlet weak var fpsLabel: UILabel!
     
-    var colorBuffer:[ColorF] = Array<ColorF>();
+    var colorBuffer:[Color] = Array<Color>();
     var currentRotation:Float = 0.0
     
     override func viewDidLoad() {
@@ -50,7 +32,7 @@ class RaytracerViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         renderView.clear()
-        colorBuffer = Array<ColorF>(count: renderView.width * renderView.height, repeatedValue: ColorF(r: 0.0, g: 0.0, b: 0.0))
+        colorBuffer = Array<Color>(count: renderView.width * renderView.height, repeatedValue: Color(r: 0.0, g: 0.0, b: 0.0))
         samplenumber = 0
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
@@ -89,21 +71,16 @@ class RaytracerViewController: UIViewController {
                 //interpolate(currentColor, max: newColor, distance: Float(samplenumber) / Float(samplenumber + 1))
                 colorBuffer[y * renderView.width + x] = mixedColor
                 
-                let r:UInt8 = UInt8(min(mixedColor.r * 255.0, 255.0))
-                let g:UInt8 = UInt8(min(mixedColor.g * 255.0, 255.0))
-                let b:UInt8 = UInt8(min(mixedColor.b * 255.0, 255.0))
-                
-                
-                renderView.plot(x, y: y, color: Color8(a: 255, r: r, g: g, b: b))
+                renderView.plot(x, y: y, color: mixedColor)
             }
         }
     }
     
-    func traceRay(ray:Ray, bounceIteration:Int) -> ColorF {
+    func traceRay(ray:Ray, bounceIteration:Int) -> Color {
 
         //We've bounced the ray around the scene 5 times. Return.
         if (bounceIteration > 4){
-            return ColorF(r: 0.0, g: 0.0, b: 0.0)
+            return Color(r: 0.0, g: 0.0, b: 0.0)
         }
         
         //Go through each sceneObject and find the closest sceneObject the ray intersects
@@ -153,55 +130,55 @@ class RaytracerViewController: UIViewController {
         let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 1.0, y: 0.0, z: 0.0),
-                               color: ColorF(r: 0.9, g: 0.5, b: 0.5),
-                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                               color: Color(r: 0.9, g: 0.5, b: 0.5),
+                               emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                material:Material.DIFFUSE)
         
         let rightWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                 maxPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                                 normal: Vector3D(x: -1.0, y: 0.0, z: 0.0),
-                                color: ColorF(r: 0.5, g: 0.5, b: 0.9),
-                                emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                                color: Color(r: 0.5, g: 0.5, b: 0.9),
+                                emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                 material:Material.DIFFUSE)
         
         let backWall:Box = Box(minPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
                                maxPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: 1.0),
-                               color: ColorF(r: 0.9, g: 0.9, b: 0.9),
-                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                               color: Color(r: 0.9, g: 0.9, b: 0.9),
+                               emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                material:Material.DIFFUSE)
         
         let frontWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
                                maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
                                normal: Vector3D(x: 0.0, y: 0.0, z: -1.0),
-                               color: ColorF(r: 0.9, g: 0.9, b: 0.9),
-                               emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                               color: Color(r: 0.9, g: 0.9, b: 0.9),
+                               emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                material:Material.DIFFUSE)
         
         let topWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
                                 maxPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
                                 normal: Vector3D(x: 0.0, y: -1.0, z: 0.0),
-                                color: ColorF(r: 0.0, g: 0.0, b: 0.0),
-                                emission: ColorF(r: 1.6, g: 1.47, b: 1.29),
+                                color: Color(r: 0.0, g: 0.0, b: 0.0),
+                                emission: Color(r: 1.6, g: 1.47, b: 1.29),
                                 material:Material.DIFFUSE)
         
         let bottomWall:Box = Box(minPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
                               normal: Vector3D(x: 0.0, y: 1.0, z: 0.0),
-                              color: ColorF(r: 0.9, g: 0.9, b: 0.9),
-                              emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                              color: Color(r: 0.9, g: 0.9, b: 0.9),
+                              emission: Color(r: 0.0, g: 0.0, b: 0.0),
                               material:Material.DIFFUSE)
         
         let mirrorSphere:Sphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7),
                                          radius: 0.3,
-                                         color: ColorF(r: 0.8, g: 0.8, b: 0.8),
-                                         emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                                         color: Color(r: 0.8, g: 0.8, b: 0.8),
+                                         emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                          material:Material.REFLECTIVE )
         
         let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.7, z: 0.3),
                                         radius: 0.3,
-                                        color: ColorF(r: 1.0, g: 1.0, b: 1.0),
-                                        emission: ColorF(r: 0.0, g: 0.0, b: 0.0),
+                                        color: Color(r: 1.0, g: 1.0, b: 1.0),
+                                        emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                         material:Material.REFRACTIVE )
         
         sceneObjects =  [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere]
@@ -273,8 +250,8 @@ struct Ray {
 }
 
 protocol SceneObject{
-    var emission:ColorF {get set}
-    var color:ColorF { get set }
+    var emission:Color {get set}
+    var color:Color { get set }
     var material:Material { get set }
     func checkRayIntersection(ray:Ray) -> HitRecord
 }
@@ -295,8 +272,8 @@ struct Box : SceneObject {
     let minPoint:Vector3D
     let maxPoint:Vector3D
     let normal:Vector3D
-    var color:ColorF
-    var emission: ColorF
+    var color:Color
+    var emission: Color
     var material: Material
     
     func checkRayIntersection(ray:Ray) -> HitRecord {
@@ -333,8 +310,8 @@ struct Box : SceneObject {
 struct Sphere : SceneObject {
     var center:Vector3D
     let radius:Float
-    var color:ColorF
-    var emission: ColorF
+    var color:Color
+    var emission: Color
     var material: Material
     
     func checkRayIntersection(ray:Ray) -> HitRecord {

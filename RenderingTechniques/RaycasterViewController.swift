@@ -160,15 +160,15 @@ class RaycasterViewController: UIViewController {
         
     }
     
-    func getColorOfTexture(texture:CFData, x:Int, y:Int) -> Color8 {
+    func getColorOfTexture(texture:CFData, x:Int, y:Int) -> Color {
         let data = CFDataGetBytePtr(texture)
         let pixelInfo: Int = ((textureWidth * y) + x) * 4
         
         let r = data[pixelInfo]
         let g = data[pixelInfo+1]
         let b = data[pixelInfo+2]
-        let a = data[pixelInfo+3]
+        //let a = data[pixelInfo+3]
         
-        return Color8(a: a, r: r, g: g, b: b)
+        return Color(r: Float(r)/255.0, g: Float(g)/255.0, b: Float(b)/255.0)
     }
 }

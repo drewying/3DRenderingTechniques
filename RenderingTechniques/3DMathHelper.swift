@@ -12,12 +12,16 @@ func clamp(value:Float) -> Float{
     return max(0.0, min(value, 1.0));
 }
 
-func interpolate(min:Float, max:Float, distance:Float) -> Float{
-    return min + (max - min) * clamp(distance);
-}
-
 func mix(left:Vector3D, right:Vector3D, mixValue:Float) -> Vector3D{
     return left * (1 - mixValue) + right * mixValue
+}
+
+func mix(left:Color, right:Color, mixValue:Float) -> Color{
+    return left * (1 - mixValue) + right * mixValue
+}
+
+func interpolate(min:Float, max:Float, distance:Float) -> Float{
+    return min + (max - min) * clamp(distance);
 }
 
 func interpolate(min:Vector3D, max:Vector3D, distance:Float) -> Vector3D{
@@ -28,12 +32,12 @@ func interpolate(min:Vector3D, max:Vector3D, distance:Float) -> Vector3D{
     return Vector3D(x: x, y: y, z: z)
 }
 
-func interpolate(min:Color8, max:Color8, distance:Float) -> Color8{
-    let r:Float = interpolate(Float(min.r), max: Float(max.r), distance: distance)
-    let g:Float = interpolate(Float(min.g), max: Float(max.g), distance: distance)
-    let b:Float = interpolate(Float(min.b), max: Float(max.b), distance: distance)
+func interpolate(min:Color, max:Color, distance:Float) -> Color{
+    let r:Float = interpolate(min.r, max: max.r, distance: distance)
+    let g:Float = interpolate(min.g, max: max.g, distance: distance)
+    let b:Float = interpolate(min.b, max: max.b, distance: distance)
     
-    return Color8(a: 255, r: UInt8(r), g: UInt8(g), b: UInt8(b))
+    return Color(r: r, g: g, b: b)
 }
 
 func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D) -> Float{
@@ -44,7 +48,7 @@ func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, ta
     return lightFactor
 }
 
-func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D, diffuseColor:Color8, ambientColor:Color8, shininess:Float, lightColor:Color8) -> Color8{
+func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D, diffuseColor:Color, ambientColor:Color, shininess:Float, lightColor:Color) -> Color{
     
     var diffuseLightingComponent:Float = 0.0
     var specularLightingCompnent:Float = 0.0

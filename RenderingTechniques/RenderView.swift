@@ -9,20 +9,32 @@
 import UIKit
 
 
-struct Color8 {
-    let a:UInt8;
-    let r:UInt8;
-    let g:UInt8;
-    let b:UInt8;
+struct Color {
+    let r:Float
+    let g:Float
+    let b:Float
+}
+
+func * (left: Color, right: Float) -> Color{
+    return Color(r: left.r * right, g: left.g * right, b: left.b * right)
+}
+
+func * (left: Color, right: Color) -> Color{
+    return Color(r: left.r * right.r, g: left.g * right.g, b: left.b * right.b)
+}
+
+func + (left: Color, right: Color) -> Color{
+    return Color(r: left.r + right.r, g: left.g + right.g, b: left.b + right.b)
 }
 
 class RenderView: UIView {
     
+
     var width:Int = 0
     var height:Int = 0
     
     
-    var pixelBuffer:[Color8] = [Color8]()
+    var pixelBuffer:[(UInt8, UInt8, UInt8, UInt8)] = [(UInt8, UInt8, UInt8, UInt8)]()
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -31,14 +43,18 @@ class RenderView: UIView {
     }
     
     func clear(){
-        pixelBuffer = Array<Color8>(count: width * height, repeatedValue: Color8(a: 255, r: 85, g: 85, b: 85))
+        pixelBuffer = Array<(UInt8, UInt8, UInt8, UInt8)>(count: width * height, repeatedValue: (255, 85, 85, 85))
     }
     
-    func plot(x:Int, y:Int, color:Color8){
+    func plot(x:Int, y:Int, color:Color){
         if (x < 0 || y < 0 || x >= width || y >= height){
             return;
         }
-        pixelBuffer[y * width + x] = color;
+        let r:UInt8 = UInt8(clamp(color.r) * 255)
+        let g:UInt8 = UInt8(clamp(color.g) * 255)
+        let b:UInt8 = UInt8(clamp(color.b) * 255)
+        
+        pixelBuffer[y * width + x] = (255, r, g, b)
     }
     
     func render(){
@@ -49,7 +65,7 @@ class RenderView: UIView {
         
         var data = pixelBuffer // Copy to mutable []
         let providerRef = CGDataProviderCreateWithCFData(
-            NSData(bytes: &data, length: data.count * sizeof(Color8))
+            NSData(bytes: &data, length: data.count * sizeof(UInt8) * 4)
         )
         
         layer.contents = CGImageCreate(
@@ -57,7 +73,7 @@ class RenderView: UIView {
             height,
             bitsPerComponent,
             bitsPerPixel,
-            width * Int(sizeof(Color8)),
+            width * Int(sizeof(UInt8)) * 4,
             rgbColorSpace,
             bitmapInfo,
             providerRef,
@@ -69,17 +85,4 @@ class RenderView: UIView {
 
 }
 
-func * (left: Color8, right: Float) -> Color8{
-    let r:Float = max(min(Float(left.r) * clamp(right), 255.0), 0.0)
-    let g:Float = max(min(Float(left.g) * clamp(right), 255.0), 0.0)
-    let b:Float = max(min(Float(left.b) * clamp(right), 255.0), 0.0)
-    return Color8(a: 255, r: UInt8(r), g: UInt8(g), b: UInt8(b))
-}
 
-func + (left: Color8, right: Color8) -> Color8{
-    let r:Float = max(min(Float(left.r) + Float(right.r), 255.0), 0.0)
-    let g:Float = max(min(Float(left.g) + Float(right.g), 255.0), 0.0)
-    let b:Float = max(min(Float(left.b) + Float(right.b), 255.0), 0.0)
-    
-    return Color8(a: 255, r: UInt8(r), g: UInt8(g), b: UInt8(b))
-}
