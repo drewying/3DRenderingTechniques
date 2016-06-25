@@ -15,8 +15,8 @@ struct Triangle {
 }
 
 struct Vertex {
-    let point:Vector3D
-    let normal:Vector3D
+    var point:Vector3D
+    var normal:Vector3D
 }
 
 
@@ -122,57 +122,39 @@ class RasterizationViewController: UIViewController {
     
     func renderTriangle(triangle:Triangle){
         
-        var p0 = triangle.v0.point * (modelMatrix * viewMatrix)
-        var p1 = triangle.v1.point * (modelMatrix * viewMatrix)
-        var p2 = triangle.v2.point * (modelMatrix * viewMatrix)
+        var v0 = triangle.v0
+        var v1 = triangle.v1
+        var v2 = triangle.v2
         
-        //Check if the triangle is visible to the camera. If not, don't render it.
+        //Transform the vertices of the triangle with the three matrices.
+        v0.point = v0.point * modelMatrix * viewMatrix * perspectiveMatrix
+        v1.point = v1.point * modelMatrix * viewMatrix * perspectiveMatrix
+        v2.point = v2.point * modelMatrix * viewMatrix * perspectiveMatrix
+        
+        /*//Check if the triangle is visible to the camera. If not, don't render it.
         if ((p0 - cameraPosition) ⋅ ((p1 - p0) × (p2 - p0)) >= 0){
             return;
+        }*/
+        
+        //Sort the Vertices from top to bottom
+        let vertices:[Vertex] = [v0, v1, v2].sort {
+            return $0.point.y < $1.point.y
         }
         
-        //Calculate the color of the pixel at each
-        let normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
-        let n0 = Matrix.transformPoint(normalMatrix, right: triangle.v0.normal).normalized()
-        let n1 = Matrix.transformPoint(normalMatrix, right: triangle.v1.normal).normalized()
-        let n2 = Matrix.transformPoint(normalMatrix, right: triangle.v2.normal).normalized()
+        v0 = vertices[0]
+        v1 = vertices[1]
+        v2 = vertices[2]
         
-        let diffuseColor:Color = Color(r: 0.5, g: 0, b: 0)
-        let ambientColor:Color = Color(r: 0.33, g: 0.33, b: 0.33)
-        let lightColor:Color = Color(r: 1.0, g: 1.0, b: 1.0)
-        
-        var c0:Color = calculatePhongLightingFactor(lightPosition, targetPosition: p0, targetNormal: n0, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
-        var c1:Color = calculatePhongLightingFactor(lightPosition, targetPosition: p1, targetNormal: n1, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
-        var c2:Color = calculatePhongLightingFactor(lightPosition, targetPosition: p2, targetNormal: n2, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
-        
-        
-        //Project the three points of the triangle into screen space, and add transform the points for perspective. 
+        //Project the three points of the triangle into screen space, and add transform the points for perspective.
         //This fulfills the role of the typical vertext shader.
-        p0 = projectPoint(p0 * perspectiveMatrix)
-        p1 = projectPoint(p1 * perspectiveMatrix)
-        p2 = projectPoint(p2 * perspectiveMatrix)
-        
-        let points:[(Vector3D, Color)] = [(p0,c0), (p1,c1), (p2,c2)].sort {
-            return $0.0.y < $1.0.y
-        }
-        
-        p0 = points[0].0
-        p1 = points[1].0
-        p2 = points[2].0
-        c0 = points[0].1
-        c1 = points[1].1
-        c2 = points[2].1
-        
-        
-        var topSlope:Float = 0
-        if (p1.y - p0.y > 0){
-            topSlope = (p1.x - p0.x) / (p1.y - p0.y);
-        }
-        
-        var bottomSlope:Float = 0
-        if (p2.y - p0.y > 0){
-           bottomSlope = (p2.x - p0.x) / (p2.y - p0.y);
-        }
+        v0.point = projectPoint(v0.point)
+        v1.point = projectPoint(v1.point)
+        v2.point = projectPoint(v2.point)
+       
+        //Calculate the topslop and bottom slop of the triangle
+        let topSlope:Float = (v1.point.y - v0.point.y > 0) ? (v1.point.x - v0.point.x) / (v1.point.y - v0.point.y) : 0
+        let bottomSlope:Float = (v2.point.y - v0.point.y > 0) ?  (v2.point.x - v0.point.x) / (v2.point.y - v0.point.y) : 0
+       
         
         // First case where triangles are like that:
         // P0
@@ -188,31 +170,31 @@ class RasterizationViewController: UIViewController {
         
         if (topSlope > bottomSlope)
         {
-            for y in Int(p0.y)...Int(p2.y) {
-                if (Float(y) < p1.y) {
-                    plotScanLine(y, p0: p0, p1: p2, p2: p0, p3: p1, c0: c0, c1: c2, c2: c0, c3: c1);
+            for y in Int(v0.point.y)...Int(v2.point.y) {
+                if (Float(y) < v1.point.y) {
+                    plotScanLine(y, v0: v0, v1: v2, v2: v0, v3: v1)
                 } else {
-                    plotScanLine(y, p0: p0, p1: p2, p2: p1, p3: p2, c0: c0, c1: c2, c2: c1, c3: c2);
+                    plotScanLine(y, v0: v0, v1: v2, v2: v1, v3: v2)
                 }
             }
         }
-            // First case where triangles are like that:
-            //       P0
-            //        -
-            //       --
-            //      - -
-            //     -  -
-            // P1 -   -
-            //     -  -
-            //      - -
-            //        -
+        // First case where triangles are like that:
+        //       P0
+        //        -
+        //       --
+        //      - -
+        //     -  -
+        // P1 -   -
+        //     -  -
+        //      - -
+        //        -
             //       P2
         else {
-            for y in Int(p0.y)...Int(p2.y) {
-                if (Float(y) < p1.y) { //Plot top half
-                    plotScanLine(y, p0: p0, p1: p1, p2: p0, p3: p2, c0: c0, c1: c1, c2: c0, c3: c2);
+            for y in Int(v0.point.y)...Int(v2.point.y) {
+                if (Float(y) < v1.point.y) { //Plot top half
+                    plotScanLine(y, v0: v0, v1: v1, v2: v0, v3: v2)
                 } else { //Plot bottom half
-                    plotScanLine(y, p0: p1, p1: p2, p2: p0, p3: p2, c0: c1, c1: c2, c2: c0, c3: c2);
+                    plotScanLine(y, v0: v1, v1: v2, v2: v0, v3: v2)
                 }
             }
         }
@@ -220,7 +202,12 @@ class RasterizationViewController: UIViewController {
         
     }
     
-    func plotScanLine(y:Int, p0:Vector3D, p1:Vector3D, p2:Vector3D, p3:Vector3D, c0:Color, c1:Color, c2:Color, c3:Color){
+    func plotScanLine(y:Int, v0:Vertex, v1:Vertex, v2:Vertex, v3:Vertex){
+        let p0 = v0.point
+        let p1 = v1.point
+        let p2 = v2.point
+        let p3 = v3.point
+        
         let leftDistance = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
         let rightDistance = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
         
@@ -231,25 +218,28 @@ class RasterizationViewController: UIViewController {
         var zStart:Float = interpolate(p0.z, max: p1.z, distance: leftDistance);
         var zEnd:Float = interpolate(p2.z, max: p3.z, distance: rightDistance);
         
-        var cStart:Color = interpolate(c0, max: c1, distance: leftDistance);
-        var cEnd:Color = interpolate(c2, max: c3, distance: rightDistance);
+        var nStart:Vector3D = interpolate(v0.normal, max: v1.normal, distance: leftDistance);
+        var nEnd:Vector3D = interpolate(v2.normal, max: v3.normal, distance: rightDistance);
         
         if (xEnd < xStart){
             //Swap start with end variables
             xStart += xEnd; xEnd = xStart - xEnd; xStart -= xEnd
             zStart += zEnd; zEnd = zStart - zEnd; zStart -= zEnd
             
-            let tempColor = cStart
-            cStart = cEnd
-            cEnd = tempColor
+            let tempColor = nStart
+            nStart = nEnd
+            nEnd = tempColor
         }
         
         for x in xStart ..< xEnd {
             let horizontalDistance = Float(x - xStart) / Float(xEnd - xStart);
             let z = interpolate(zStart, max: zEnd, distance: horizontalDistance);
-            let color = interpolate(cStart, max: cEnd, distance: horizontalDistance);
+            let normal = interpolate(nStart, max: nEnd, distance: horizontalDistance);
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
                 if (z < zBuffer[x][y]){
+                    let point = unprojectPoint(Vector3D(x: Float(x), y: Float(y), z: z)) * Matrix.inverse(perspectiveMatrix)
+                    let vertext = Vertex(point: point, normal: normal)
+                    let color = shader(vertext) //Color(r: 0.5, g: 0.0, b: 0.0) //shader(Vector3D(x: Float(x/renderView.width) , y: Float(y/renderView.height), z: z) * Matrix.inverse(perspectiveMatrix), normal: normal)
                     renderView.plot(x, y: y, color: color)
                     zBuffer[x][y] = z
                 }
@@ -259,14 +249,28 @@ class RasterizationViewController: UIViewController {
         
     }
     
+    func unprojectPoint(point:Vector3D) -> Vector3D{
+        let x = ((point.x / Float(renderView.width)) * 2.0) - 1.0
+        let y = ((point.y / Float(renderView.height)) * 2.0) - 1.0
+        return Vector3D(x: x, y: y, z: point.z)
+    }
+    
     func projectPoint(point:Vector3D) -> Vector3D{
         let x = point.x * Float(renderView.width) + Float(renderView.width) / 2.0;
         let y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
         return Vector3D(x: x, y: y, z: point.z)
     }
     
-    func shader(point:Vector3D, normal:Vector3D){
+    func shader(vertex:Vertex) -> Color{
+        //Calculate the color of the pixel at each
+        let normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
+        let normal = Matrix.transformPoint(normalMatrix, right: vertex.normal).normalized()
         
+        let diffuseColor:Color = Color(r: 0.5, g: 0, b: 0)
+        let ambientColor:Color = Color(r: 0.33, g: 0.33, b: 0.33)
+        let lightColor:Color = Color(r: 1.0, g: 1.0, b: 1.0)
+        
+        return calculatePhongLightingFactor(lightPosition, targetPosition: vertex.point, targetNormal: normal, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
     }
     
 }
