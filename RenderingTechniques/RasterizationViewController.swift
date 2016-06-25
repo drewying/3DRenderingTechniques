@@ -170,12 +170,38 @@ class RasterizationViewController: UIViewController {
         
         if (topSlope > bottomSlope)
         {
-            for y in Int(v0.point.y)...Int(v2.point.y) {
-                if (Float(y) < v1.point.y) {
-                    plotScanLine(y, v0: v0, v1: v2, v2: v0, v3: v1)
-                } else {
-                    plotScanLine(y, v0: v0, v1: v2, v2: v1, v3: v2)
-                }
+            
+            for y in Int(v0.point.y)...Int(v1.point.y) {
+                let leftDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
+                let rightDistance = (v1.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v1.point.y - v0.point.y)
+                
+                let leftPoint = interpolate(v0.point, max:v2.point, distance: leftDistance)
+                let rightPoint = interpolate(v0.point, max:v1.point, distance: rightDistance)
+                
+                let leftNormal = interpolate(v0.normal, max:v2.normal, distance: leftDistance)
+                let rightNormal = interpolate(v0.normal, max:v1.normal, distance: rightDistance)
+                
+                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
+                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                
+                plotScanLine(y, left: leftVertex, right: rightVertex)
+                
+            }
+            
+            for y in Int(v1.point.y)...Int(v2.point.y) {
+                let leftDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
+                let rightDistance = (v2.point.y == v1.point.y) ? 0 : (Float(y) - v1.point.y) / (v2.point.y - v1.point.y)
+                
+                let leftPoint = interpolate(v0.point, max:v2.point, distance: leftDistance)
+                let rightPoint = interpolate(v1.point, max:v2.point, distance: rightDistance)
+                
+                let leftNormal = interpolate(v0.normal, max:v2.normal, distance: leftDistance)
+                let rightNormal = interpolate(v1.normal, max:v2.normal, distance: rightDistance)
+                
+                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
+                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                
+                plotScanLine(y, left: leftVertex, right: rightVertex)
             }
         }
         // First case where triangles are like that:
@@ -190,58 +216,64 @@ class RasterizationViewController: UIViewController {
         //        -
             //       P2
         else {
-            for y in Int(v0.point.y)...Int(v2.point.y) {
-                if (Float(y) < v1.point.y) { //Plot top half
-                    plotScanLine(y, v0: v0, v1: v1, v2: v0, v3: v2)
-                } else { //Plot bottom half
-                    plotScanLine(y, v0: v1, v1: v2, v2: v0, v3: v2)
-                }
+            for y in Int(v0.point.y)...Int(v1.point.y) {
+                let leftDistance = (v1.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v1.point.y - v0.point.y)
+                let rightDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
+                
+                let leftPoint = interpolate(v0.point, max:v1.point, distance: leftDistance)
+                let rightPoint = interpolate(v0.point, max:v2.point, distance: rightDistance)
+                
+                let leftNormal = interpolate(v0.normal, max:v1.normal, distance: leftDistance)
+                let rightNormal = interpolate(v0.normal, max:v2.normal, distance: rightDistance)
+                
+                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
+                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                
+                plotScanLine(y, left: leftVertex, right: rightVertex)
+                
+            }
+            
+            for y in Int(v1.point.y)...Int(v2.point.y) {
+                let leftDistance =  (v2.point.y == v1.point.y) ? 0 : (Float(y) - v1.point.y) / (v2.point.y - v1.point.y)
+                let rightDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
+                
+                let leftPoint = interpolate(v1.point, max:v2.point, distance: leftDistance)
+                let rightPoint = interpolate(v0.point, max:v2.point, distance: rightDistance)
+                
+                let leftNormal = interpolate(v1.normal, max:v2.normal, distance: leftDistance)
+                let rightNormal = interpolate(v0.normal, max:v2.normal, distance: rightDistance)
+                
+                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
+                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                
+                plotScanLine(y, left: leftVertex, right: rightVertex)
             }
         }
         
         
     }
     
-    func plotScanLine(y:Int, v0:Vertex, v1:Vertex, v2:Vertex, v3:Vertex){
-        let p0 = v0.point
-        let p1 = v1.point
-        let p2 = v2.point
-        let p3 = v3.point
+    func plotScanLine(y:Int, left:Vertex, right:Vertex){
+   
+        var start = left
+        var end = right
         
-        let leftDistance = p0.y != p1.y ? (Float(y) - p0.y) / (p1.y - p0.y) : 1.0;
-        let rightDistance = p2.y != p3.y ? (Float(y) - p2.y) / (p3.y - p2.y) : 1.0;
-        
-        //Calculate the left and start
-        var xStart = Int(interpolate(p0.x, max: p1.x, distance: leftDistance));
-        var xEnd = Int(interpolate(p2.x, max: p3.x, distance: rightDistance));
-        
-        var zStart:Float = interpolate(p0.z, max: p1.z, distance: leftDistance);
-        var zEnd:Float = interpolate(p2.z, max: p3.z, distance: rightDistance);
-        
-        var nStart:Vector3D = interpolate(v0.normal, max: v1.normal, distance: leftDistance);
-        var nEnd:Vector3D = interpolate(v2.normal, max: v3.normal, distance: rightDistance);
-        
-        if (xEnd < xStart){
-            //Swap start with end variables
-            xStart += xEnd; xEnd = xStart - xEnd; xStart -= xEnd
-            zStart += zEnd; zEnd = zStart - zEnd; zStart -= zEnd
-            
-            let tempColor = nStart
-            nStart = nEnd
-            nEnd = tempColor
+        if (left.point.x > right.point.x){
+            swap(&start, &end)
         }
         
-        for x in xStart ..< xEnd {
-            let horizontalDistance = Float(x - xStart) / Float(xEnd - xStart);
-            let z = interpolate(zStart, max: zEnd, distance: horizontalDistance);
-            let normal = interpolate(nStart, max: nEnd, distance: horizontalDistance);
+        for x in Int(start.point.x) ..< Int(end.point.x) {
+            let horizontalDistance = (Float(x) - start.point.x) / (end.point.x - start.point.x);
+            let point = interpolate(start.point, max: start.point, distance: horizontalDistance);
+            let normal = interpolate(start.normal, max: end.normal, distance: horizontalDistance);
+            
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
-                if (z < zBuffer[x][y]){
-                    let point = unprojectPoint(Vector3D(x: Float(x), y: Float(y), z: z)) * Matrix.inverse(perspectiveMatrix)
-                    let vertext = Vertex(point: point, normal: normal)
+                if (point.z < zBuffer[x][y]){
+                    let tPoint = unprojectPoint(point) * Matrix.inverse(perspectiveMatrix)
+                    let vertext = Vertex(point: tPoint, normal: normal)
                     let color = shader(vertext) //Color(r: 0.5, g: 0.0, b: 0.0) //shader(Vector3D(x: Float(x/renderView.width) , y: Float(y/renderView.height), z: z) * Matrix.inverse(perspectiveMatrix), normal: normal)
                     renderView.plot(x, y: y, color: color)
-                    zBuffer[x][y] = z
+                    zBuffer[x][y] = point.z
                 }
             }
             
