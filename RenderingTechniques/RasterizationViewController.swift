@@ -264,7 +264,7 @@ class RasterizationViewController: UIViewController {
         
         for x in Int(start.point.x) ..< Int(end.point.x) {
             let horizontalDistance = (Float(x) - start.point.x) / (end.point.x - start.point.x);
-            let point = interpolate(start.point, max: start.point, distance: horizontalDistance);
+            let point = interpolate(start.point, max: end.point, distance: horizontalDistance);
             let normal = interpolate(start.normal, max: end.normal, distance: horizontalDistance);
             
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
