@@ -19,6 +19,11 @@ struct Vertex {
     var normal:Vector3D
 }
 
+func interpolate(min:Vertex, max:Vertex, distance:Float) -> Vertex{
+    let returnPoint = interpolate(min.point, max: max.point, distance: distance)
+    let returnNormal = interpolate(min.normal, max: max.normal, distance: distance)
+    return Vertex(point: returnPoint, normal: returnNormal)
+}
 
 class RasterizationViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
@@ -175,31 +180,18 @@ class RasterizationViewController: UIViewController {
                 let leftDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
                 let rightDistance = (v1.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v1.point.y - v0.point.y)
                 
-                let leftPoint = interpolate(v0.point, max:v2.point, distance: leftDistance)
-                let rightPoint = interpolate(v0.point, max:v1.point, distance: rightDistance)
-                
-                let leftNormal = interpolate(v0.normal, max:v2.normal, distance: leftDistance)
-                let rightNormal = interpolate(v0.normal, max:v1.normal, distance: rightDistance)
-                
-                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
-                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
-                
+                let leftVertex = interpolate(v0, max: v2, distance: leftDistance)
+                let rightVertex = interpolate(v0, max: v1, distance: rightDistance)
+            
                 plotScanLine(y, left: leftVertex, right: rightVertex)
-                
             }
             
             for y in Int(v1.point.y)...Int(v2.point.y) {
                 let leftDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
                 let rightDistance = (v2.point.y == v1.point.y) ? 0 : (Float(y) - v1.point.y) / (v2.point.y - v1.point.y)
                 
-                let leftPoint = interpolate(v0.point, max:v2.point, distance: leftDistance)
-                let rightPoint = interpolate(v1.point, max:v2.point, distance: rightDistance)
-                
-                let leftNormal = interpolate(v0.normal, max:v2.normal, distance: leftDistance)
-                let rightNormal = interpolate(v1.normal, max:v2.normal, distance: rightDistance)
-                
-                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
-                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                let leftVertex = interpolate(v0, max: v2, distance: leftDistance)
+                let rightVertex = interpolate(v1, max: v2, distance: rightDistance)
                 
                 plotScanLine(y, left: leftVertex, right: rightVertex)
             }
@@ -214,20 +206,14 @@ class RasterizationViewController: UIViewController {
         //     -  -
         //      - -
         //        -
-            //       P2
+        //       P2
         else {
             for y in Int(v0.point.y)...Int(v1.point.y) {
                 let leftDistance = (v1.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v1.point.y - v0.point.y)
                 let rightDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
                 
-                let leftPoint = interpolate(v0.point, max:v1.point, distance: leftDistance)
-                let rightPoint = interpolate(v0.point, max:v2.point, distance: rightDistance)
-                
-                let leftNormal = interpolate(v0.normal, max:v1.normal, distance: leftDistance)
-                let rightNormal = interpolate(v0.normal, max:v2.normal, distance: rightDistance)
-                
-                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
-                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                let leftVertex = interpolate(v0, max: v1, distance: leftDistance)
+                let rightVertex = interpolate(v0, max: v2, distance: rightDistance)
                 
                 plotScanLine(y, left: leftVertex, right: rightVertex)
                 
@@ -237,14 +223,8 @@ class RasterizationViewController: UIViewController {
                 let leftDistance =  (v2.point.y == v1.point.y) ? 0 : (Float(y) - v1.point.y) / (v2.point.y - v1.point.y)
                 let rightDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
                 
-                let leftPoint = interpolate(v1.point, max:v2.point, distance: leftDistance)
-                let rightPoint = interpolate(v0.point, max:v2.point, distance: rightDistance)
-                
-                let leftNormal = interpolate(v1.normal, max:v2.normal, distance: leftDistance)
-                let rightNormal = interpolate(v0.normal, max:v2.normal, distance: rightDistance)
-                
-                let leftVertex = Vertex(point: leftPoint, normal: leftNormal)
-                let rightVertex = Vertex(point: rightPoint, normal: rightNormal)
+                let leftVertex = interpolate(v1, max: v2, distance: leftDistance)
+                let rightVertex = interpolate(v0, max: v2, distance: rightDistance)
                 
                 plotScanLine(y, left: leftVertex, right: rightVertex)
             }
@@ -264,21 +244,17 @@ class RasterizationViewController: UIViewController {
         
         for x in Int(start.point.x) ..< Int(end.point.x) {
             let horizontalDistance = (Float(x) - start.point.x) / (end.point.x - start.point.x);
-            let point = interpolate(start.point, max: end.point, distance: horizontalDistance);
-            let normal = interpolate(start.normal, max: end.normal, distance: horizontalDistance);
+            var vertex = interpolate(start, max: end, distance: horizontalDistance);
             
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
-                if (point.z < zBuffer[x][y]){
-                    let tPoint = unprojectPoint(point) * Matrix.inverse(perspectiveMatrix)
-                    let vertext = Vertex(point: tPoint, normal: normal)
-                    let color = shader(vertext) //Color(r: 0.5, g: 0.0, b: 0.0) //shader(Vector3D(x: Float(x/renderView.width) , y: Float(y/renderView.height), z: z) * Matrix.inverse(perspectiveMatrix), normal: normal)
+                if (vertex.point.z < zBuffer[x][y]){
+                    zBuffer[x][y] = vertex.point.z
+                    vertex.point = unprojectPoint(vertex.point) * Matrix.inverse(perspectiveMatrix)
+                    let color = shader(vertex)
                     renderView.plot(x, y: y, color: color)
-                    zBuffer[x][y] = point.z
                 }
             }
-            
         }
-        
     }
     
     func unprojectPoint(point:Vector3D) -> Vector3D{
@@ -294,7 +270,7 @@ class RasterizationViewController: UIViewController {
     }
     
     func shader(vertex:Vertex) -> Color{
-        //Calculate the color of the pixel at each
+
         let normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
         let normal = Matrix.transformPoint(normalMatrix, right: vertex.normal).normalized()
         
