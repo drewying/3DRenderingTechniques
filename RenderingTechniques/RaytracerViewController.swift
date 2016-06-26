@@ -13,10 +13,10 @@ class RaytracerViewController: UIViewController {
     
     var timer: CADisplayLink! = nil
     var samplenumber:Int = 0
-    let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -0.9)
+    let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -3.0)
     let cameraUp = Vector3D.up()
     let lightPosition = Vector3D(x: 0.0, y: 0.9, z: 0.0)
-    var sceneObjects:[SceneObject] = Array<SceneObject>()
+    var sceneObjects:[Sphere] = Array<Sphere>()
 
     
     @IBOutlet weak var fpsLabel: UILabel!
@@ -52,7 +52,7 @@ class RaytracerViewController: UIViewController {
     }
     
     func drawScreen(){
-        let fieldOfView:Float = 1.57 //90 degrees in Radians
+        let fieldOfView:Float = 1.57 / 2.0 //90 degrees in Radians
         let scale:Float = tanf(fieldOfView * 0.5)
         let aspectRatio:Float = Float(renderView.width)/Float(renderView.height)
         let dx = 1.0 / Float(renderView.width)
@@ -79,20 +79,24 @@ class RaytracerViewController: UIViewController {
     func traceRay(ray:Ray, bounceIteration:Int) -> Color {
 
         //We've bounced the ray around the scene 5 times. Return.
-        if (bounceIteration > 4){
+        if (bounceIteration >=  4){
             return Color(r: 0.0, g: 0.0, b: 0.0)
         }
         
         //Go through each sceneObject and find the closest sceneObject the ray intersects
-        var closestObject:SceneObject = sceneObjects[0]
+        var closestObject:Sphere = sceneObjects[0]
         var closestHitRecord:HitRecord = HitRecord.noHit()
         
-        for sceneObject in sceneObjects {
+        for sceneObject:Sphere in sceneObjects {
             let hitRecord:HitRecord = sceneObject.checkRayIntersection(ray)
             if (hitRecord.hitSuccess && hitRecord.hitDistance < closestHitRecord.hitDistance){
                 closestHitRecord = hitRecord
                 closestObject = sceneObject
             }
+        }
+        
+        if (!closestHitRecord.hitSuccess){
+            return Color(r: 0.0, g: 0.0, b: 0.0)
         }
         
         //Create a new ray to gather more information about the scene
@@ -127,47 +131,43 @@ class RaytracerViewController: UIViewController {
     }
     
     func setupScene(){
-        let leftWall:Box = Box(minPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
-                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
-                               normal: Vector3D(x: 1.0, y: 0.0, z: 0.0),
-                               color: Color(r: 0.9, g: 0.5, b: 0.5),
-                               emission: Color(r: 0.0, g: 0.0, b: 0.0),
-                               material:Material.DIFFUSE)
         
-        let rightWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
-                                maxPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
-                                normal: Vector3D(x: -1.0, y: 0.0, z: 0.0),
-                                color: Color(r: 0.5, g: 0.5, b: 0.9),
-                                emission: Color(r: 0.0, g: 0.0, b: 0.0),
-                                material:Material.DIFFUSE)
+        let leftWall:Sphere = Sphere(center: Vector3D(x: -10e3, y: 0.0, z: 0.0),
+                                     radius: 10e3 - 1.0,
+                                     color: Color(r: 0.9, g: 0.5, b: 0.5),
+                                     emission: Color(r: 0.0, g: 0.0, b: 0.0),
+                                     material:Material.DIFFUSE )
         
-        let backWall:Box = Box(minPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
-                               maxPoint: Vector3D(x: 1.0, y: 1.0, z: -1.0),
-                               normal: Vector3D(x: 0.0, y: 0.0, z: 1.0),
-                               color: Color(r: 0.9, g: 0.9, b: 0.9),
-                               emission: Color(r: 0.0, g: 0.0, b: 0.0),
-                               material:Material.DIFFUSE)
+        let rightWall:Sphere = Sphere(center: Vector3D(x: 10e3, y: 0.0, z: 0.0),
+                                   radius: 10e3 - 1.0,
+                                   color: Color(r: 0.5, g: 0.5, b: 0.9),
+                                   emission: Color(r: 0.0, g: 0.0, b: 0.0),
+                                   material:Material.DIFFUSE )
         
-        let frontWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
-                               maxPoint: Vector3D(x: -1.0, y: -1.0, z: 1.0),
-                               normal: Vector3D(x: 0.0, y: 0.0, z: -1.0),
-                               color: Color(r: 0.9, g: 0.9, b: 0.9),
-                               emission: Color(r: 0.0, g: 0.0, b: 0.0),
-                               material:Material.DIFFUSE)
+        let frontWall:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 10e3),
+                                     radius: 10e3 - 2.0,
+                                     color: Color(r: 0.9, g: 0.9, b: 0.9),
+                                     emission: Color(r: 0.0, g: 0.0, b: 0.0),
+                                     material:Material.DIFFUSE )
         
-        let topWall:Box = Box(minPoint: Vector3D(x: 1.0, y: 1.0, z: 1.0),
-                                maxPoint: Vector3D(x: -1.0, y: 1.0, z: -1.0),
-                                normal: Vector3D(x: 0.0, y: -1.0, z: 0.0),
-                                color: Color(r: 0.0, g: 0.0, b: 0.0),
-                                emission: Color(r: 1.6, g: 1.47, b: 1.29),
-                                material:Material.DIFFUSE)
+        let backWall:Sphere = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: -10e3),
+                                      radius: 10e3 - 3.0,
+                                      color: Color(r: 0.9, g: 0.9, b: 0.9),
+                                      emission: Color(r: 0.0, g: 0.0, b: 0.0),
+                                      material:Material.DIFFUSE )
         
-        let bottomWall:Box = Box(minPoint: Vector3D(x: 1.0, y: -1.0, z: 1.0),
-                              maxPoint: Vector3D(x: -1.0, y: -1.0, z: -1.0),
-                              normal: Vector3D(x: 0.0, y: 1.0, z: 0.0),
-                              color: Color(r: 0.9, g: 0.9, b: 0.9),
-                              emission: Color(r: 0.0, g: 0.0, b: 0.0),
-                              material:Material.DIFFUSE)
+        let topWall:Sphere = Sphere(center: Vector3D(x: 0.0, y: 10e3, z: 0.0),
+                                    radius: 10e3 - 1.0,
+                                    color: Color(r: 0.0, g: 0.0, b: 0.0),
+                                    emission: Color(r: 1.6, g: 1.47, b: 1.29),
+                                    material:Material.DIFFUSE )
+        
+
+        let bottomWall:Sphere = Sphere(center: Vector3D(x: 0.0, y: -10e3, z: 0.0),
+                                    radius: 10e3 - 1.0,
+                                    color: Color(r: 0.8, g: 0.8, b: 0.8),
+                                    emission: Color(r: 0.0, g: 0.0, b: 0.0),
+                                    material:Material.DIFFUSE )
         
         let mirrorSphere:Sphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7),
                                          radius: 0.3,
@@ -249,13 +249,6 @@ struct Ray {
     }
 }
 
-protocol SceneObject{
-    var emission:Color {get set}
-    var color:Color { get set }
-    var material:Material { get set }
-    func checkRayIntersection(ray:Ray) -> HitRecord
-}
-
 struct HitRecord {
     let hitSuccess:Bool
     let hitPosition:Vector3D
@@ -267,47 +260,7 @@ struct HitRecord {
     }
 }
 
-struct Box : SceneObject {
-    
-    let minPoint:Vector3D
-    let maxPoint:Vector3D
-    let normal:Vector3D
-    var color:Color
-    var emission: Color
-    var material: Material
-    
-    func checkRayIntersection(ray:Ray) -> HitRecord {
-        
-        if (normal ⋅ ray.direction > 0){
-            return HitRecord.noHit()
-        }
-        
-        let tMin:Vector3D = (minPoint - ray.origin) / ray.direction
-        let tMax:Vector3D = (maxPoint - ray.origin) / ray.direction
-        let t1:Vector3D = min(tMin, right: tMax)
-        let t2:Vector3D = max(tMin, right: tMax)
-        let tNear:Float = max(max(t1.x, t1.y), t1.z)
-        let tFar:Float = min(min(t2.x, t2.y), t2.z)
-        
-        
-        if (tNear > tFar){
-            return HitRecord.noHit()
-        }
-        
-        if (tNear <= 0.001 && tFar <= 0.001){
-            return HitRecord.noHit()
-        }
-        
-        let hitDistance = (tNear <= 0.001 ? tNear : tFar)
-        let hitNormal = self.normal.normalized()
-        let hitPosition = ray.origin + ray.direction * hitDistance
-        
-        return HitRecord(hitSuccess: true, hitPosition: hitPosition, hitNormal: hitNormal, hitDistance: hitDistance)
-        
-    }
-}
-
-struct Sphere : SceneObject {
+struct Sphere {
     var center:Vector3D
     let radius:Float
     var color:Color
