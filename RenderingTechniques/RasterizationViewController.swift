@@ -136,10 +136,10 @@ class RasterizationViewController: UIViewController {
         v1.point = v1.point * modelMatrix * viewMatrix * perspectiveMatrix
         v2.point = v2.point * modelMatrix * viewMatrix * perspectiveMatrix
         
-        /*//Check if the triangle is visible to the camera. If not, don't render it.
-        if ((p0 - cameraPosition) ⋅ ((p1 - p0) × (p2 - p0)) >= 0){
+        //Check if the triangle is visible to the camera. If not, don't render it.
+        if ((v0.point - cameraPosition) ⋅ ((v1.point - v0.point) × (v2.point - v0.point)) >= 0){
             return;
-        }*/
+        }
         
         //Sort the Vertices from top to bottom
         let vertices:[Vertex] = [v0, v1, v2].sort {
@@ -157,80 +157,37 @@ class RasterizationViewController: UIViewController {
         v2.point = projectPoint(v2.point)
        
         //Calculate the topslop and bottom slop of the triangle
-        let topSlope:Float = (v1.point.y - v0.point.y > 0) ? (v1.point.x - v0.point.x) / (v1.point.y - v0.point.y) : 0
-        let bottomSlope:Float = (v2.point.y - v0.point.y > 0) ?  (v2.point.x - v0.point.x) / (v2.point.y - v0.point.y) : 0
+        let topSlope:Float = (v1.point.x - v0.point.x) / (v1.point.y - v0.point.y)
+        let bottomSlope:Float = (v2.point.x - v0.point.x) / (v2.point.y - v0.point.y)
        
         
-        // First case where triangles are like that:
-        // P0
-        // -
-        // --
-        // - -
-        // -  -
-        // -   - P1
-        // -  -
-        // - -
-        // -
-        // P2
+        //Plot the top half of the triangle.
+        var leftVertex = (topSlope > bottomSlope) ? v2 : v1
+        var rightVertex = (topSlope > bottomSlope) ? v1 : v2
         
-        if (topSlope > bottomSlope)
-        {
+        for y in Int(v0.point.y)...Int(v1.point.y) {
+            let leftDistance = (Float(y) - v0.point.y) / (leftVertex.point.y - v0.point.y)
+            let rightDistance = (Float(y) - v0.point.y) / (rightVertex.point.y - v0.point.y)
             
-            for y in Int(v0.point.y)...Int(v1.point.y) {
-                let leftDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
-                let rightDistance = (v1.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v1.point.y - v0.point.y)
-                
-                let leftVertex = interpolate(v0, max: v2, distance: leftDistance)
-                let rightVertex = interpolate(v0, max: v1, distance: rightDistance)
-            
-                plotScanLine(y, left: leftVertex, right: rightVertex)
-            }
-            
-            for y in Int(v1.point.y)...Int(v2.point.y) {
-                let leftDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
-                let rightDistance = (v2.point.y == v1.point.y) ? 0 : (Float(y) - v1.point.y) / (v2.point.y - v1.point.y)
-                
-                let leftVertex = interpolate(v0, max: v2, distance: leftDistance)
-                let rightVertex = interpolate(v1, max: v2, distance: rightDistance)
-                
-                plotScanLine(y, left: leftVertex, right: rightVertex)
-            }
-        }
-        // First case where triangles are like that:
-        //       P0
-        //        -
-        //       --
-        //      - -
-        //     -  -
-        // P1 -   -
-        //     -  -
-        //      - -
-        //        -
-        //       P2
-        else {
-            for y in Int(v0.point.y)...Int(v1.point.y) {
-                let leftDistance = (v1.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v1.point.y - v0.point.y)
-                let rightDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
-                
-                let leftVertex = interpolate(v0, max: v1, distance: leftDistance)
-                let rightVertex = interpolate(v0, max: v2, distance: rightDistance)
-                
-                plotScanLine(y, left: leftVertex, right: rightVertex)
-                
-            }
-            
-            for y in Int(v1.point.y)...Int(v2.point.y) {
-                let leftDistance =  (v2.point.y == v1.point.y) ? 0 : (Float(y) - v1.point.y) / (v2.point.y - v1.point.y)
-                let rightDistance = (v2.point.y == v0.point.y) ? 0 : (Float(y) - v0.point.y) / (v2.point.y - v0.point.y)
-                
-                let leftVertex = interpolate(v1, max: v2, distance: leftDistance)
-                let rightVertex = interpolate(v0, max: v2, distance: rightDistance)
-                
-                plotScanLine(y, left: leftVertex, right: rightVertex)
-            }
+            let left = interpolate(v0, max: leftVertex, distance: leftDistance)
+            let right = interpolate(v0, max: rightVertex, distance: rightDistance)
+        
+            plotScanLine(y, left: left, right: right)
         }
         
+        //Plot the bottom half of the triangle
+        leftVertex = (topSlope > bottomSlope) ? v0 : v1
+        rightVertex = (topSlope > bottomSlope) ? v1 : v0
         
+        for y in Int(v1.point.y)...Int(v2.point.y) {
+            let leftDistance = (Float(y) - leftVertex.point.y) / (v2.point.y - leftVertex.point.y)
+            let rightDistance = (Float(y) - rightVertex.point.y) / (v2.point.y - rightVertex.point.y)
+            
+            let left = interpolate(leftVertex, max: v2, distance: leftDistance)
+            let right = interpolate(rightVertex, max: v2, distance: rightDistance)
+            
+            plotScanLine(y, left: left, right: right)
+        }
     }
     
     func plotScanLine(y:Int, left:Vertex, right:Vertex){
