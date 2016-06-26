@@ -10,6 +10,7 @@ import UIKit
 
 class RaytracerViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
+    @IBOutlet weak var fpsLabel: UILabel!
     
     var timer: CADisplayLink! = nil
     var samplenumber:Int = 0
@@ -17,23 +18,31 @@ class RaytracerViewController: UIViewController {
     let cameraUp = Vector3D.up()
     let lightPosition = Vector3D(x: 0.0, y: 0.9, z: 0.0)
     var sceneObjects:[Sphere] = Array<Sphere>()
-
-    
-    @IBOutlet weak var fpsLabel: UILabel!
-    
     var colorBuffer:[Color] = Array<Color>();
     var currentRotation:Float = 0.0
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScene()
     }
     
+    var token: dispatch_once_t = 0
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if (self.renderView.width != 0){
+            dispatch_once(&token) {
+                self.renderView.clear()
+                self.colorBuffer = Array<Color>(count: self.renderView.width * self.renderView.height, repeatedValue: Color(r: 0.0, g: 0.0, b: 0.0))
+                self.samplenumber = 0
+                self.renderView.width = Int(Float(self.renderView.width) * 0.55)
+                self.renderView.height = Int(Float(self.renderView.height) * 0.55)
+            }
+        }
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        renderView.clear()
-        colorBuffer = Array<Color>(count: renderView.width * renderView.height, repeatedValue: Color(r: 0.0, g: 0.0, b: 0.0))
-        samplenumber = 0
         timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
         timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
@@ -52,25 +61,13 @@ class RaytracerViewController: UIViewController {
     }
     
     func drawScreen(){
-        let fieldOfView:Float = 1.57 / 2.0 //90 degrees in Radians
-        let scale:Float = tanf(fieldOfView * 0.5)
-        let aspectRatio:Float = Float(renderView.width)/Float(renderView.height)
-        let dx = 1.0 / Float(renderView.width)
-        let dy = 1.0 / Float(renderView.height)
-        
         for x:Int in 0 ..< renderView.width {
             for y:Int in 0 ..< renderView.height {
-                let cameraX = (2 * (Float(x) + 0.5) * dx - 1) * aspectRatio * scale
-                let cameraY = (1 - 2 * (Float(y) + 0.5) * dy) * scale * -1
-                let ray:Ray = makeRay(cameraX, y: cameraY)
-                
-                
+                let ray:Ray = makeRayThatIntersectsPixel(x, y: y)
                 let newColor = traceRay(ray, bounceIteration: 0)
                 let currentColor = colorBuffer[y * renderView.width + x]
                 let mixedColor = ((currentColor * Float(samplenumber)) + newColor)  *  (1.0/Float(samplenumber + 1))
-                //interpolate(currentColor, max: newColor, distance: Float(samplenumber) / Float(samplenumber + 1))
                 colorBuffer[y * renderView.width + x] = mixedColor
-                
                 renderView.plot(x, y: y, color: mixedColor)
             }
         }
@@ -79,7 +76,7 @@ class RaytracerViewController: UIViewController {
     func traceRay(ray:Ray, bounceIteration:Int) -> Color {
 
         //We've bounced the ray around the scene 5 times. Return.
-        if (bounceIteration >=  4){
+        if (bounceIteration >=  5){
             return Color(r: 0.0, g: 0.0, b: 0.0)
         }
         
@@ -93,10 +90,6 @@ class RaytracerViewController: UIViewController {
                 closestHitRecord = hitRecord
                 closestObject = sceneObject
             }
-        }
-        
-        if (!closestHitRecord.hitSuccess){
-            return Color(r: 0.0, g: 0.0, b: 0.0)
         }
         
         //Create a new ray to gather more information about the scene
@@ -117,14 +110,28 @@ class RaytracerViewController: UIViewController {
         return traceRay(nextRay, bounceIteration: bounceIteration + 1) * closestObject.color + closestObject.emission
     }
     
-    func makeRay(x:Float, y:Float) -> Ray{
+    func makeRayThatIntersectsPixel(x:Int, y:Int) -> Ray{
+        let fieldOfView:Float = 1.57 / 2.0 //45 degrees in Radians
+        let scale:Float = tanf(fieldOfView * 0.5)
+        let aspectRatio:Float = Float(renderView.width)/Float(renderView.height)
+        let dx = 1.0 / Float(renderView.width)
+        let dy = 1.0 / Float(renderView.height)
         
+        var cameraX = (2 * (Float(x) + 0.5) * dx - 1) * aspectRatio * scale
+        var cameraY = (1 - 2 * (Float(y) + 0.5) * dy) * scale * -1
+        
+        let r1 = Float(arc4random()) / Float(UINT32_MAX)
+        let r2 = Float(arc4random()) / Float(UINT32_MAX)
+        
+        cameraX += (r1 - 0.5)/Float(renderView.width)
+        cameraY += (r2 - 0.5)/Float(renderView.height)
+
         let lookAt = -cameraPosition.normalized()
         let eyeVector = (lookAt - cameraPosition).normalized()
         let rightVector = (eyeVector × cameraUp)
         let upVector = (eyeVector × rightVector)
         
-        var rayDirection = eyeVector + rightVector * x + upVector * y;
+        var rayDirection = eyeVector + rightVector * cameraX + upVector * cameraY
         rayDirection = rayDirection.normalized()
         
         return Ray(origin: cameraPosition, direction: rayDirection)
@@ -175,8 +182,8 @@ class RaytracerViewController: UIViewController {
                                          emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                          material:Material.REFLECTIVE )
         
-        let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.7, z: 0.3),
-                                        radius: 0.3,
+        let glassSphere:Sphere = Sphere(center: Vector3D(x: 0.5, y: -0.65, z: 0.25),
+                                        radius: 0.35,
                                         color: Color(r: 1.0, g: 1.0, b: 1.0),
                                         emission: Color(r: 0.0, g: 0.0, b: 0.0),
                                         material:Material.REFRACTIVE )
