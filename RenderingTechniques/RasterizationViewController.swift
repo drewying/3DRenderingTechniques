@@ -157,20 +157,26 @@ class RasterizationViewController: UIViewController {
         v2.point = projectPoint(v2.point)
         
         //Plot the top half of the triangle.
+        //Calculate the and right points.
         var leftVertex = (v2.point.x < v1.point.x) ? v2 : v1
         var rightVertex = (v2.point.x < v1.point.x) ? v1 : v2
         
         for y in Int(v0.point.y)...Int(v1.point.y) {
+            //Calculate the distance along the left and right slopes for that row of pixels.
             let leftDistance = (Float(y) - v0.point.y) / (leftVertex.point.y - v0.point.y)
             let rightDistance = (Float(y) - v0.point.y) / (rightVertex.point.y - v0.point.y)
             
-            let left = interpolate(v0, max: leftVertex, distance: leftDistance)
-            let right = interpolate(v0, max: rightVertex, distance: rightDistance)
+            //Create two points along the edges of triangle through interporlation
+            let start = interpolate(v0, max: leftVertex, distance: leftDistance)
+            let end = interpolate(v0, max: rightVertex, distance: rightDistance)
         
-            plotScanLine(y, left: left, right: right)
+            //Plot a horizontal line
+            plotScanLine(y, left: start, right: end)
         }
         
-        //Plot the bottom half of the triangle
+        //Plot the bottom half the triangle.
+        
+        //We've reached the mid point. Recalculate the left and right point.
         leftVertex = (v0.point.x < v1.point.x) ? v0 : v1
         rightVertex = (v0.point.x < v1.point.x) ? v1 : v0
         
@@ -178,10 +184,10 @@ class RasterizationViewController: UIViewController {
             let leftDistance = (Float(y) - leftVertex.point.y) / (v2.point.y - leftVertex.point.y)
             let rightDistance = (Float(y) - rightVertex.point.y) / (v2.point.y - rightVertex.point.y)
             
-            let left = interpolate(leftVertex, max: v2, distance: leftDistance)
-            let right = interpolate(rightVertex, max: v2, distance: rightDistance)
+            let start = interpolate(leftVertex, max: v2, distance: leftDistance)
+            let end = interpolate(rightVertex, max: v2, distance: rightDistance)
             
-            plotScanLine(y, left: left, right: right)
+            plotScanLine(y, left: start, right: end)
         }
     }
     
