@@ -41,6 +41,8 @@ class RasterizationViewController: UIViewController {
     var modelMatrix:Matrix = Matrix.identityMatrix()
     var perspectiveMatrix:Matrix = Matrix.identityMatrix()
     var viewMatrix:Matrix = Matrix.identityMatrix()
+    var invertedPerspectiveMatrix:Matrix = Matrix.identityMatrix()
+    var normalMatrix:Matrix = Matrix.identityMatrix()
     
     
     override func viewDidLoad() {
@@ -122,6 +124,10 @@ class RasterizationViewController: UIViewController {
         viewMatrix = Matrix.lookAt(cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
         //The perspective matrix adds the illusion of perspective
         perspectiveMatrix = Matrix.perspective(0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
+        //The inverse perspective, used for lighting
+        invertedPerspectiveMatrix = Matrix.inverse(perspectiveMatrix)
+        //The normal matrix, used for lighting
+        normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
         
     }
     
@@ -207,7 +213,8 @@ class RasterizationViewController: UIViewController {
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
                 if (vertex.point.z < zBuffer[x][y]){
                     zBuffer[x][y] = vertex.point.z
-                    vertex.point = unprojectPoint(vertex.point) * Matrix.inverse(perspectiveMatrix)
+                    vertex.point = unprojectPoint(vertex.point) * invertedPerspectiveMatrix
+                    vertex.normal = Matrix.transformPoint(normalMatrix, right: vertex.normal).normalized()
                     let color = shader(vertex)
                     renderView.plot(x, y: y, color: color)
                 }
@@ -228,15 +235,10 @@ class RasterizationViewController: UIViewController {
     }
     
     func shader(vertex:Vertex) -> Color{
-
-        let normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
-        let normal = Matrix.transformPoint(normalMatrix, right: vertex.normal).normalized()
-        
         let diffuseColor:Color = Color(r: 0.5, g: 0, b: 0)
         let ambientColor:Color = Color(r: 0.33, g: 0.33, b: 0.33)
         let lightColor:Color = Color(r: 1.0, g: 1.0, b: 1.0)
-        
-        return calculatePhongLightingFactor(lightPosition, targetPosition: vertex.point, targetNormal: normal, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        return calculatePhongLightingFactor(lightPosition, targetPosition: vertex.point, targetNormal: vertex.normal, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
     }
     
 }

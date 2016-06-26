@@ -111,7 +111,8 @@ class RaytracerViewController: UIViewController {
     }
     
     func makeRayThatIntersectsPixel(x:Int, y:Int) -> Ray{
-        let fieldOfView:Float = 1.57 / 2.0 //45 degrees in Radians
+        //Convert pixel coordinates to world coordinate
+        let fieldOfView:Float = 0.785
         let scale:Float = tanf(fieldOfView * 0.5)
         let aspectRatio:Float = Float(renderView.width)/Float(renderView.height)
         let dx = 1.0 / Float(renderView.width)
@@ -120,19 +121,18 @@ class RaytracerViewController: UIViewController {
         var cameraX = (2 * (Float(x) + 0.5) * dx - 1) * aspectRatio * scale
         var cameraY = (1 - 2 * (Float(y) + 0.5) * dy) * scale * -1
         
+        //Randomly move the ray up or down to create anti-aliasing
         let r1 = Float(arc4random()) / Float(UINT32_MAX)
         let r2 = Float(arc4random()) / Float(UINT32_MAX)
-        
         cameraX += (r1 - 0.5)/Float(renderView.width)
         cameraY += (r2 - 0.5)/Float(renderView.height)
 
+        //Transform the world coordinate into a ray
         let lookAt = -cameraPosition.normalized()
         let eyeVector = (lookAt - cameraPosition).normalized()
         let rightVector = (eyeVector × cameraUp)
         let upVector = (eyeVector × rightVector)
-        
-        var rayDirection = eyeVector + rightVector * cameraX + upVector * cameraY
-        rayDirection = rayDirection.normalized()
+        let rayDirection = (eyeVector + rightVector * cameraX + upVector * cameraY).normalized()
         
         return Ray(origin: cameraPosition, direction: rayDirection)
     }
