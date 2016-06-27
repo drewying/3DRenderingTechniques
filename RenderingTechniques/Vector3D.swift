@@ -8,8 +8,6 @@
 
 import Foundation
 
-
-
 struct Vector3D{
     let x:Float
     let y:Float

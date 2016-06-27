@@ -247,7 +247,7 @@ struct Ray {
         let reflectance:Float = (rs*rs + rp*rp);
         // Check for perfect refraction (Reflection)
         let reflectionProbability:Float = 0.1;
-        if(Float(arc4random()) / Float(UINT32_MAX) < reflectance + reflectionProbability) {
+        if(Float(arc4random()) / Float(UINT32_MAX) < reflectance) {
             return reflectRay(origin, normal: normal)
         }
        

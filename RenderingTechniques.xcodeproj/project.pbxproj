@@ -21,6 +21,7 @@
 		D1CD46871D0846CD0066A83D /* RenderingTechniquesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */; };
 		D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizationViewController.swift */; };
 		D1CD46991D0862A50066A83D /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1CD46981D0862A50066A83D /* teapot.obj */; };
+		D1E484A91D20D2CD003047C5 /* Vector2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E484A81D20D2CD003047C5 /* Vector2D.swift */; };
 		D1EE203A1D1CDD6400414FC0 /* greystone.png in Resources */ = {isa = PBXBuildFile; fileRef = D1EE20391D1CDD6400414FC0 /* greystone.png */; };
 		D1EE203C1D1CDD6F00414FC0 /* redbrick.png in Resources */ = {isa = PBXBuildFile; fileRef = D1EE203B1D1CDD6F00414FC0 /* redbrick.png */; };
 /* End PBXBuildFile section */
@@ -63,6 +64,7 @@
 		D1CD46881D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D1CD46941D0846F50066A83D /* RasterizationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RasterizationViewController.swift; sourceTree = "<group>"; };
 		D1CD46981D0862A50066A83D /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
+		D1E484A81D20D2CD003047C5 /* Vector2D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector2D.swift; sourceTree = "<group>"; };
 		D1EE20391D1CDD6400414FC0 /* greystone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = greystone.png; sourceTree = "<group>"; };
 		D1EE203B1D1CDD6F00414FC0 /* redbrick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = redbrick.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -98,6 +100,7 @@
 				D12805BE1D0A052A00F1C929 /* Matrix.swift */,
 				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
 				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
+				D1E484A81D20D2CD003047C5 /* Vector2D.swift */,
 			);
 			name = 3DMath;
 			sourceTree = "<group>";
@@ -319,6 +322,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */,
+				D1E484A91D20D2CD003047C5 /* Vector2D.swift in Sources */,
 				D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */,
 				D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */,
 				D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */,
