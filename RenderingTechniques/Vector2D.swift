@@ -95,9 +95,6 @@ func max (left: Vector2D, right: Vector2D) -> Vector2D{
     return Vector2D(x: max(left.x, right.x), y: max(left.y, right.y))
 }
 
-infix operator × { associativity left precedence 160 }
-infix operator ⋅ { associativity left precedence 160 }
-
 func ⋅ (left: Vector2D, right: Vector2D) -> Float{
     return left.x * right.x + left.y * right.y
 }
