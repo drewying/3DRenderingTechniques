@@ -30,6 +30,16 @@ struct Vector2D{
         return "(\(x),\(y)";
     }
     
+    func rotate(angle:Float) -> Vector2D{
+        let cosine:Float = cos(angle)
+        let sine = sin(angle)
+        
+        let x = self.x * cosine - self.y * sine
+        let y = self.x * sine + self.y * cosine
+        
+        return Vector2D(x: x, y: y)
+    }
+    
     static func up() -> Vector2D {
         return Vector2D(x: 0.0, y: 1.0)
     }

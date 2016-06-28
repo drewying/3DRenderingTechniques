@@ -10,9 +10,13 @@ import UIKit
 
 class RaycasterViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
+    @IBOutlet weak var fpsLabel: UILabel!
     var timer: CADisplayLink! = nil
+    var currentRotation:Float = 0.0
+    
     var stoneWallTextureData:CFData!
     var redBrickTextureData:CFData!
+    
     let textureWidth:Int = 64
     let textureHeight:Int = 64
     
@@ -24,9 +28,6 @@ class RaycasterViewController: UIViewController {
         [1,0,0,0,0,0,1],
         [2,2,0,0,0,2,2],
         [2,2,1,1,1,2,2]]
-    var currentRotation:Float = 0.0
-    
-    @IBOutlet weak var fpsLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,19 +64,15 @@ class RaycasterViewController: UIViewController {
     
     func drawColumn(x:Int){
        
-        let direction:Vector3D = Vector3D(x: -1.0, y: 0.0, z: 0.0) * Matrix.rotateZ(currentRotation)
-        let plane:Vector3D = Vector3D(x: 0.0, y: 0.5, z: 0.0) * Matrix.rotateZ(currentRotation)
+        let viewDirection:Vector2D = Vector2D(x: -1.0, y: 0.0).rotate(currentRotation)
+        let plane:Vector2D = Vector2D(x: 0.0, y: 0.5).rotate(currentRotation)
         
         let cameraX:Float = 2.0 * Float(x) / Float(renderView.width) - 1.0;
-        let rayOrigin:Vector3D = Vector3D(x: 3.5, y: 3.5, z: 0.0)
-        let rayDirection:Vector3D = Vector3D(x: direction.x + plane.x * cameraX, y: direction.y + plane.y * cameraX, z: 0.0)
+        let rayOrigin:Vector2D = Vector2D(x: 3.5, y: 3.5)
+        let rayDirection:Vector3D = Vector3D(x: viewDirection.x + plane.x * cameraX, y: viewDirection.y + plane.y * cameraX, z: 0.0)
         
-
         let deltaDistanceX:Float = rayDirection.x == 0 ? FLT_MAX : sqrt(1.0 + (rayDirection.y * rayDirection.y) / (rayDirection.x * rayDirection.x))
         let deltaDistanceY:Float = rayDirection.y == 0 ? FLT_MAX : sqrt(1.0 + (rayDirection.x * rayDirection.x) / (rayDirection.y * rayDirection.y))
-        
-        let mapWidth:Int = worldMap.count
-        let mapHeight:Int = worldMap[0].count
         
         var mapCoordinateX:Int = Int(rayOrigin.x)
         var mapCoordinateY:Int = Int(rayOrigin.y)
@@ -115,9 +112,8 @@ class RaycasterViewController: UIViewController {
                 mapCoordinateY += wallStepY
                 isSideHit = true;
             }
-            if (mapCoordinateX < 0 || mapCoordinateY < 0 || mapCoordinateX > mapWidth || mapCoordinateY > mapHeight){
-                hitWall = true
-            } else if (worldMap[mapCoordinateX][mapCoordinateY] > 0){
+            
+            if (worldMap[mapCoordinateX][mapCoordinateY] > 0){
                 hitWall = true
             }
         }
@@ -144,7 +140,6 @@ class RaycasterViewController: UIViewController {
         }
         
         wallHitPositionX -= floor((wallHitPositionX));
-        
         
         let textureData = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
         
