@@ -35,8 +35,8 @@ class RaytracerViewController: UIViewController {
                 self.renderView.clear()
                 self.colorBuffer = Array<Color>(count: self.renderView.width * self.renderView.height, repeatedValue: Color(r: 0.0, g: 0.0, b: 0.0))
                 self.samplenumber = 0
-                self.renderView.width = Int(Float(self.renderView.width) * 0.55)
-                self.renderView.height = Int(Float(self.renderView.height) * 0.55)
+                self.renderView.width = Int(Float(self.renderView.width) * 0.75)
+                self.renderView.height = Int(Float(self.renderView.height) * 0.75)
             }
         }
     }
@@ -63,8 +63,11 @@ class RaytracerViewController: UIViewController {
     func drawScreen(){
         for x:Int in 0 ..< renderView.width {
             for y:Int in 0 ..< renderView.height {
+                //Generate a ray that passes through the pixel at (x, y)
                 let ray:Ray = makeRayThatIntersectsPixel(x, y: y)
+                //Trace that ray and determine the color
                 let newColor = traceRay(ray, bounceIteration: 0)
+                //Mix the new color with the current known color.
                 let currentColor = colorBuffer[y * renderView.width + x]
                 let mixedColor = ((currentColor * Float(samplenumber)) + newColor)  *  (1.0/Float(samplenumber + 1))
                 colorBuffer[y * renderView.width + x] = mixedColor
