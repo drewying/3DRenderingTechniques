@@ -20,6 +20,7 @@ class RaycasterViewController: UIViewController {
     let textureWidth:Int = 64
     let textureHeight:Int = 64
     
+    let playerPosition:Vector2D = Vector2D(x: 3.5, y: 3.5)
     let worldMap:[[Int]] =
        [[1,1,2,2,2,1,1],
         [1,0,2,0,2,1,1],
@@ -68,41 +69,29 @@ class RaycasterViewController: UIViewController {
         let plane:Vector2D = Vector2D(x: 0.0, y: 0.5).rotate(currentRotation)
         
         let cameraX:Float = 2.0 * Float(x) / Float(renderView.width) - 1.0;
-        let rayOrigin:Vector2D = Vector2D(x: 3.5, y: 3.5)
-        let rayDirection:Vector3D = Vector3D(x: viewDirection.x + plane.x * cameraX, y: viewDirection.y + plane.y * cameraX, z: 0.0)
+        let rayDirection:Vector2D = Vector2D(x: viewDirection.x + plane.x * cameraX, y: viewDirection.y + plane.y * cameraX)
         
+        //The starting map coordinate
+        var mapCoordinateX:Int = Int(playerPosition.x)
+        var mapCoordinateY:Int = Int(playerPosition.y)
+        
+        //The direction we step through the map.
+        let wallStepX:Int = (rayDirection.x < 0) ? -1 : 1
+        let wallStepY:Int = (rayDirection.y < 0) ? -1 : 1
+        
+        //The length of the ray from one x-side to next x-side and y-side to next y-side
         let deltaDistanceX:Float = rayDirection.x == 0 ? FLT_MAX : sqrt(1.0 + (rayDirection.y * rayDirection.y) / (rayDirection.x * rayDirection.x))
         let deltaDistanceY:Float = rayDirection.y == 0 ? FLT_MAX : sqrt(1.0 + (rayDirection.x * rayDirection.x) / (rayDirection.y * rayDirection.y))
         
-        var mapCoordinateX:Int = Int(rayOrigin.x)
-        var mapCoordinateY:Int = Int(rayOrigin.y)
+        //Length of ray from player to next x-side or y-side
+        var sideDistanceX:Float = (rayDirection.x < 0) ? (playerPosition.x - Float(mapCoordinateX)) * deltaDistanceX : (Float(mapCoordinateX) + 1.0 - playerPosition.x) * deltaDistanceX
+        var sideDistanceY:Float = (rayDirection.y < 0) ? (playerPosition.y - Float(mapCoordinateY)) * deltaDistanceY : (Float(mapCoordinateY) + 1.0 - playerPosition.y) * deltaDistanceY
         
-        var wallStepX:Int = 0
-        var wallStepY:Int = 0
-        
-        var sideDistanceX:Float = 0.0
-        var sideDistanceY:Float = 0.0
-        
-        if (rayDirection.x < 0){
-            wallStepX = -1
-            sideDistanceX = (rayOrigin.x - Float(mapCoordinateX)) * deltaDistanceX
-        } else {
-            wallStepX = 1
-            sideDistanceX = (Float(mapCoordinateX) + 1.0 - rayOrigin.x) * deltaDistanceX
-        }
-        
-        if (rayDirection.y < 0){
-            wallStepY = -1
-            sideDistanceY = (rayOrigin.y - Float(mapCoordinateY)) * deltaDistanceY
-        } else {
-            wallStepY = 1
-            sideDistanceY = (Float(mapCoordinateY) + 1.0 - rayOrigin.y) * deltaDistanceY
-        }
-        
-        var hitWall:Bool = false
+        //Did we hit the x-side or y-side?
         var isSideHit:Bool = false
         
-        while (!hitWall){
+        //Find the next wall intersection by checking the x and y sides along the direction of the ray.
+        while (worldMap[mapCoordinateX][mapCoordinateY] <= 0){
             if (sideDistanceX < sideDistanceY){
                 sideDistanceX += deltaDistanceX
                 mapCoordinateX += wallStepX
@@ -112,49 +101,44 @@ class RaycasterViewController: UIViewController {
                 mapCoordinateY += wallStepY
                 isSideHit = true;
             }
-            
-            if (worldMap[mapCoordinateX][mapCoordinateY] > 0){
-                hitWall = true
-            }
         }
         
+        //Get the wall distance
         var wallDistance:Float = 0.0
-        
         if (!isSideHit){
-            wallDistance = (Float(mapCoordinateX) - rayOrigin.x + (1.0 - Float(wallStepX)) / 2.0) / rayDirection.x;
+            wallDistance = (Float(mapCoordinateX) - playerPosition.x + (1.0 - Float(wallStepX)) / 2.0) / rayDirection.x;
         } else {
-            wallDistance = (Float(mapCoordinateY) - rayOrigin.y + (1.0 - Float(wallStepY)) / 2.0) / rayDirection.y;
+            wallDistance = (Float(mapCoordinateY) - playerPosition.y + (1.0 - Float(wallStepY)) / 2.0) / rayDirection.y;
         }
         
-        let lineHeight:Int = Int(Float(renderView.width) / wallDistance)
-        
+        //Get the beginning and ending y pixel values to draw
+        let lineHeight:Int = Int(Float(renderView.height) / wallDistance)
         let yStartPixel = -lineHeight / 2 + renderView.height / 2;
         let yEndPixel = lineHeight / 2 + renderView.height / 2;
         
-        //Calculate the point on the wall that was hit
+        //Get the texture data for thw all
+        let textureData = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
+        
+        //Calculate the x point on the wall that was hit
         var wallHitPositionX:Float = 0.0
         if (!isSideHit){
-            wallHitPositionX = rayOrigin.y + wallDistance * rayDirection.y;
+            wallHitPositionX = playerPosition.y + wallDistance * rayDirection.y;
         } else {
-            wallHitPositionX = rayOrigin.x + wallDistance * rayDirection.x;
+            wallHitPositionX = playerPosition.x + wallDistance * rayDirection.x;
         }
         
         wallHitPositionX -= floor((wallHitPositionX));
         
-        let textureData = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
-        
+        //Go through and plot each pixel in the column
         let wallHitPositionStartY:Float = Float(renderView.height) / 2.0 - Float(lineHeight) / 2.0
-        
         for y in yStartPixel ..< yEndPixel {
-
             let wallHitPositionY:Float = (Float(y) - wallHitPositionStartY) / Float(lineHeight)
             let color = getColorOfTexture(textureData, x: Int(wallHitPositionX * Float(textureWidth)), y: Int(wallHitPositionY * Float(textureHeight)))
-
             renderView.plot(x, y: y, color: color * (isSideHit ? 0.5 : 1.0))
         }
-        
     }
     
+    //Given texture data, get the color for the corresponding x and y pixel.
     func getColorOfTexture(texture:CFData, x:Int, y:Int) -> Color {
         let data = CFDataGetBytePtr(texture)
         let pixelInfo: Int = ((textureWidth * y) + x) * 4
