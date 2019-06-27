@@ -20,8 +20,8 @@ struct Vertex {
 }
 
 func interpolate(min:Vertex, max:Vertex, distance:Float) -> Vertex{
-    let returnPoint = interpolate(min.point, max: max.point, distance: distance)
-    let returnNormal = interpolate(min.normal, max: max.normal, distance: distance)
+    let returnPoint = interpolate(min: min.point, max: max.point, distance: distance)
+    let returnNormal = interpolate(min: min.normal, max: max.normal, distance: distance)
     return Vertex(point: returnPoint, normal: returnNormal)
 }
 
@@ -50,24 +50,24 @@ class RasterizationViewController: UIViewController {
         loadTeapot()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
-        timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        timer = CADisplayLink(target: self, selector: #selector(renderLoop))
+        timer.add(to: .current, forMode: .common)
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         timer.invalidate()
     }
     
-    func renderLoop(){
+    @objc func renderLoop(){
         let startTime:NSDate = NSDate()
         updateMatrices()
-        zBuffer = Array<Array<Float>>(count: renderView.width, repeatedValue: Array<Float>(count: renderView.height, repeatedValue: FLT_MAX))
+        zBuffer = [[Float]](repeating: [Float](repeating:Float.greatestFiniteMagnitude, count: renderView.height), count: renderView.width)
         renderView.clear()
-        for triangle:Triangle in triangles{
-            renderTriangle(triangle)
+        triangles.forEach {
+            render(triangle: $0)
         }
         renderView.render()
         currentRotation += 0.02
@@ -76,62 +76,63 @@ class RasterizationViewController: UIViewController {
     }
     
     func loadTeapot(){
-        if let filepath = NSBundle.mainBundle().pathForResource("teapot", ofType: "obj") {
-            //if let filepath = NSBundle.mainBundle().pathForResource("cube", ofType: "obj") {
-            do {
-                let contents:String = try NSString(contentsOfFile: filepath, usedEncoding: nil) as String
-                let lines:[String] = contents.componentsSeparatedByString("\n")
-                var points:[Vector3D] = Array<Vector3D>()
-                var normals:[Vector3D] = Array<Vector3D>()
-                
-                for line:String in lines{
-                    if (line.hasPrefix("v ")){
-                        let values:[String] = line.componentsSeparatedByString(" ")
-                        points.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
-                    }
-                    if (line.hasPrefix("vn ")){
-                        let values:[String] = line.componentsSeparatedByString(" ")
-                        normals.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
-                    }
-                    if (line.hasPrefix("f ")){
-                        let values:[String] = line.componentsSeparatedByString(" ")
-                        let i0:Int = (values[1].substringToIndex((values[1].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
-                        let in0:Int = (values[1].substringFromIndex((values[1].rangeOfString("//")?.endIndex)!) as NSString).integerValue - 1
-                        let i1:Int = (values[2].substringToIndex((values[2].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
-                        let in1:Int = (values[2].substringFromIndex((values[2].rangeOfString("//")?.endIndex)!) as NSString).integerValue - 1
-                        let i2:Int = (values[3].substringToIndex((values[3].rangeOfString("//")?.startIndex)!) as NSString).integerValue - 1
-                        let in2:Int = (values[3].substringFromIndex((values[3].rangeOfString("//")?.endIndex)!) as NSString).integerValue - 1
-                        
-                        let v0:Vertex = Vertex(point: points[i0], normal: normals[in0])
-                        let v1:Vertex = Vertex(point: points[i1], normal: normals[in1])
-                        let v2:Vertex = Vertex(point: points[i2], normal: normals[in2])
-                        
-                        triangles.append(Triangle(v0: v0, v1: v1, v2: v2))
-                    }
+        guard let filepath = Bundle.main.url(forResource: "teapot", withExtension: "obj") else {
+            fatalError("Couldn't Load Teapot")
+        }
+        
+        do {
+            let contents:String = try String(contentsOf: filepath, encoding: .ascii)
+            let lines:[String] = contents.components(separatedBy: "\n")
+            var points:[Vector3D] = Array<Vector3D>()
+            var normals:[Vector3D] = Array<Vector3D>()
+            
+            for line:String in lines{
+                if (line.hasPrefix("v ")){
+                    let values:[String] = line.components(separatedBy: " ")
+                    points.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
                 }
-            } catch {
-                print("Couldn't load teapot")
+                if (line.hasPrefix("vn ")){
+                    let values:[String] = line.components(separatedBy: " ")
+                    normals.append(Vector3D(x: (values[1] as NSString).floatValue, y: (values[2] as NSString).floatValue, z: (values[3] as NSString).floatValue))
+                }
+                if (line.hasPrefix("f ")){
+                    let values:[String] = line.components(separatedBy:" ")
+                    let i0:Int = Int(values[1].components(separatedBy: "//")[0])! - 1
+                    let in0:Int = Int(values[1].components(separatedBy: "//")[1])! - 1
+                    
+                    let i1:Int = Int(values[2].components(separatedBy: "//")[0])! - 1
+                    let in1:Int = Int(values[2].components(separatedBy: "//")[1])! - 1
+                    
+                    let i2:Int = Int(values[3].components(separatedBy: "//")[0])! - 1
+                    let in2:Int = Int(values[3].components(separatedBy: "//")[1])! - 1
+                    
+                    let v0:Vertex = Vertex(point: points[i0], normal: normals[in0])
+                    let v1:Vertex = Vertex(point: points[i1], normal: normals[in1])
+                    let v2:Vertex = Vertex(point: points[i2], normal: normals[in2])
+                    
+                    triangles.append(Triangle(v0: v0, v1: v1, v2: v2))
+                }
             }
-        } else {
+        } catch {
             print("Couldn't load teapot")
         }
     }
     
     func updateMatrices(){
         //The model matrix is the matrix that's responsible for positioning the model in world space
-        modelMatrix = Matrix.rotateY(-currentRotation) * Matrix.rotateX(0.65) * Matrix.translate(Vector3D(x: 0.0, y: -0.4, z: 0.0))
+        modelMatrix = Matrix.rotateY(angle: -currentRotation) * Matrix.rotateX(angle: 0.65) * Matrix.translate(vector: Vector3D(x: 0.0, y: -0.4, z: 0.0))
         //The view matrix transforms from world space into camera space
-        viewMatrix = Matrix.lookAt(cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
+        viewMatrix = Matrix.lookAt(cameraPosition: cameraPosition, cameraTarget: Vector3D(x: 0, y: 0, z: 0), cameraUp: Vector3D.up())
         //The perspective matrix adds the illusion of perspective
-        perspectiveMatrix = Matrix.perspective(0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
+        perspectiveMatrix = Matrix.perspective(fov: 0.78, aspectRatio: Float(renderView.width)/Float(renderView.height), zNear: -1.0, zFar: 1.0)
         //The inverse perspective, used for lighting
-        invertedPerspectiveMatrix = Matrix.inverse(perspectiveMatrix)
+        invertedPerspectiveMatrix = Matrix.inverse(matrix: perspectiveMatrix)
         //The normal matrix, used for lighting
-        normalMatrix = Matrix.transpose(Matrix.inverse(modelMatrix * viewMatrix))
+        normalMatrix = Matrix.transpose(matrix: Matrix.inverse(matrix: modelMatrix * viewMatrix))
         
     }
     
-    func renderTriangle(triangle:Triangle){
+    func render(triangle:Triangle){
         
         var v0 = triangle.v0
         var v1 = triangle.v1
@@ -148,7 +149,7 @@ class RasterizationViewController: UIViewController {
         }
         
         //Sort the Vertices from top to bottom
-        let vertices:[Vertex] = [v0, v1, v2].sort {
+        let vertices:[Vertex] = [v0, v1, v2].sorted {
             return $0.point.y < $1.point.y
         }
         
@@ -158,9 +159,9 @@ class RasterizationViewController: UIViewController {
         
         //Project the three points of the triangle into screen space, and add transform the points for perspective.
         //This fulfills the role of the typical vertext shader.
-        v0.point = projectPoint(v0.point)
-        v1.point = projectPoint(v1.point)
-        v2.point = projectPoint(v2.point)
+        v0.point = project(point: v0.point)
+        v1.point = project(point: v1.point)
+        v2.point = project(point: v2.point)
         
         //Plot the top half of the triangle.
         //Calculate the and right points.
@@ -173,11 +174,11 @@ class RasterizationViewController: UIViewController {
             let rightDistance = (Float(y) - v0.point.y) / (rightVertex.point.y - v0.point.y)
             
             //Create two points along the edges of triangle through interporlation
-            let start = interpolate(v0, max: leftVertex, distance: leftDistance)
-            let end = interpolate(v0, max: rightVertex, distance: rightDistance)
+            let start = interpolate(min: v0, max: leftVertex, distance: leftDistance)
+            let end = interpolate(min: v0, max: rightVertex, distance: rightDistance)
         
             //Plot a horizontal line
-            plotScanLine(y, left: start, right: end)
+            plotScanLine(y: y, left: start, right: end)
         }
         
         //Plot the bottom half the triangle.
@@ -190,10 +191,10 @@ class RasterizationViewController: UIViewController {
             let leftDistance = (Float(y) - leftVertex.point.y) / (v2.point.y - leftVertex.point.y)
             let rightDistance = (Float(y) - rightVertex.point.y) / (v2.point.y - rightVertex.point.y)
             
-            let start = interpolate(leftVertex, max: v2, distance: leftDistance)
-            let end = interpolate(rightVertex, max: v2, distance: rightDistance)
+            let start = interpolate(min: leftVertex, max: v2, distance: leftDistance)
+            let end = interpolate(min: rightVertex, max: v2, distance: rightDistance)
             
-            plotScanLine(y, left: start, right: end)
+            plotScanLine(y: y, left: start, right: end)
         }
     }
     
@@ -208,27 +209,27 @@ class RasterizationViewController: UIViewController {
         
         for x in Int(start.point.x) ..< Int(end.point.x) {
             let horizontalDistance = (Float(x) - start.point.x) / (end.point.x - start.point.x);
-            var vertex = interpolate(start, max: end, distance: horizontalDistance);
+            var vertex = interpolate(min: start, max: end, distance: horizontalDistance);
             
             if (x >= 0 && y >= 0 && x < renderView.width && y < renderView.height){
                 if (vertex.point.z < zBuffer[x][y]){
                     zBuffer[x][y] = vertex.point.z
-                    vertex.point = unprojectPoint(vertex.point) * invertedPerspectiveMatrix
-                    vertex.normal = Matrix.transformPoint(normalMatrix, right: vertex.normal).normalized()
-                    let color = shader(vertex)
-                    renderView.plot(x, y: y, color: color)
+                    vertex.point = unproject(point: vertex.point) * invertedPerspectiveMatrix
+                    vertex.normal = Matrix.transformPoint(left: normalMatrix, right: vertex.normal).normalized()
+                    let color = shader(vertex: vertex)
+                    renderView.plot(x: x, y: y, color: color)
                 }
             }
         }
     }
     
-    func unprojectPoint(point:Vector3D) -> Vector3D{
+    func unproject(point:Vector3D) -> Vector3D{
         let x = ((point.x / Float(renderView.width)) * 2.0) - 1.0
         let y = ((point.y / Float(renderView.height)) * 2.0) - 1.0
         return Vector3D(x: x, y: y, z: point.z)
     }
     
-    func projectPoint(point:Vector3D) -> Vector3D{
+    func project(point:Vector3D) -> Vector3D{
         let x = point.x * Float(renderView.width) + Float(renderView.width) / 2.0;
         let y = point.y * Float(renderView.height) + Float(renderView.height) / 2.0;
         return Vector3D(x: x, y: y, z: point.z)
@@ -238,7 +239,6 @@ class RasterizationViewController: UIViewController {
         let diffuseColor:Color = Color(r: 0.5, g: 0, b: 0)
         let ambientColor:Color = Color(r: 0.33, g: 0.33, b: 0.33)
         let lightColor:Color = Color(r: 1.0, g: 1.0, b: 1.0)
-        return calculatePhongLightingFactor(lightPosition, targetPosition: vertex.point, targetNormal: vertex.normal, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
+        return calculatePhongLightingFactor(lightPosition: lightPosition, targetPosition: vertex.point, targetNormal: vertex.normal, diffuseColor: diffuseColor, ambientColor: ambientColor, shininess: 4.0, lightColor: lightColor)
     }
-    
 }

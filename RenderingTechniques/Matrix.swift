@@ -265,5 +265,5 @@ func * (left: Vector3D, right: Matrix) -> Vector3D {
 }
 
 func * (left: Matrix, right: Vector3D) -> Vector3D {
-    return Matrix.transformPoint(left, right: right)
+    return Matrix.transformPoint(left: left, right: right)
 }

@@ -14,8 +14,8 @@ class RaycasterViewController: UIViewController {
     var timer: CADisplayLink! = nil
     var currentRotation:Float = 0.0
     
-    var stoneWallTextureData:CFData!
-    var redBrickTextureData:CFData!
+    var stoneWallTextureData:UIImage = UIImage(named: "greystone.png")!
+    var redBrickTextureData:UIImage = UIImage(named: "redbrick.png")!
     
     let textureWidth:Int = 64
     let textureHeight:Int = 64
@@ -30,21 +30,13 @@ class RaycasterViewController: UIViewController {
         [2,2,0,0,0,2,2],
         [2,2,1,1,1,2,2]]
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        let wallImage:UIImage = UIImage(named: "greystone.png")!
-        stoneWallTextureData = CGDataProviderCopyData(CGImageGetDataProvider(wallImage.CGImage))!
-        let redWallImage:UIImage = UIImage(named: "redbrick.png")!
-        redBrickTextureData = CGDataProviderCopyData(CGImageGetDataProvider(redWallImage.CGImage))!
-    }
-    
-    func renderLoop(){
+    @objc func renderLoop(){
         let startTime:NSDate = NSDate()
         
         renderView.clear()
         
         for x:Int in 0 ..< renderView.width {
-            drawColumn(x)
+            drawColumn(x: x)
         }
         
         renderView.render()
@@ -52,21 +44,21 @@ class RaycasterViewController: UIViewController {
         self.fpsLabel.text = String(format: "%.1 FPS", 1.0 / Float(-startTime.timeIntervalSinceNow))
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
-        timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        timer = CADisplayLink(target: self, selector: #selector(renderLoop))
+        timer.add(to: .current, forMode: .common)
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         timer.invalidate()
     }
     
     func drawColumn(x:Int){
        
-        let viewDirection:Vector2D = Vector2D(x: -1.0, y: 0.0).rotate(currentRotation)
-        let plane:Vector2D = Vector2D(x: 0.0, y: 0.5).rotate(currentRotation)
+        let viewDirection:Vector2D = Vector2D(x: -1.0, y: 0.0).rotate(angle: currentRotation)
+        let plane:Vector2D = Vector2D(x: 0.0, y: 0.5).rotate(angle: currentRotation)
         
         let cameraX:Float = 2.0 * Float(x) / Float(renderView.width) - 1.0;
         let rayDirection:Vector2D = Vector2D(x: viewDirection.x + plane.x * cameraX, y: viewDirection.y + plane.y * cameraX)
@@ -80,8 +72,8 @@ class RaycasterViewController: UIViewController {
         let wallStepY:Int = (rayDirection.y < 0) ? -1 : 1
         
         //The length of the ray from one x-side to next x-side and y-side to next y-side
-        let deltaDistanceX:Float = rayDirection.x == 0 ? FLT_MAX : sqrt(1.0 + (rayDirection.y * rayDirection.y) / (rayDirection.x * rayDirection.x))
-        let deltaDistanceY:Float = rayDirection.y == 0 ? FLT_MAX : sqrt(1.0 + (rayDirection.x * rayDirection.x) / (rayDirection.y * rayDirection.y))
+        let deltaDistanceX:Float = rayDirection.x == 0 ? Float.greatestFiniteMagnitude : sqrt(1.0 + (rayDirection.y * rayDirection.y) / (rayDirection.x * rayDirection.x))
+        let deltaDistanceY:Float = rayDirection.y == 0 ? Float.greatestFiniteMagnitude : sqrt(1.0 + (rayDirection.x * rayDirection.x) / (rayDirection.y * rayDirection.y))
         
         //Length of ray from player to next x-side or y-side
         var sideDistanceX:Float = (rayDirection.x < 0) ? (playerPosition.x - Float(mapCoordinateX)) * deltaDistanceX : (Float(mapCoordinateX) + 1.0 - playerPosition.x) * deltaDistanceX
@@ -133,21 +125,25 @@ class RaycasterViewController: UIViewController {
         let wallHitPositionStartY:Float = Float(renderView.height) / 2.0 - Float(lineHeight) / 2.0
         for y in yStartPixel ..< yEndPixel {
             let wallHitPositionY:Float = (Float(y) - wallHitPositionStartY) / Float(lineHeight)
-            let color = getColorOfTexture(textureData, x: Int(wallHitPositionX * Float(textureWidth)), y: Int(wallHitPositionY * Float(textureHeight)))
-            renderView.plot(x, y: y, color: color * (isSideHit ? 0.5 : 1.0))
+            let color = getColorFromTexture(texture: textureData, x: Int(wallHitPositionX * Float(textureWidth)), y: Int(wallHitPositionY * Float(textureHeight)))
+            renderView.plot(x: x, y: y, color: color * (isSideHit ? 0.5 : 1.0))
         }
     }
     
     //Given texture data, get the color for the corresponding x and y pixel.
-    func getColorOfTexture(texture:CFData, x:Int, y:Int) -> Color {
-        let data = CFDataGetBytePtr(texture)
-        let pixelInfo: Int = ((textureWidth * y) + x) * 4
+    func getColorFromTexture(texture:UIImage, x:Int, y:Int) -> Color {
+
+        let provider = texture.cgImage!.dataProvider
+        let providerData = provider!.data
+        let data = CFDataGetBytePtr(providerData)
         
-        let r = data[pixelInfo]
-        let g = data[pixelInfo+1]
-        let b = data[pixelInfo+2]
-        //let a = data[pixelInfo+3]
+        let numberOfComponents = 4
+        let pixelData = ((Int(texture.size.width) * y) + x) * numberOfComponents
         
-        return Color(r: Float(r)/255.0, g: Float(g)/255.0, b: Float(b)/255.0)
+        let r = Float(data![pixelData]) / 255.0
+        let g = Float(data![pixelData + 1]) / 255.0
+        let b = Float(data![pixelData + 2]) / 255.0
+        
+        return Color(r: r, g: g, b: b)
     }
 }

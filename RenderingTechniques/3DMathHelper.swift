@@ -8,39 +8,39 @@
 
 import Foundation
 
-func clamp(value:Float) -> Float{
+func clamp(_ value:Float) -> Float {
     return max(0.0, min(value, 1.0));
 }
 
-func mix(left:Vector3D, right:Vector3D, mixValue:Float) -> Vector3D{
+func mix(left:Vector3D, right:Vector3D, mixValue:Float) -> Vector3D {
     return left * (1 - mixValue) + right * mixValue
 }
 
-func mix(left:Color, right:Color, mixValue:Float) -> Color{
+func mix(left:Color, right:Color, mixValue:Float) -> Color {
     return left * (1 - mixValue) + right * mixValue
 }
 
-func interpolate(min:Float, max:Float, distance:Float) -> Float{
+func interpolate(min:Float, max:Float, distance:Float) -> Float {
     return min + (max - min) * clamp(distance);
 }
 
-func interpolate(min:Vector3D, max:Vector3D, distance:Float) -> Vector3D{
-    let x:Float = interpolate(min.x, max: max.x, distance: distance)
-    let y:Float = interpolate(min.y, max: max.y, distance: distance)
-    let z:Float = interpolate(min.z, max: max.z, distance: distance)
+func interpolate(min:Vector3D, max:Vector3D, distance:Float) -> Vector3D {
+    let x:Float = interpolate(min: min.x, max: max.x, distance: distance)
+    let y:Float = interpolate(min: min.y, max: max.y, distance: distance)
+    let z:Float = interpolate(min: min.z, max: max.z, distance: distance)
     
     return Vector3D(x: x, y: y, z: z)
 }
 
-func interpolate(min:Color, max:Color, distance:Float) -> Color{
-    let r:Float = interpolate(min.r, max: max.r, distance: distance)
-    let g:Float = interpolate(min.g, max: max.g, distance: distance)
-    let b:Float = interpolate(min.b, max: max.b, distance: distance)
+func interpolate(min:Color, max:Color, distance:Float) -> Color {
+    let r:Float = interpolate(min: min.r, max: max.r, distance: distance)
+    let g:Float = interpolate(min: min.g, max: max.g, distance: distance)
+    let b:Float = interpolate(min: min.b, max: max.b, distance: distance)
     
     return Color(r: r, g: g, b: b)
 }
 
-func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D) -> Float{
+func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D) -> Float {
     let lightDistance = (lightPosition - targetPosition).length()
     let lightVector = (lightPosition - targetPosition).normalized()
     var lightFactor = max((lightVector ⋅ targetNormal), 0.25)
@@ -48,7 +48,7 @@ func calculateLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, ta
     return lightFactor
 }
 
-func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D, diffuseColor:Color, ambientColor:Color, shininess:Float, lightColor:Color) -> Color{
+func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3D, targetNormal:Vector3D, diffuseColor:Color, ambientColor:Color, shininess:Float, lightColor:Color) -> Color {
     
     var diffuseLightingComponent:Float = 0.0
     var specularLightingCompnent:Float = 0.0
@@ -56,7 +56,6 @@ func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3
     let lightDirection = (lightPosition - targetPosition).normalized()
     
     let reflectDirection = (-lightDirection) - 2.0 * (targetNormal ⋅ (-lightDirection)) * targetNormal
-    
     
     let viewDirection = (-targetPosition).normalized()
     
@@ -68,5 +67,4 @@ func calculatePhongLightingFactor(lightPosition:Vector3D, targetPosition:Vector3
     }
     
     return diffuseColor * diffuseLightingComponent + lightColor * specularLightingCompnent
-    
 }

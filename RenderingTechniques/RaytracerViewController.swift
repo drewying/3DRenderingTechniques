@@ -26,33 +26,24 @@ class RaytracerViewController: UIViewController {
         super.viewDidLoad()
         setupScene()
     }
-    
-    var token: dispatch_once_t = 0
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        if (self.renderView.width != 0){
-            dispatch_once(&token) {
-                self.renderView.clear()
-                self.colorBuffer = Array<Color>(count: self.renderView.width * self.renderView.height, repeatedValue: Color(r: 0.0, g: 0.0, b: 0.0))
-                self.samplenumber = 0
-                self.renderView.width = Int(Float(self.renderView.width) * 0.75)
-                self.renderView.height = Int(Float(self.renderView.height) * 0.75)
-            }
-        }
-    }
-    
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        timer = CADisplayLink(target: self, selector: #selector(RasterizationViewController.renderLoop))
-        timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        self.renderView.clear()
+        self.colorBuffer = [Color](repeating:Color(r: 0.0, g: 0.0, b: 0.0), count: self.renderView.width * self.renderView.height)
+        self.samplenumber = 0
+        self.renderView.width = Int(Float(self.renderView.width) * 0.75)
+        self.renderView.height = Int(Float(self.renderView.height) * 0.75)
+        
+        timer = CADisplayLink(target: self, selector: #selector(renderLoop))
+        timer.add(to: .current, forMode: .common)
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         timer.invalidate()
     }
     
-    func renderLoop() {
+    @objc func renderLoop() {
         let startTime:NSDate = NSDate()
         drawScreen()
         renderView.render()
@@ -61,17 +52,17 @@ class RaytracerViewController: UIViewController {
     }
     
     func drawScreen(){
-        for x:Int in 0 ..< renderView.width {
-            for y:Int in 0 ..< renderView.height {
+        for x in 0..<renderView.width {
+            for y in 0..<renderView.height {
                 //Generate a ray that passes through the pixel at (x, y)
-                let ray:Ray = makeRayThatIntersectsPixel(x, y: y)
+                let ray:Ray = makeRayThatIntersectsPixel(x: x, y: y)
                 //Trace that ray and determine the color
-                let newColor = traceRay(ray, bounceIteration: 0)
+                let newColor = traceRay(ray: ray, bounceIteration: 0)
                 //Mix the new color with the current known color.
                 let currentColor = colorBuffer[y * renderView.width + x]
                 let mixedColor = ((currentColor * Float(samplenumber)) + newColor)  *  (1.0/Float(samplenumber + 1))
                 colorBuffer[y * renderView.width + x] = mixedColor
-                renderView.plot(x, y: y, color: mixedColor)
+                renderView.plot(x: x, y: y, color: mixedColor)
             }
         }
     }
@@ -88,7 +79,7 @@ class RaytracerViewController: UIViewController {
         var closestHitRecord:HitRecord = HitRecord.noHit()
         
         for sceneObject:Sphere in sceneObjects {
-            let hitRecord:HitRecord = sceneObject.checkRayIntersection(ray)
+            let hitRecord:HitRecord = sceneObject.checkRayIntersection(ray: ray)
             if (hitRecord.hitSuccess && hitRecord.hitDistance < closestHitRecord.hitDistance){
                 closestHitRecord = hitRecord
                 closestObject = sceneObject
@@ -99,18 +90,18 @@ class RaytracerViewController: UIViewController {
         var nextRay = ray;
         switch closestObject.material {
         case Material.DIFFUSE:
-            nextRay = ray.bounceRay(closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
+            nextRay = ray.bounceRay(origin: closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
             break
         case Material.REFLECTIVE:
-            nextRay = ray.reflectRay(closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
+            nextRay = ray.reflectRay(origin: closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
             break
         case Material.REFRACTIVE:
-            nextRay = ray.refractRay(closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
+            nextRay = ray.refractRay(origin: closestHitRecord.hitPosition, normal: closestHitRecord.hitNormal)
             break
         }
     
         //Gather color and lighting data about both this hit as well as the next one
-        return traceRay(nextRay, bounceIteration: bounceIteration + 1) * closestObject.color + closestObject.emission
+        return traceRay(ray: nextRay, bounceIteration: bounceIteration + 1) * closestObject.color + closestObject.emission
     }
     
     func makeRayThatIntersectsPixel(x:Int, y:Int) -> Ray{
@@ -215,7 +206,7 @@ struct Ray {
         let vv:Vector3D = uu × normal
         
         let r:Float = sqrt(u1);
-        let theta:Float = 2 * Float(M_PI) * u2;
+        let theta:Float = 2 * .pi * u2;
         
         let x:Float = r * cos(theta);
         let y:Float = r * sin(theta);
@@ -251,7 +242,7 @@ struct Ray {
         
         // Check for perfect refraction (Reflection)
         if(Float(arc4random()) / Float(UINT32_MAX) < reflectance) {
-            return reflectRay(origin, normal: normal)
+            return reflectRay(origin:origin, normal: normal)
         }
        
         let refractDirection = ((direction + (normal * theta1)) * eta) + (normal * -theta2)
@@ -266,7 +257,7 @@ struct HitRecord {
     let hitDistance:Float
     
     static func noHit() -> HitRecord{
-        return HitRecord(hitSuccess: false, hitPosition: Vector3D(x: 0, y: 0, z: 0), hitNormal: Vector3D(x: 0, y: 0, z: 0), hitDistance: FLT_MAX)
+        return HitRecord(hitSuccess: false, hitPosition: Vector3D(x: 0, y: 0, z: 0), hitNormal: Vector3D(x: 0, y: 0, z: 0), hitDistance: Float.greatestFiniteMagnitude)
     }
 }
 

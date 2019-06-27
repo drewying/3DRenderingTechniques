@@ -29,7 +29,6 @@ func + (left: Color, right: Color) -> Color{
 
 class RenderView: UIView {
     
-
     var width:Int = 0
     var height:Int = 0
     
@@ -43,7 +42,7 @@ class RenderView: UIView {
     }
     
     func clear(){
-        pixelBuffer = Array<(UInt8, UInt8, UInt8, UInt8)>(count: width * height, repeatedValue: (255, 85, 85, 85))
+        pixelBuffer = [(UInt8, UInt8, UInt8, UInt8)](repeating: (255, 85, 85, 85), count: width * height)
     }
     
     func plot(x:Int, y:Int, color:Color){
@@ -59,27 +58,27 @@ class RenderView: UIView {
     
     func render(){
         let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedFirst.rawValue)
+        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
         let bitsPerComponent = 8
         let bitsPerPixel = 32
         
         var data = pixelBuffer // Copy to mutable []
-        let providerRef = CGDataProviderCreateWithCFData(
-            NSData(bytes: &data, length: data.count * sizeof(UInt8) * 4)
-        )
+        guard let providerRef = CGDataProvider(data: NSData(bytes: &data, length: data.count * 4)) else {
+                return
+        }
         
-        layer.contents = CGImageCreate(
-            width,
-            height,
-            bitsPerComponent,
-            bitsPerPixel,
-            width * Int(sizeof(UInt8)) * 4,
-            rgbColorSpace,
-            bitmapInfo,
-            providerRef,
-            nil,
-            true,
-            .RenderingIntentDefault
+        layer.contents = CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: bitsPerComponent,
+            bitsPerPixel: bitsPerPixel,
+            bytesPerRow: width * 4,
+            space: rgbColorSpace,
+            bitmapInfo: bitmapInfo,
+            provider: providerRef,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
         )
     }
 

@@ -104,8 +104,8 @@ func max (left: Vector3D, right: Vector3D) -> Vector3D{
     return Vector3D(x: max(left.x, right.x), y: max(left.y, right.y), z: max(left.z, right.z))
 }
 
-infix operator × { associativity left precedence 160 }
-infix operator ⋅ { associativity left precedence 160 }
+infix operator × : MultiplicationPrecedence
+infix operator ⋅ : MultiplicationPrecedence
 
 func × (left: Vector3D, right: Vector3D) -> Vector3D{
     return Vector3D(
