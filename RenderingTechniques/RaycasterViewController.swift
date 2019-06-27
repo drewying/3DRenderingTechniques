@@ -12,13 +12,13 @@ class RaycasterViewController: UIViewController {
     @IBOutlet weak var renderView: RenderView!
     @IBOutlet weak var fpsLabel: UILabel!
     var timer: CADisplayLink! = nil
-    var currentRotation:Float = 0.0
+    var currentRotation: Float = 0.0
     
-    var stoneWallTextureData:UIImage = UIImage(named: "greystone.png")!
-    var redBrickTextureData:UIImage = UIImage(named: "redbrick.png")!
+    var stoneWallTextureData: UIImage = UIImage(named: "greystone.png")!
+    var redBrickTextureData: UIImage = UIImage(named: "redbrick.png")!
     
-    let textureWidth:Int = 64
-    let textureHeight:Int = 64
+    let textureWidth: Int = 64
+    let textureHeight: Int = 64
     
     let playerPosition:Vector2D = Vector2D(x: 3.5, y: 3.5)
     let worldMap:[[Int]] =
@@ -109,7 +109,7 @@ class RaycasterViewController: UIViewController {
         let yEndPixel = lineHeight / 2 + renderView.height / 2;
         
         //Get the texture data for thw all
-        let textureData = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
+        let texture = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
         
         //Calculate the x point on the wall that was hit
         var wallHitPositionX:Float = 0.0
@@ -125,25 +125,29 @@ class RaycasterViewController: UIViewController {
         let wallHitPositionStartY:Float = Float(renderView.height) / 2.0 - Float(lineHeight) / 2.0
         for y in yStartPixel ..< yEndPixel {
             let wallHitPositionY:Float = (Float(y) - wallHitPositionStartY) / Float(lineHeight)
-            let color = getColorFromTexture(texture: textureData, x: Int(wallHitPositionX * Float(textureWidth)), y: Int(wallHitPositionY * Float(textureHeight)))
+            let color = texture.getPixelColor(x: Int(wallHitPositionX * Float(textureWidth)), y: Int(wallHitPositionY * Float(textureHeight)))
             renderView.plot(x: x, y: y, color: color * (isSideHit ? 0.5 : 1.0))
         }
     }
-    
-    //Given texture data, get the color for the corresponding x and y pixel.
-    func getColorFromTexture(texture:UIImage, x:Int, y:Int) -> Color {
+}
 
-        let provider = texture.cgImage!.dataProvider
-        let providerData = provider!.data
-        let data = CFDataGetBytePtr(providerData)
+extension UIImage {
+    
+    func getPixelColor(x:Int, y:Int) -> Color {
         
-        let numberOfComponents = 4
-        let pixelData = ((Int(texture.size.width) * y) + x) * numberOfComponents
-        
-        let r = Float(data![pixelData]) / 255.0
-        let g = Float(data![pixelData + 1]) / 255.0
-        let b = Float(data![pixelData + 2]) / 255.0
-        
-        return Color(r: r, g: g, b: b)
+        if let pixelData = self.cgImage?.dataProvider?.data {
+            let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+            
+            let pixelInfo: Int = (Int(self.size.width) * y + x) * 4
+            
+            let r = Float(data[pixelInfo+0]) / 255.0
+            let g = Float(data[pixelInfo+1]) / 255.0
+            let b = Float(data[pixelInfo+2]) / 255.0
+            
+            return Color(r: r, g: g, b: b)
+        } else {
+            //IF something is wrong I returned WHITE, but change as needed
+            return Color(r: 0, g: 0, b: 0)
+        }
     }
 }
