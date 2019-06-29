@@ -17,8 +17,6 @@
 		D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466A1D0846CD0066A83D /* Main.storyboard */; };
 		D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466D1D0846CD0066A83D /* Assets.xcassets */; };
 		D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */; };
-		D1CD467C1D0846CD0066A83D /* RenderingTechniquesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD467B1D0846CD0066A83D /* RenderingTechniquesTests.swift */; };
-		D1CD46871D0846CD0066A83D /* RenderingTechniquesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */; };
 		D1CD46951D0846F50066A83D /* RasterizationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizationViewController.swift */; };
 		D1CD46991D0862A50066A83D /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1CD46981D0862A50066A83D /* teapot.obj */; };
 		D1E484A91D20D2CD003047C5 /* Vector2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E484A81D20D2CD003047C5 /* Vector2D.swift */; };
@@ -57,11 +55,7 @@
 		D1CD46701D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D1CD46721D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D1CD46771D0846CD0066A83D /* RenderingTechniquesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RenderingTechniquesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D1CD467B1D0846CD0066A83D /* RenderingTechniquesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderingTechniquesTests.swift; sourceTree = "<group>"; };
-		D1CD467D1D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D1CD46821D0846CD0066A83D /* RenderingTechniquesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RenderingTechniquesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderingTechniquesUITests.swift; sourceTree = "<group>"; };
-		D1CD46881D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D1CD46941D0846F50066A83D /* RasterizationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RasterizationViewController.swift; sourceTree = "<group>"; };
 		D1CD46981D0862A50066A83D /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 		D1E484A81D20D2CD003047C5 /* Vector2D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector2D.swift; sourceTree = "<group>"; };
@@ -140,8 +134,6 @@
 			isa = PBXGroup;
 			children = (
 				D1CD46651D0846CD0066A83D /* RenderingTechniques */,
-				D1CD467A1D0846CD0066A83D /* RenderingTechniquesTests */,
-				D1CD46851D0846CD0066A83D /* RenderingTechniquesUITests */,
 				D1CD46641D0846CD0066A83D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -169,24 +161,6 @@
 			path = RenderingTechniques;
 			sourceTree = "<group>";
 		};
-		D1CD467A1D0846CD0066A83D /* RenderingTechniquesTests */ = {
-			isa = PBXGroup;
-			children = (
-				D1CD467B1D0846CD0066A83D /* RenderingTechniquesTests.swift */,
-				D1CD467D1D0846CD0066A83D /* Info.plist */,
-			);
-			path = RenderingTechniquesTests;
-			sourceTree = "<group>";
-		};
-		D1CD46851D0846CD0066A83D /* RenderingTechniquesUITests */ = {
-			isa = PBXGroup;
-			children = (
-				D1CD46861D0846CD0066A83D /* RenderingTechniquesUITests.swift */,
-				D1CD46881D0846CD0066A83D /* Info.plist */,
-			);
-			path = RenderingTechniquesUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -194,6 +168,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D1CD468B1D0846CD0066A83D /* Build configuration list for PBXNativeTarget "RenderingTechniques" */;
 			buildPhases = (
+				10836D1922C5645100B24D64 /* ShellScript */,
 				D1CD465F1D0846CD0066A83D /* Sources */,
 				D1CD46601D0846CD0066A83D /* Frameworks */,
 				D1CD46611D0846CD0066A83D /* Resources */,
@@ -316,6 +291,26 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		10836D1922C5645100B24D64 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D1CD465F1D0846CD0066A83D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -337,7 +332,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D1CD467C1D0846CD0066A83D /* RenderingTechniquesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,7 +339,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D1CD46871D0846CD0066A83D /* RenderingTechniquesUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
