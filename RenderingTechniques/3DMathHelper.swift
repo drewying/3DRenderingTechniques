@@ -1,12 +1,12 @@
 //
-//  File.swift
+//  MathHelper.swift
 //  RenderingTechniques
 //
 //  Created by Drew Ingebretsen on 6/20/16.
 //  Copyright © 2016 Drew Ingebretsen. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 func clamp(_ value: Float) -> Float {
     return max(0.0, min(value, 1.0))
@@ -52,10 +52,10 @@ func calculatePhongLightingFactor(
     lightPosition: Vector3D,
     targetPosition: Vector3D,
     targetNormal: Vector3D,
-    diffuseColor: Color,
-    ambientColor: Color,
+    diffuseColor: UIColor,
+    ambientColor: UIColor,
     shininess: Float,
-    lightColor: Color) -> Color {
+    lightColor: UIColor) -> UIColor {
 
     var diffuseLightingComponent: Float = 0.0
     var specularLightingCompnent: Float = 0.0
@@ -74,4 +74,78 @@ func calculatePhongLightingFactor(
     }
 
     return diffuseColor * diffuseLightingComponent + lightColor * specularLightingCompnent
+}
+
+func * (left: UIColor, right: Float) -> UIColor {
+    var leftR: CGFloat = 0
+    var leftG: CGFloat = 0
+    var leftB: CGFloat = 0
+    var leftA: CGFloat = 0
+
+    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
+
+    let outputR = min(1.0, leftR * CGFloat(right))
+    let outputB = min(1.0, leftB * CGFloat(right))
+    let outputG = min(1.0, leftG * CGFloat(right))
+
+    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: leftA)
+}
+
+func + (left: UIColor, right: Float) -> UIColor {
+    var leftR: CGFloat = 0
+    var leftG: CGFloat = 0
+    var leftB: CGFloat = 0
+    var leftA: CGFloat = 0
+
+    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
+
+    let outputR = min(1.0, leftR + CGFloat(right))
+    let outputB = min(1.0, leftB + CGFloat(right))
+    let outputG = min(1.0, leftG + CGFloat(right))
+
+    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: leftA)
+}
+
+func * (left: UIColor, right: UIColor) -> UIColor {
+    var leftR: CGFloat = 0
+    var leftG: CGFloat = 0
+    var leftB: CGFloat = 0
+    var leftA: CGFloat = 0
+
+    var rightR: CGFloat = 0
+    var rightG: CGFloat = 0
+    var rightB: CGFloat = 0
+    var rightA: CGFloat = 0
+
+    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
+    right.getRed(&rightR, green: &rightG, blue: &rightB, alpha: &rightA)
+
+    let outputR = min(1.0, leftR * rightR)
+    let outputB = min(1.0, leftB * rightB)
+    let outputG = min(1.0, leftG * rightG)
+    let outputA = max(leftA, rightA)
+
+    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: outputA)
+}
+
+func + (left: UIColor, right: UIColor) -> UIColor {
+    var leftR: CGFloat = 0
+    var leftG: CGFloat = 0
+    var leftB: CGFloat = 0
+    var leftA: CGFloat = 0
+
+    var rightR: CGFloat = 0
+    var rightG: CGFloat = 0
+    var rightB: CGFloat = 0
+    var rightA: CGFloat = 0
+
+    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
+    right.getRed(&rightR, green: &rightG, blue: &rightB, alpha: &rightA)
+
+    let outputR = min(1.0, leftR + rightR)
+    let outputB = min(1.0, leftB + rightB)
+    let outputG = min(1.0, leftG + rightG)
+    let outputA = max(leftA, rightA)
+
+    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: outputA)
 }

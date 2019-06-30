@@ -13,7 +13,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+
+        let raycasterViewController = RenderViewController<RaycasterRenderer>()
+        raycasterViewController.title = "Raycasting"
+
+        let rasterizationViewController = RenderViewController<RasterizationRenderer>()
+        rasterizationViewController.title = "Rasterization"
+        
+        let raytracerViewController = RenderViewController<RaytracerRenderer>()
+        raytracerViewController.title = "Raytracer"
+
+        let viewController = UITabBarController()
+        viewController.addChild(rasterizationViewController)
+        viewController.addChild(raycasterViewController)
+        viewController.addChild(raytracerViewController)
+
+        window?.rootViewController = viewController
+        window?.makeKeyAndVisible()
         return true
     }
 }
