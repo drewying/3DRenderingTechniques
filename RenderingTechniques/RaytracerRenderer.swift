@@ -29,14 +29,14 @@ struct Ray {
         let z = sqrt(1.0 - u1)
 
         let bounceDirection = x * uu + y * vv + z * normal
-        return Ray(origin: origin, direction: bounceDirection.normalized() )
+        return Ray(origin: from, direction: bounceDirection.normalized() )
 
     }
 
     func reflectRay(from: Vector3D, normal: Vector3D) -> Ray {
         let cosine = direction ⋅ normal
         let reflectDirection = direction - (normal * 2.0 * cosine)
-        return Ray(origin: origin, direction: reflectDirection.normalized())
+        return Ray(origin: from, direction: reflectDirection.normalized())
     }
 
     func refractRay(from: Vector3D, normal: Vector3D) -> Ray {
@@ -62,7 +62,7 @@ struct Ray {
         }
 
         let refractDirection = ((direction + (normal * theta1)) * eta) + (normal * -theta2)
-        return Ray(origin: origin, direction: refractDirection.normalized())
+        return Ray(origin: from, direction: refractDirection.normalized())
     }
 }
 
@@ -113,7 +113,7 @@ struct Sphere {
 // swiftlint:enable variable_name
 
 final class RaytracerRenderer: Renderer {
-    var samplenumber: Int = 0
+    var sampleNumber: Int = 0
     let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -3.0)
     let cameraUp = Vector3D.up()
     let lightPosition = Vector3D(x: 0.0, y: 0.9, z: 0.0)
@@ -144,10 +144,11 @@ final class RaytracerRenderer: Renderer {
 
                 // Mix the new color with the current known color.
                 let currentcolor = output[yPos][xPos]
-                let mixedcolor = ((currentcolor * Float(samplenumber)) + newcolor)  *  (1.0/Float(samplenumber + 1))
+                let mixedcolor = ((currentcolor * Float(sampleNumber)) + newcolor)  *  (1.0/Float(sampleNumber + 1))
                 output[yPos][xPos] = mixedcolor
             }
         }
+        sampleNumber += 1
         return output
     }
 
