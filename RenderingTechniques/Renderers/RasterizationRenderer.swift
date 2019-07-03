@@ -33,7 +33,7 @@ final class RasterizationRenderer: Renderer {
     var height: Int = 0
     var currentRotation: Float = 0.0
     var zBuffer: [[Float]] = [[Float]]()
-    var output: [[UIColor]] = [[UIColor]]()
+    var output: [[Color]] = [[Color]]()
 
     lazy var triangles: [Triangle] = {
         guard let filePath = Bundle.main.url(forResource: "teapot", withExtension: "obj") else {
@@ -50,7 +50,7 @@ final class RasterizationRenderer: Renderer {
     var invertedPerspectiveMatrix: Matrix = Matrix.identityMatrix()
     var normalMatrix: Matrix = Matrix.identityMatrix()
 
-    func render(width: Int, height: Int) -> [[UIColor]] {
+    func render(width: Int, height: Int) -> CGImage? {
         self.width = width
         self.height = height
 
@@ -67,11 +67,11 @@ final class RasterizationRenderer: Renderer {
         triangles.forEach {
             draw(triangle: $0)
         }
-        return output
+        return CGImage.image(colorData: output)
     }
 
     func clearOutput() {
-        output = [[UIColor]](repeating: [UIColor](repeating: UIColor.gray, count: height), count: width)
+        output = [[Color]](repeating: [Color](repeating: Color.gray, count: height), count: width)
         zBuffer = [[Float]](repeating: [Float](repeating: Float.greatestFiniteMagnitude, count: height), count: width)
     }
 
@@ -247,10 +247,10 @@ final class RasterizationRenderer: Renderer {
         return Vector3D(x: projectedX, y: projectedY, z: point.z)
     }
 
-    func shade(vertex: Vertex) -> UIColor {
-        let diffuseColor: UIColor = UIColor.blue
-        let ambientColor: UIColor = UIColor.darkGray
-        let lightColor: UIColor = UIColor.white
+    func shade(vertex: Vertex) -> Color {
+        let diffuseColor = Color.royalBlue
+        let ambientColor = Color.gray
+        let lightColor   = Color.white
 
         return calculatePhongLightingFactor(
             lightPosition: lightPosition,

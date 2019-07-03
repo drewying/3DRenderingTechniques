@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let rasterizationViewController = RenderViewController<RasterizationRenderer>()
         rasterizationViewController.title = "Rasterization"
-        
+
         let raytracerViewController = RenderViewController<RaytracerRenderer>()
         raytracerViewController.title = "Raytracer"
 

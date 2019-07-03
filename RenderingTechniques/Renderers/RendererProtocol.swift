@@ -10,5 +10,5 @@ import UIKit
 
 protocol Renderer {
     init()
-    func render(width: Int, height: Int) -> [[UIColor]]
+    func render(width: Int, height: Int) -> CGImage?
 }

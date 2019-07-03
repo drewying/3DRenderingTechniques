@@ -9,14 +9,13 @@
 /* Begin PBXBuildFile section */
 		10836D1C22C760C600B24D64 /* RendererProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10836D1B22C760C600B24D64 /* RendererProtocol.swift */; };
 		10836D1E22C81F8000B24D64 /* RenderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10836D1D22C81F8000B24D64 /* RenderViewController.swift */; };
+		10B2890122CD315C00BEB048 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B2890022CD315C00BEB048 /* Color.swift */; };
 		D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BE1D0A052A00F1C929 /* Matrix.swift */; };
 		D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805BF1D0A052A00F1C929 /* Vector3D.swift */; };
 		D12805C91D1233B1002AF7EB /* RaytracerRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12805C81D1233B1002AF7EB /* RaytracerRenderer.swift */; };
 		D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */; };
-		D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AB43C41D0C80A8008C1A80 /* RenderView.swift */; };
 		D1C3E8BD1D1A5007005AE039 /* RaycasterRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C3E8BC1D1A5007005AE039 /* RaycasterRenderer.swift */; };
 		D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46661D0846CD0066A83D /* AppDelegate.swift */; };
-		D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466A1D0846CD0066A83D /* Main.storyboard */; };
 		D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466D1D0846CD0066A83D /* Assets.xcassets */; };
 		D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */; };
 		D1CD46951D0846F50066A83D /* RasterizationRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizationRenderer.swift */; };
@@ -46,15 +45,14 @@
 /* Begin PBXFileReference section */
 		10836D1B22C760C600B24D64 /* RendererProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RendererProtocol.swift; sourceTree = "<group>"; };
 		10836D1D22C81F8000B24D64 /* RenderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderViewController.swift; sourceTree = "<group>"; };
+		10B2890022CD315C00BEB048 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		D12805BE1D0A052A00F1C929 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
 		D12805BF1D0A052A00F1C929 /* Vector3D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector3D.swift; sourceTree = "<group>"; };
 		D12805C81D1233B1002AF7EB /* RaytracerRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaytracerRenderer.swift; sourceTree = "<group>"; };
 		D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = 3DMathHelper.swift; sourceTree = "<group>"; };
-		D1AB43C41D0C80A8008C1A80 /* RenderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderView.swift; sourceTree = "<group>"; };
 		D1C3E8BC1D1A5007005AE039 /* RaycasterRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaycasterRenderer.swift; sourceTree = "<group>"; };
 		D1CD46631D0846CD0066A83D /* RenderingTechniques.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RenderingTechniques.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46661D0846CD0066A83D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D1CD466B1D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D1CD466D1D0846CD0066A83D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D1CD46701D0846CD0066A83D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D1CD46721D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -92,17 +90,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		10836D1A22C7609500B24D64 /* Resources */ = {
+		10B31EAF22CD65D100C885AC /* Renderers */ = {
+			isa = PBXGroup;
+			children = (
+				D1C3E8BC1D1A5007005AE039 /* RaycasterRenderer.swift */,
+				D1CD46941D0846F50066A83D /* RasterizationRenderer.swift */,
+				D12805C81D1233B1002AF7EB /* RaytracerRenderer.swift */,
+				10836D1B22C760C600B24D64 /* RendererProtocol.swift */,
+			);
+			path = Renderers;
+			sourceTree = "<group>";
+		};
+		10B31EB022CD65F500C885AC /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				D1EE203B1D1CDD6F00414FC0 /* redbrick.png */,
 				D1EE20391D1CDD6400414FC0 /* greystone.png */,
-				D1CD466A1D0846CD0066A83D /* Main.storyboard */,
+				D1CD46981D0862A50066A83D /* teapot.obj */,
 				D1CD466D1D0846CD0066A83D /* Assets.xcassets */,
 				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
-				D1CD46981D0862A50066A83D /* teapot.obj */,
 			);
-			name = Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		D1C3E8BE1D1A74A3005AE039 /* 3DMath */ = {
@@ -112,6 +120,7 @@
 				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
 				D1E484A81D20D2CD003047C5 /* Vector2D.swift */,
 				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
+				10B2890022CD315C00BEB048 /* Color.swift */,
 			);
 			name = 3DMath;
 			sourceTree = "<group>";
@@ -119,21 +128,9 @@
 		D1C3E8BF1D1A74B8005AE039 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
-				D1CD46941D0846F50066A83D /* RasterizationRenderer.swift */,
 				10836D1D22C81F8000B24D64 /* RenderViewController.swift */,
-				D12805C81D1233B1002AF7EB /* RaytracerRenderer.swift */,
-				D1C3E8BC1D1A5007005AE039 /* RaycasterRenderer.swift */,
 			);
 			name = ViewControllers;
-			sourceTree = "<group>";
-		};
-		D1C3E8C01D1A74C6005AE039 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				D1AB43C41D0C80A8008C1A80 /* RenderView.swift */,
-				10836D1B22C760C600B24D64 /* RendererProtocol.swift */,
-			);
-			name = Views;
 			sourceTree = "<group>";
 		};
 		D1CD465A1D0846CC0066A83D = {
@@ -157,8 +154,8 @@
 		D1CD46651D0846CD0066A83D /* RenderingTechniques */ = {
 			isa = PBXGroup;
 			children = (
-				10836D1A22C7609500B24D64 /* Resources */,
-				D1C3E8C01D1A74C6005AE039 /* Views */,
+				10B31EB022CD65F500C885AC /* Resources */,
+				10B31EAF22CD65D100C885AC /* Renderers */,
 				D1C3E8BF1D1A74B8005AE039 /* ViewControllers */,
 				D1C3E8BE1D1A74A3005AE039 /* 3DMath */,
 				D1CD46661D0846CD0066A83D /* AppDelegate.swift */,
@@ -276,7 +273,6 @@
 				D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */,
 				D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */,
 				D1EE203C1D1CDD6F00414FC0 /* redbrick.png in Resources */,
-				D1CD466C1D0846CD0066A83D /* Main.storyboard in Resources */,
 				D1EE203A1D1CDD6400414FC0 /* greystone.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -325,8 +321,8 @@
 				10836D1C22C760C600B24D64 /* RendererProtocol.swift in Sources */,
 				D12805C01D0A052A00F1C929 /* Matrix.swift in Sources */,
 				D1E484A91D20D2CD003047C5 /* Vector2D.swift in Sources */,
-				D1AB43C51D0C80A8008C1A80 /* RenderView.swift in Sources */,
 				D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */,
+				10B2890122CD315C00BEB048 /* Color.swift in Sources */,
 				D1CD46951D0846F50066A83D /* RasterizationRenderer.swift in Sources */,
 				D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */,
 				10836D1E22C81F8000B24D64 /* RenderViewController.swift in Sources */,
@@ -366,14 +362,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		D1CD466A1D0846CD0066A83D /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D1CD466B1D0846CD0066A83D /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -498,6 +486,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RenderingTechniques/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.thinkpeopletech.RenderingTechniques;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -510,6 +499,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RenderingTechniques/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.thinkpeopletech.RenderingTechniques;
 				PRODUCT_NAME = "$(TARGET_NAME)";

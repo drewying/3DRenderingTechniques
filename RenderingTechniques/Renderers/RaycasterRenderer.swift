@@ -30,9 +30,9 @@ final class RaycasterRenderer: Renderer {
 
     var height: Int = 0
     var width: Int = 0
-    var output: [[UIColor]] = [[UIColor]]()
+    var output: [[Color]] = [[Color]]()
 
-    func render(width: Int, height: Int) -> [[UIColor]] {
+    func render(width: Int, height: Int) -> CGImage? {
         self.height = height
         self.width = width
 
@@ -43,11 +43,11 @@ final class RaycasterRenderer: Renderer {
         for xPos in 0..<width {
             drawColumn(column: xPos)
         }
-        return output
+        return CGImage.image(colorData: output)
     }
 
     func clearOutput() {
-        output = [[UIColor]](repeating: [UIColor](repeating: UIColor.gray, count: height), count: width)
+        output = [[Color]](repeating: [Color](repeating: Color.gray, count: height), count: width)
     }
 
     func makeRayThatIntersectsColumn(column: Int) -> Vector2D {
@@ -133,20 +133,20 @@ final class RaycasterRenderer: Renderer {
 
 extension UIImage {
 
-    func getPixelColor(pixelX: Int, pixelY: Int) -> UIColor {
+    func getPixelColor(pixelX: Int, pixelY: Int) -> Color {
 
         if let pixelData = self.cgImage?.dataProvider?.data {
             let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
 
             let pixelInfo = (Int(self.size.width) * pixelY + pixelX) * 4
 
-            let red = CGFloat(data[pixelInfo+0]) / 255.0
-            let green = CGFloat(data[pixelInfo+1]) / 255.0
-            let blue = CGFloat(data[pixelInfo+2]) / 255.0
+            let red = Float(data[pixelInfo+0]) / 255.0
+            let green = Float(data[pixelInfo+1]) / 255.0
+            let blue = Float(data[pixelInfo+2]) / 255.0
 
-            return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
+            return Color(red: red, green: green, blue: blue)
         } else {
-            return UIColor.black
+            return Color.black
         }
     }
 }

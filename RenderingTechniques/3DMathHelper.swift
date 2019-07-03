@@ -33,11 +33,11 @@ func interpolate(min: Vector3D, max: Vector3D, distance: Float) -> Vector3D {
 }
 
 func interpolate(min: Color, max: Color, distance: Float) -> Color {
-    let interpolatedR: Float = interpolate(min: min.r, max: max.r, distance: distance)
-    let interpolatedG: Float = interpolate(min: min.g, max: max.g, distance: distance)
-    let interpolatedB: Float = interpolate(min: min.b, max: max.b, distance: distance)
+    let interpolatedR: Float = interpolate(min: min.red, max: max.red, distance: distance)
+    let interpolatedG: Float = interpolate(min: min.green, max: max.green, distance: distance)
+    let interpolatedB: Float = interpolate(min: min.blue, max: max.blue, distance: distance)
 
-    return Color(r: interpolatedR, g: interpolatedG, b: interpolatedB)
+    return Color(red: interpolatedR, green: interpolatedG, blue: interpolatedB)
 }
 
 func calculateLightingFactor(lightPosition: Vector3D, targetPosition: Vector3D, targetNormal: Vector3D) -> Float {
@@ -52,10 +52,10 @@ func calculatePhongLightingFactor(
     lightPosition: Vector3D,
     targetPosition: Vector3D,
     targetNormal: Vector3D,
-    diffuseColor: UIColor,
-    ambientColor: UIColor,
+    diffuseColor: Color,
+    ambientColor: Color,
     shininess: Float,
-    lightColor: UIColor) -> UIColor {
+    lightColor: Color) -> Color {
 
     var diffuseLightingComponent: Float = 0.0
     var specularLightingCompnent: Float = 0.0
@@ -74,78 +74,4 @@ func calculatePhongLightingFactor(
     }
 
     return diffuseColor * diffuseLightingComponent + lightColor * specularLightingCompnent
-}
-
-func * (left: UIColor, right: Float) -> UIColor {
-    var leftR: CGFloat = 0
-    var leftG: CGFloat = 0
-    var leftB: CGFloat = 0
-    var leftA: CGFloat = 0
-
-    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
-
-    let outputR = min(1.0, leftR * CGFloat(right))
-    let outputB = min(1.0, leftB * CGFloat(right))
-    let outputG = min(1.0, leftG * CGFloat(right))
-
-    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: leftA)
-}
-
-func + (left: UIColor, right: Float) -> UIColor {
-    var leftR: CGFloat = 0
-    var leftG: CGFloat = 0
-    var leftB: CGFloat = 0
-    var leftA: CGFloat = 0
-
-    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
-
-    let outputR = min(1.0, leftR + CGFloat(right))
-    let outputB = min(1.0, leftB + CGFloat(right))
-    let outputG = min(1.0, leftG + CGFloat(right))
-
-    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: leftA)
-}
-
-func * (left: UIColor, right: UIColor) -> UIColor {
-    var leftR: CGFloat = 0
-    var leftG: CGFloat = 0
-    var leftB: CGFloat = 0
-    var leftA: CGFloat = 0
-
-    var rightR: CGFloat = 0
-    var rightG: CGFloat = 0
-    var rightB: CGFloat = 0
-    var rightA: CGFloat = 0
-
-    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
-    right.getRed(&rightR, green: &rightG, blue: &rightB, alpha: &rightA)
-
-    let outputR = min(1.0, leftR * rightR)
-    let outputB = min(1.0, leftB * rightB)
-    let outputG = min(1.0, leftG * rightG)
-    let outputA = max(leftA, rightA)
-
-    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: outputA)
-}
-
-func + (left: UIColor, right: UIColor) -> UIColor {
-    var leftR: CGFloat = 0
-    var leftG: CGFloat = 0
-    var leftB: CGFloat = 0
-    var leftA: CGFloat = 0
-
-    var rightR: CGFloat = 0
-    var rightG: CGFloat = 0
-    var rightB: CGFloat = 0
-    var rightA: CGFloat = 0
-
-    left.getRed(&leftR, green: &leftG, blue: &leftB, alpha: &leftA)
-    right.getRed(&rightR, green: &rightG, blue: &rightB, alpha: &rightA)
-
-    let outputR = min(1.0, leftR + rightR)
-    let outputB = min(1.0, leftB + rightB)
-    let outputG = min(1.0, leftG + rightG)
-    let outputA = max(leftA, rightA)
-
-    return UIColor(red: outputR, green: outputG, blue: outputB, alpha: outputA)
 }

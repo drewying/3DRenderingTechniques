@@ -82,8 +82,8 @@ struct Sphere {
 
     var center: Vector3D
     let radius: Float
-    var color: UIColor
-    var emission: UIColor
+    var color: Color
+    var emission: Color
     var material: Material
 
     func checkRayIntersection(ray: Ray) -> HitRecord? {
@@ -121,17 +121,17 @@ final class RaytracerRenderer: Renderer {
         return setupScene()
     }()
 
-    var output: [[UIColor]] = [[UIColor]]()
+    var output: [[Color]] = [[Color]]()
 
     var width: Int = 0
     var height: Int = 0
 
-    func render(width: Int, height: Int) -> [[UIColor]] {
+    func render(width: Int, height: Int) -> CGImage? {
         self.width = width
         self.height = height
-        
+
         if output.count != width && output.first?.count != height {
-            output = [[UIColor]](repeating: [UIColor](repeating: UIColor.black, count: height), count: width)
+            output = [[Color]](repeating: [Color](repeating: Color.black, count: height), count: width)
         }
 
         for xPos in 0..<width {
@@ -140,23 +140,23 @@ final class RaytracerRenderer: Renderer {
                 let ray: Ray = makeRayThatIntersectsPixel(xPos: xPos, yPos: yPos)
 
                 // Recursively trace that ray and determine the color
-                let newcolor = traceRay(ray: ray, bounceIteration: 0)
+                let newColor = traceRay(ray: ray, bounceIteration: 0)
 
                 // Mix the new color with the current known color.
-                let currentcolor = output[yPos][xPos]
-                let mixedcolor = ((currentcolor * Float(sampleNumber)) + newcolor)  *  (1.0/Float(sampleNumber + 1))
-                output[yPos][xPos] = mixedcolor
+                let currentColor = output[yPos][xPos]
+                let mixedColor = ((currentColor * Float(sampleNumber)) + newColor)  *  (1.0/Float(sampleNumber + 1))
+                output[yPos][xPos] = mixedColor
             }
         }
         sampleNumber += 1
-        return output
+        return CGImage.image(colorData: output)
     }
 
-    func traceRay(ray: Ray, bounceIteration: Int) -> UIColor {
+    func traceRay(ray: Ray, bounceIteration: Int) -> Color {
 
         //We've bounced the ray around the scene 5 times. Return.
         if bounceIteration >= 5 {
-            return UIColor.black
+            return Color.black
         }
 
         //Go through each sceneObject and find the closest Sphere that the ray intersects with.
@@ -171,7 +171,7 @@ final class RaytracerRenderer: Renderer {
         }
 
         guard let hit = closestHit else {
-            return UIColor.black
+            return Color.black
         }
 
         // Create a new ray to gather more information about the scene
@@ -219,50 +219,50 @@ final class RaytracerRenderer: Renderer {
     func setupScene() -> [Sphere] {
         let leftWall = Sphere(center: Vector3D(x: -10e3, y: 0.0, z: 0.0),
                               radius: 10e3 - 1.0,
-                              color: UIColor(red: 0.9, green: 0.5, blue: 0.5, alpha: 1.0),
-                              emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
+                              color: Color.crimson,
+                              emission: Color.black,
                               material: .DIFFUSE )
 
         let rightWall = Sphere(center: Vector3D(x: 10e3, y: 0.0, z: 0.0),
                                radius: 10e3 - 1.0,
-                               color: UIColor(red: 0.5, green: 0.5, blue: 0.9, alpha: 0.0),
-                               emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0),
+                               color: Color.royalBlue,
+                               emission: Color.black,
                                material: .DIFFUSE )
 
         let frontWall = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: 10e3),
                                radius: 10e3 - 2.0,
-                               color: UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0),
-                               emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
+                               color: Color.offWhite,
+                               emission: Color.black,
                                material: .DIFFUSE )
 
         let backWall = Sphere(center: Vector3D(x: 0.0, y: 0.0, z: -10e3),
                               radius: 10e3 - 3.0,
-                              color: UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0),
-                              emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
+                              color: Color.offWhite,
+                              emission: Color.black,
                               material: .DIFFUSE )
 
         let topWall = Sphere(center: Vector3D(x: 0.0, y: 10e3, z: 0.0),
                              radius: 10e3 - 1.0,
-                             color: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
-                             emission: UIColor(red: 1.6, green: 1.47, blue: 1.29, alpha: 1.0),
+                             color: Color.black,
+                             emission: Color(red: 1.6, green: 1.47, blue: 1.29),
                              material: .DIFFUSE )
 
         let bottomWall = Sphere(center: Vector3D(x: 0.0, y: -10e3, z: 0.0),
                                 radius: 10e3 - 1.0,
-                                color: UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1.0),
-                                emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
+                                color: Color.offWhite,
+                                emission: Color.black,
                                 material: .DIFFUSE )
 
         let mirrorSphere = Sphere(center: Vector3D(x: -0.5, y: -0.7, z: 0.7),
                                   radius: 0.3,
-                                  color: UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1.0),
-                                  emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
+                                  color: Color.white,
+                                  emission: Color.black,
                                   material: .REFLECTIVE )
 
         let glassSphere = Sphere(center: Vector3D(x: 0.5, y: -0.65, z: 0.25),
                                  radius: 0.35,
-                                 color: UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0),
-                                 emission: UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0),
+                                 color: Color.white,
+                                 emission: Color.black,
                                  material: .REFRACTIVE )
 
         return [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere]
