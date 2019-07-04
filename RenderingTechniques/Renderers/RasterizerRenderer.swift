@@ -1,5 +1,5 @@
 //
-//  RasterizationRenderer.swift
+//  RasterizerRenderer.swift
 //  RenderingTechniques
 //
 //  Created by Drew Ingebretsen on 6/8/16.
@@ -25,7 +25,7 @@ func interpolate(min: Vertex, max: Vertex, distance: Float) -> Vertex {
     return Vertex(point: returnPoint, normal: returnNormal)
 }
 
-final class RasterizationRenderer: Renderer {
+final class RasterizerRenderer: Renderer {
 
     let lightPosition: Vector3D = Vector3D(x: 1.0, y: 1.0, z: 1.0)
     let cameraPosition: Vector3D = Vector3D(x: 0.0, y: 0.0, z: 5.0)
@@ -122,7 +122,7 @@ final class RasterizationRenderer: Renderer {
     func updateMatrices() {
         // The model matrix is the matrix that is responsible for rotating and positioning the model in 3D space
         modelMatrix = Matrix.rotateY(angle: -currentRotation) *
-                      Matrix.rotateX(angle: 0.65) *
+                      Matrix.rotateX(angle: 0.5) *
                       Matrix.translate(vector: Vector3D(x: 0.0, y: -0.4, z: 0.0))
 
         // The view matrix transforms from 3D space into camera space

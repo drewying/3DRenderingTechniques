@@ -18,7 +18,7 @@
 		D1CD46671D0846CD0066A83D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46661D0846CD0066A83D /* AppDelegate.swift */; };
 		D1CD466E1D0846CD0066A83D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466D1D0846CD0066A83D /* Assets.xcassets */; };
 		D1CD46711D0846CD0066A83D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */; };
-		D1CD46951D0846F50066A83D /* RasterizationRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizationRenderer.swift */; };
+		D1CD46951D0846F50066A83D /* RasterizerRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CD46941D0846F50066A83D /* RasterizerRenderer.swift */; };
 		D1CD46991D0862A50066A83D /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1CD46981D0862A50066A83D /* teapot.obj */; };
 		D1E484A91D20D2CD003047C5 /* Vector2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E484A81D20D2CD003047C5 /* Vector2D.swift */; };
 		D1EE203A1D1CDD6400414FC0 /* greystone.png in Resources */ = {isa = PBXBuildFile; fileRef = D1EE20391D1CDD6400414FC0 /* greystone.png */; };
@@ -58,7 +58,7 @@
 		D1CD46721D0846CD0066A83D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D1CD46771D0846CD0066A83D /* RenderingTechniquesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RenderingTechniquesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1CD46821D0846CD0066A83D /* RenderingTechniquesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RenderingTechniquesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D1CD46941D0846F50066A83D /* RasterizationRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RasterizationRenderer.swift; sourceTree = "<group>"; };
+		D1CD46941D0846F50066A83D /* RasterizerRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RasterizerRenderer.swift; sourceTree = "<group>"; };
 		D1CD46981D0862A50066A83D /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 		D1E484A81D20D2CD003047C5 /* Vector2D.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector2D.swift; sourceTree = "<group>"; };
 		D1EE20391D1CDD6400414FC0 /* greystone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = greystone.png; sourceTree = "<group>"; };
@@ -94,7 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				D1C3E8BC1D1A5007005AE039 /* RaycasterRenderer.swift */,
-				D1CD46941D0846F50066A83D /* RasterizationRenderer.swift */,
+				D1CD46941D0846F50066A83D /* RasterizerRenderer.swift */,
 				D12805C81D1233B1002AF7EB /* RaytracerRenderer.swift */,
 				10836D1B22C760C600B24D64 /* RendererProtocol.swift */,
 			);
@@ -323,7 +323,7 @@
 				D1E484A91D20D2CD003047C5 /* Vector2D.swift in Sources */,
 				D12DE5941D18F7DB00EBB8D1 /* 3DMathHelper.swift in Sources */,
 				10B2890122CD315C00BEB048 /* Color.swift in Sources */,
-				D1CD46951D0846F50066A83D /* RasterizationRenderer.swift in Sources */,
+				D1CD46951D0846F50066A83D /* RasterizerRenderer.swift in Sources */,
 				D12805C11D0A052A00F1C929 /* Vector3D.swift in Sources */,
 				10836D1E22C81F8000B24D64 /* RenderViewController.swift in Sources */,
 				D1C3E8BD1D1A5007005AE039 /* RaycasterRenderer.swift in Sources */,

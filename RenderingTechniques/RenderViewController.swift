@@ -8,14 +8,18 @@
 
 import UIKit
 
-class RenderViewController<RendererType: Renderer>: UIViewController {
+class RenderViewController: UIViewController {
     var renderOutputView: UIImageView!
     var fpsLabel: UILabel!
     var timer: CADisplayLink!
-    var renderer: RendererType!
-
+    var renderer: Renderer!
+    
+    convenience init(renderer: Renderer) {
+        self.init()
+        self.renderer = renderer
+    }
+    
     override func viewDidLoad() {
-        renderer = RendererType()
 
         renderOutputView = UIImageView()
         view.addSubview(renderOutputView)

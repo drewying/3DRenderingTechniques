@@ -15,13 +15,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         self.window = UIWindow(frame: UIScreen.main.bounds)
 
-        let raycasterViewController = RenderViewController<RaycasterRenderer>()
+        let raycasterViewController = RenderViewController(renderer: RaycasterRenderer())
         raycasterViewController.title = "Raycasting"
 
-        let rasterizationViewController = RenderViewController<RasterizationRenderer>()
+        let rasterizationViewController = RenderViewController(renderer: RasterizerRenderer())
         rasterizationViewController.title = "Rasterization"
 
-        let raytracerViewController = RenderViewController<RaytracerRenderer>()
+        let raytracerViewController = RenderViewController(renderer: RaytracerRenderer())
         raytracerViewController.title = "Raytracer"
 
         let viewController = UITabBarController()

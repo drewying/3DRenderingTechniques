@@ -10,8 +10,13 @@ import UIKit
 
 final class RaycasterRenderer: Renderer {
 
-    var stoneWallTextureData: UIImage = UIImage(named: "greystone.png")!
-    var redBrickTextureData: UIImage = UIImage(named: "redbrick.png")!
+    lazy var stoneWallTexture: [[Color]] = {
+        return loadTextureData(fileName: "greystone.png")
+    }()
+
+    lazy var brickWallTexture: [[Color]] = {
+        return loadTextureData(fileName: "redbrick.png")
+    }()
 
     let textureWidth: Int = 64
     let textureHeight: Int = 64
@@ -103,15 +108,15 @@ final class RaycasterRenderer: Renderer {
             wallDistance = (Float(mapCoordinateY) - cameraPosition.y + (1.0 - Float(wallStepY)) / 2.0) / ray.y
         }
 
-        //Get the beginning and ending y pixel values to draw
+        // Using th wall distance, calculate the height of the column to draw values to draw
         let lineHeight = Int(Float(height) / wallDistance)
         let yStartPixel = -lineHeight / 2 + height / 2
         let yEndPixel = lineHeight / 2 + height / 2
 
-        //G et the texture data for thw all
-        let texture = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTextureData : redBrickTextureData
+        //Get the texture data for the wall we hit
+        let texture = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTexture : brickWallTexture
 
-        // Calculate the x point on the wall that was hit
+        // Calculate the x point on the wall that was hit so we can get the appropriate texture data
         var wallHitPositionX: Float = 0.0
         if isSideHit == false {
             wallHitPositionX = cameraPosition.y + wallDistance * ray.y
@@ -125,8 +130,40 @@ final class RaycasterRenderer: Renderer {
         let wallHitPositionStartY: Float = Float(height) / 2.0 - Float(lineHeight) / 2.0
         for yPixel in yStartPixel..<yEndPixel {
             let wallHitPositionY: Float = (Float(yPixel) - wallHitPositionStartY) / Float(lineHeight)
-            let color = texture.getPixelColor(pixelX: Int(wallHitPositionX * Float(textureWidth)), pixelY: Int(wallHitPositionY * Float(textureHeight)))
+            let textureXPos = Int(wallHitPositionX * Float(textureWidth))
+            let textureYPos = Int(wallHitPositionY * Float(textureHeight))
+
+            let color = texture[textureXPos][textureYPos]
             output[yPixel][column] = color * (isSideHit ? 0.5 : 1.0)
+        }
+    }
+
+    func loadTextureData(fileName: String) -> [[Color]] {
+        guard let image =  UIImage(named: fileName) else {
+            return [[Color]]()
+        }
+
+        if let pixelData = image.cgImage?.dataProvider?.data {
+            var output = [[Color]]()
+            let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+
+            for xPos in 0..<Int(image.size.width) {
+                var colorRow = [Color]()
+
+                for yPos in 0..<(Int(image.size.height)) {
+                    let pixelInfo = (Int(image.size.width) * yPos + xPos) * 4
+
+                    let red = Float(data[pixelInfo+0]) / 255.0
+                    let green = Float(data[pixelInfo+1]) / 255.0
+                    let blue = Float(data[pixelInfo+2]) / 255.0
+                    colorRow.append(Color(red: red, green: green, blue: blue))
+                }
+                output.append(colorRow)
+            }
+
+            return output
+        } else {
+            return [[Color]]()
         }
     }
 }

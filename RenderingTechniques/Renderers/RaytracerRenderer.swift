@@ -41,7 +41,7 @@ struct Ray {
 
     func refractRay(from: Vector3D, normal: Vector3D) -> Ray {
         let theta1: Float = abs(direction ⋅ normal)
-    
+
         var internalIndex: Float = 1.0
         var externalIndex: Float  = 1.5
 
@@ -52,8 +52,12 @@ struct Ray {
 
         let eta: Float = externalIndex/internalIndex
         let theta2: Float = sqrt(1.0 - (eta * eta) * (1.0 - (theta1 * theta1)))
-        let rs: Float = (externalIndex * theta1 - internalIndex * theta2) / (externalIndex*theta1 + internalIndex * theta2)
-        let rp: Float = (internalIndex * theta1 - externalIndex * theta2) / (internalIndex*theta1 + externalIndex * theta2)
+        let rs: Float =
+            (externalIndex * theta1 - internalIndex * theta2) /
+            (externalIndex * theta1 + internalIndex * theta2)
+        let rp: Float =
+            (internalIndex * theta1 - externalIndex * theta2) /
+            (internalIndex * theta1 + externalIndex * theta2)
         let reflectance: Float = (rs*rs + rp*rp)
 
         // Check for perfect refraction (Reflection)
