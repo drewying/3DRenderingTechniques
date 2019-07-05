@@ -49,14 +49,14 @@ func calculateLightingFactor(lightPosition: Vector3D, targetPosition: Vector3D, 
 }
 
 func calculatePhongLightingFactor(
+    targetVertex: Vertex,
     lightPosition: Vector3D,
-    targetPosition: Vector3D,
-    targetNormal: Vector3D,
+    lightColor: Color,
     diffuseColor: Color,
-    ambientColor: Color,
-    shininess: Float,
-    lightColor: Color) -> Color {
+    shininess: Float) -> Color {
 
+    let targetNormal = targetVertex.normal
+    let targetPosition = targetVertex.point
     var diffuseLightingComponent: Float = 0.0
     var specularLightingCompnent: Float = 0.0
 

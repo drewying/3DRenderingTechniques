@@ -65,24 +65,26 @@ final class RaycasterRenderer: Renderer {
     }
 
     func drawColumn(column: Int) {
-        // Generate the ray that represents our current view
+        // Generate a ray that passes through the specified column
         let ray = makeRayThatIntersectsColumn(column: column)
 
         // The starting map coordinate
         var mapCoordinateX = Int(cameraPosition.x)
         var mapCoordinateY = Int(cameraPosition.y)
 
-        //The direction we step through the map.
+        // The direction we step through the map.
         let wallStepX = (ray.x < 0) ? -1 : 1
         let wallStepY = (ray.y < 0) ? -1 : 1
 
-        //The length of the ray from one x-side to next x-side and y-side to next y-side
+        // The length of the ray from one x-side to next x-side and y-side to next y-side
         let deltaDistanceX = ray.x == 0 ? Float.greatestFiniteMagnitude : sqrt(1.0 + (ray.y * ray.y) / (ray.x * ray.x))
         let deltaDistanceY = ray.y == 0 ? Float.greatestFiniteMagnitude : sqrt(1.0 + (ray.x * ray.x) / (ray.y * ray.y))
 
-        //Length of ray from player to next x-side or y-side
-        var sideDistanceX = (ray.x < 0) ? (cameraPosition.x - Float(mapCoordinateX)) * deltaDistanceX : (Float(mapCoordinateX) + 1.0 - cameraPosition.x) * deltaDistanceX
-        var sideDistanceY = (ray.y < 0) ? (cameraPosition.y - Float(mapCoordinateY)) * deltaDistanceY : (Float(mapCoordinateY) + 1.0 - cameraPosition.y) * deltaDistanceY
+        // Length of ray from starting to next x-side or y-side
+        var sideDistanceX = (ray.x < 0) ? (cameraPosition.x - Float(mapCoordinateX)) * deltaDistanceX :
+                                          (Float(mapCoordinateX) + 1.0 - cameraPosition.x) * deltaDistanceX
+        var sideDistanceY = (ray.y < 0) ? (cameraPosition.y - Float(mapCoordinateY)) * deltaDistanceY :
+                                          (Float(mapCoordinateY) + 1.0 - cameraPosition.y) * deltaDistanceY
 
         // Let's track if we hit the x-side or y-side?
         var isSideHit = false
@@ -100,7 +102,7 @@ final class RaycasterRenderer: Renderer {
             }
         }
 
-        //We've hit a wall. Get the wall distance
+        // We've hit a wall. Get the distance of the wall from the camera
         var wallDistance: Float = 0.0
         if isSideHit == false {
             wallDistance = (Float(mapCoordinateX) - cameraPosition.x + (1.0 - Float(wallStepX)) / 2.0) / ray.x
@@ -117,16 +119,12 @@ final class RaycasterRenderer: Renderer {
         let texture = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTexture : brickWallTexture
 
         // Calculate the x point on the wall that was hit so we can get the appropriate texture data
-        var wallHitPositionX: Float = 0.0
-        if isSideHit == false {
-            wallHitPositionX = cameraPosition.y + wallDistance * ray.y
-        } else {
-            wallHitPositionX = cameraPosition.x + wallDistance * ray.x
-        }
+        var wallHitPositionX = isSideHit ? cameraPosition.x + wallDistance * ray.x :
+                                           cameraPosition.y + wallDistance * ray.y
 
         wallHitPositionX -= floor((wallHitPositionX))
 
-        // Go through and draw each pixel in the column
+        // Go through and draw each pixel in the column into our output
         let wallHitPositionStartY: Float = Float(height) / 2.0 - Float(lineHeight) / 2.0
         for yPixel in yStartPixel..<yEndPixel {
             let wallHitPositionY: Float = (Float(yPixel) - wallHitPositionStartY) / Float(lineHeight)
@@ -164,26 +162,6 @@ final class RaycasterRenderer: Renderer {
             return output
         } else {
             return [[Color]]()
-        }
-    }
-}
-
-extension UIImage {
-
-    func getPixelColor(pixelX: Int, pixelY: Int) -> Color {
-
-        if let pixelData = self.cgImage?.dataProvider?.data {
-            let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
-
-            let pixelInfo = (Int(self.size.width) * pixelY + pixelX) * 4
-
-            let red = Float(data[pixelInfo+0]) / 255.0
-            let green = Float(data[pixelInfo+1]) / 255.0
-            let blue = Float(data[pixelInfo+2]) / 255.0
-
-            return Color(red: red, green: green, blue: blue)
-        } else {
-            return Color.black
         }
     }
 }

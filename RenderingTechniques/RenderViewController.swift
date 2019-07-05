@@ -13,12 +13,12 @@ class RenderViewController: UIViewController {
     var fpsLabel: UILabel!
     var timer: CADisplayLink!
     var renderer: Renderer!
-    
+
     convenience init(renderer: Renderer) {
         self.init()
         self.renderer = renderer
     }
-    
+
     override func viewDidLoad() {
 
         renderOutputView = UIImageView()

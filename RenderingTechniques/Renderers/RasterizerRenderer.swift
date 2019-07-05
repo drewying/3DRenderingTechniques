@@ -248,18 +248,12 @@ final class RasterizerRenderer: Renderer {
     }
 
     func shade(vertex: Vertex) -> Color {
-        let diffuseColor = Color.royalBlue
-        let ambientColor = Color.gray
-        let lightColor   = Color.white
-
         return calculatePhongLightingFactor(
+            targetVertex: vertex,
             lightPosition: lightPosition,
-            targetPosition: vertex.point,
-            targetNormal: vertex.normal,
-            diffuseColor: diffuseColor,
-            ambientColor: ambientColor,
-            shininess: 4.0,
-            lightColor: lightColor
+            lightColor: Color.gray,
+            diffuseColor: Color.royalBlue,
+            shininess: 4.0
         )
     }
 }

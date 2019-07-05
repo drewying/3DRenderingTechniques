@@ -15,8 +15,8 @@ struct Ray {
     let direction: Vector3D
 
     func bounceRay(from: Vector3D, normal: Vector3D) -> Ray {
-        let u1 = Float(arc4random()) / Float(UINT32_MAX)
-        let u2 = Float(arc4random()) / Float(UINT32_MAX)
+        let u1 = Float.random(in: 0...1.0)
+        let u2 = Float.random(in: 0...1.0)
 
         let uu = (normal × Vector3D(x: 0.0, y: 1.0, z: 1.0)).normalized()
         let vv = uu × normal
@@ -61,7 +61,7 @@ struct Ray {
         let reflectance: Float = (rs*rs + rp*rp)
 
         // Check for perfect refraction (Reflection)
-        if Float(arc4random()) / Float(UINT32_MAX) < reflectance {
+        if Float.random(in: 0...1.0) < reflectance {
             return reflectRay(from: origin, normal: normal)
         }
 
@@ -205,8 +205,8 @@ final class RaytracerRenderer: Renderer {
         var cameraY = (1 - 2 * (Float(yPos) + 0.5) * dyPos) * scale * -1
 
         // Randomly move the ray slightly up or down randomly to create anti-aliasing
-        let randomX = Float(arc4random()) / Float(UINT32_MAX)
-        let randomY = Float(arc4random()) / Float(UINT32_MAX)
+        let randomX = Float.random(in: 0...1.0)
+        let randomY = Float.random(in: 0...1.0)
         cameraX += (randomX - 0.5)/Float(width)
         cameraY += (randomY - 0.5)/Float(height)
 
