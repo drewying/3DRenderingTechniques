@@ -6,7 +6,7 @@
 //  Copyright © 2016 Drew Ingebretsen. All rights reserved.
 //
 
-import UIKit
+import CoreGraphics
 
 // swiftlint:disable variable_name
 
@@ -158,12 +158,12 @@ final class RaytracerRenderer: Renderer {
 
     func traceRay(ray: Ray, bounceIteration: Int) -> Color {
 
-        //We've bounced the ray around the scene 5 times. Return.
+        // We've bounced the ray around the scene 5 times. Return.
         if bounceIteration >= 5 {
             return Color.black
         }
 
-        //Go through each sceneObject and find the closest Sphere that the ray intersects with.
+        // Go through each object in the scene and find the closest sphere that the ray intersects with.
         var closestHit: HitRecord?
 
         for sceneObject: Sphere in sceneObjects {
@@ -178,7 +178,7 @@ final class RaytracerRenderer: Renderer {
             return Color.black
         }
 
-        // Create a new ray to gather more information about the scene
+        // Create a new ray from where we hit to gather more information about the scene
         var nextRay = ray
         switch hit.object.material {
         case .DIFFUSE:
@@ -189,13 +189,13 @@ final class RaytracerRenderer: Renderer {
             nextRay = ray.refractRay(from: hit.position, normal: hit.normal)
         }
 
-        //Gather color and lighting data about both this hit as well as the next one
-        return traceRay(ray: nextRay, bounceIteration: bounceIteration + 1) * hit.object.color + hit.object.emission
+        // Recursively Gather color and lighting data about the next ray and combine it with this one
+        return (traceRay(ray: nextRay, bounceIteration: bounceIteration + 1) * hit.object.color) + hit.object.emission
     }
 
     func makeRayThatIntersectsPixel(xPos: Int, yPos: Int) -> Ray {
         // Convert pixel coordinates to world coordinate
-        let fieldOfView: Float = 0.785
+        let fieldOfView: Float = 0.785 // 45 degrees
         let scale: Float = tanf(fieldOfView * 0.5)
         let aspectRatio = Float(width)/Float(height)
         let dxPos = 1.0 / Float(width)

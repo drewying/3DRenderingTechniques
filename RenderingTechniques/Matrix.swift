@@ -8,8 +8,9 @@
 
 import UIKit
 
-//This matrix assumes a LH coordinate system
+//swiftlint:disable function_body_length
 
+//This matrix assumes a LH coordinate system
 struct Matrix {
     var data: [Float] = [
         0.0, 0.0, 0.0, 0.0,
@@ -324,3 +325,5 @@ func * (left: Vector3D, right: Matrix) -> Vector3D {
 func * (left: Matrix, right: Vector3D) -> Vector3D {
     return Matrix.transformPoint(left: left, right: right)
 }
+
+//swiftlint:enable function_body_length

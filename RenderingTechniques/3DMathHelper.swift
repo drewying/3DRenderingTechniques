@@ -6,7 +6,7 @@
 //  Copyright © 2016 Drew Ingebretsen. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 func clamp(_ value: Float) -> Float {
     return max(0.0, min(value, 1.0))
@@ -40,12 +40,15 @@ func interpolate(min: Color, max: Color, distance: Float) -> Color {
     return Color(red: interpolatedR, green: interpolatedG, blue: interpolatedB)
 }
 
-func calculateLightingFactor(lightPosition: Vector3D, targetPosition: Vector3D, targetNormal: Vector3D) -> Float {
-    let lightDistance = (lightPosition - targetPosition).length()
-    let lightVector = (lightPosition - targetPosition).normalized()
-    var lightFactor = max((lightVector ⋅ targetNormal), 0.25)
-    lightFactor *= (1.0 / (1.0 + (0.25 * lightDistance * lightDistance)))
-    return lightFactor
+func calculateLambertLightingFactor(
+    lightPosition: Vector3D,
+    targetVertex: Vertex,
+    diffuseColor: Color,
+    lightColor: Color) -> Color {
+
+    let lightDirection = (lightPosition - targetVertex.point).normalized()
+    let lightFactor = max(lightDirection ⋅ targetVertex.normal, 0)
+    return diffuseColor * lightColor * lightFactor
 }
 
 func calculatePhongLightingFactor(

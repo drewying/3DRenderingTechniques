@@ -6,7 +6,8 @@
 //  Copyright © 2016 Drew Ingebretsen. All rights reserved.
 //
 
-import UIKit
+import CoreGraphics
+import Foundation
 
 struct Triangle {
     var vertex0: Vertex
@@ -253,7 +254,7 @@ final class RasterizerRenderer: Renderer {
             lightPosition: lightPosition,
             lightColor: Color.gray,
             diffuseColor: Color.royalBlue,
-            shininess: 4.0
+            shininess: 3.0
         )
     }
 }

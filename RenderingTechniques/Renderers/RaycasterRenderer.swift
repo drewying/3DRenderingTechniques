@@ -18,9 +18,6 @@ final class RaycasterRenderer: Renderer {
         return loadTextureData(fileName: "redbrick.png")
     }()
 
-    let textureWidth: Int = 64
-    let textureHeight: Int = 64
-
     let cameraPosition: Vector2D = Vector2D(x: 3.5, y: 3.5)
     var cameraRotation: Float = 0.0
 
@@ -77,26 +74,26 @@ final class RaycasterRenderer: Renderer {
         let wallStepY = (ray.y < 0) ? -1 : 1
 
         // The length of the ray from one x-side to next x-side and y-side to next y-side
-        let deltaDistanceX = ray.x == 0 ? Float.greatestFiniteMagnitude : sqrt(1.0 + (ray.y * ray.y) / (ray.x * ray.x))
-        let deltaDistanceY = ray.y == 0 ? Float.greatestFiniteMagnitude : sqrt(1.0 + (ray.x * ray.x) / (ray.y * ray.y))
+        let deltaDistanceX = sqrt(1.0 + (ray.y * ray.y) / (ray.x * ray.x))
+        let deltaDistanceY = sqrt(1.0 + (ray.x * ray.x) / (ray.y * ray.y))
 
-        // Length of ray from starting to next x-side or y-side
-        var sideDistanceX = (ray.x < 0) ? (cameraPosition.x - Float(mapCoordinateX)) * deltaDistanceX :
+        // Current length along the ray we've marched, from starting to the next x-side or y-side
+        var distanceX = (ray.x < 0) ? (cameraPosition.x - Float(mapCoordinateX)) * deltaDistanceX :
                                           (Float(mapCoordinateX) + 1.0 - cameraPosition.x) * deltaDistanceX
-        var sideDistanceY = (ray.y < 0) ? (cameraPosition.y - Float(mapCoordinateY)) * deltaDistanceY :
+        var distanceY = (ray.y < 0) ? (cameraPosition.y - Float(mapCoordinateY)) * deltaDistanceY :
                                           (Float(mapCoordinateY) + 1.0 - cameraPosition.y) * deltaDistanceY
 
         // Let's track if we hit the x-side or y-side?
         var isSideHit = false
 
-        // Find the next wall intersection by checking the x and y sides along the direction of the ray.
+        // March along the ray until we hit a wall
         while worldMap[mapCoordinateX][mapCoordinateY] <= 0 {
-            if sideDistanceX < sideDistanceY {
-                sideDistanceX += deltaDistanceX
+            if distanceX < distanceY {
+                distanceX += deltaDistanceX
                 mapCoordinateX += wallStepX
                 isSideHit = false
             } else {
-                sideDistanceY += deltaDistanceY
+                distanceY += deltaDistanceY
                 mapCoordinateY += wallStepY
                 isSideHit = true
             }
@@ -115,7 +112,7 @@ final class RaycasterRenderer: Renderer {
         let yStartPixel = -lineHeight / 2 + height / 2
         let yEndPixel = lineHeight / 2 + height / 2
 
-        //Get the texture data for the wall we hit
+        // Get the texture data for the wall we hit
         let texture = worldMap[mapCoordinateX][mapCoordinateY] == 1 ? stoneWallTexture : brickWallTexture
 
         // Calculate the x point on the wall that was hit so we can get the appropriate texture data
@@ -128,8 +125,8 @@ final class RaycasterRenderer: Renderer {
         let wallHitPositionStartY: Float = Float(height) / 2.0 - Float(lineHeight) / 2.0
         for yPixel in yStartPixel..<yEndPixel {
             let wallHitPositionY: Float = (Float(yPixel) - wallHitPositionStartY) / Float(lineHeight)
-            let textureXPos = Int(wallHitPositionX * Float(textureWidth))
-            let textureYPos = Int(wallHitPositionY * Float(textureHeight))
+            let textureXPos = Int(wallHitPositionX * Float(texture.count))
+            let textureYPos = Int(wallHitPositionY * Float(texture[0].count))
 
             let color = texture[textureXPos][textureYPos]
             output[yPixel][column] = color * (isSideHit ? 0.5 : 1.0)

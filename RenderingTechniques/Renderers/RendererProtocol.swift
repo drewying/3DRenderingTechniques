@@ -6,7 +6,7 @@
 //  Copyright © 2019 Drew Ingebretsen. All rights reserved.
 //
 
-import UIKit
+import CoreGraphics
 
 protocol Renderer {
     init()

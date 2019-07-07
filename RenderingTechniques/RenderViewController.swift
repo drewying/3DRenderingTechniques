@@ -20,7 +20,6 @@ class RenderViewController: UIViewController {
     }
 
     override func viewDidLoad() {
-
         renderOutputView = UIImageView()
         view.addSubview(renderOutputView)
         renderOutputView.translatesAutoresizingMaskIntoConstraints = false
@@ -36,6 +35,8 @@ class RenderViewController: UIViewController {
         view.addSubview(fpsLabel)
         fpsLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         fpsLabel.topAnchor.constraint(equalTo: renderOutputView.bottomAnchor).isActive = true
+
+        self.view.backgroundColor = UIColor.gray
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -55,7 +56,7 @@ class RenderViewController: UIViewController {
         let height = Int(renderOutputView.frame.height)
         if let image = renderer.render(width: width, height: height) {
             renderOutputView.image = UIImage(cgImage: image)
-            fpsLabel.text = String(format: "%.1 FPS", 1.0 / Float(-startTime.timeIntervalSinceNow))
+            fpsLabel.text = "\(Int(1 / -startTime.timeIntervalSinceNow)) FPS"
         }
     }
 }
