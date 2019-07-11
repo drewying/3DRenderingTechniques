@@ -90,6 +90,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1017605122D702AE00424398 /* 3DMath */ = {
+			isa = PBXGroup;
+			children = (
+				D12805BE1D0A052A00F1C929 /* Matrix.swift */,
+				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
+				D1E484A81D20D2CD003047C5 /* Vector2D.swift */,
+				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
+				10B2890022CD315C00BEB048 /* Color.swift */,
+			);
+			path = 3DMath;
+			sourceTree = "<group>";
+		};
 		10B31EAF22CD65D100C885AC /* Renderers */ = {
 			isa = PBXGroup;
 			children = (
@@ -111,18 +123,6 @@
 				D1CD466F1D0846CD0066A83D /* LaunchScreen.storyboard */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		D1C3E8BE1D1A74A3005AE039 /* 3DMath */ = {
-			isa = PBXGroup;
-			children = (
-				D12805BE1D0A052A00F1C929 /* Matrix.swift */,
-				D12805BF1D0A052A00F1C929 /* Vector3D.swift */,
-				D1E484A81D20D2CD003047C5 /* Vector2D.swift */,
-				D12DE5931D18F7DB00EBB8D1 /* 3DMathHelper.swift */,
-				10B2890022CD315C00BEB048 /* Color.swift */,
-			);
-			name = 3DMath;
 			sourceTree = "<group>";
 		};
 		D1C3E8BF1D1A74B8005AE039 /* ViewControllers */ = {
@@ -154,10 +154,10 @@
 		D1CD46651D0846CD0066A83D /* RenderingTechniques */ = {
 			isa = PBXGroup;
 			children = (
-				10B31EB022CD65F500C885AC /* Resources */,
+				1017605122D702AE00424398 /* 3DMath */,
 				10B31EAF22CD65D100C885AC /* Renderers */,
+				10B31EB022CD65F500C885AC /* Resources */,
 				D1C3E8BF1D1A74B8005AE039 /* ViewControllers */,
-				D1C3E8BE1D1A74A3005AE039 /* 3DMath */,
 				D1CD46661D0846CD0066A83D /* AppDelegate.swift */,
 				D1CD46721D0846CD0066A83D /* Info.plist */,
 			);
