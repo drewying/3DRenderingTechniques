@@ -117,7 +117,7 @@ struct Sphere {
 // swiftlint:enable variable_name
 
 final class RaytracerRenderer: Renderer {
-    var sampleNumber: Int = 0
+    var sampleNumber: Float = 0
     let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -3.0)
     let cameraUp = Vector3D.up()
     let cameraRight = Vector3D.right()
@@ -149,7 +149,7 @@ final class RaytracerRenderer: Renderer {
 
                 // Mix the new color with the current known color.
                 let currentColor = output[yPos][xPos]
-                let mixedColor = ((currentColor * Float(sampleNumber)) + newColor)  *  (1.0/Float(sampleNumber + 1))
+                let mixedColor = (currentColor * sampleNumber + newColor)  /  (sampleNumber + 1)
                 output[yPos][xPos] = mixedColor
             }
         }

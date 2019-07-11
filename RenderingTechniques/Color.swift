@@ -58,6 +58,10 @@ func * (left: Color, right: Float) -> Color {
     return Color(red: left.red * right, green: left.green * right, blue: left.blue * right)
 }
 
+func / (left: Color, right: Float) -> Color {
+    return Color(red: left.red / right, green: left.green / right, blue: left.blue / right)
+}
+
 func * (left: Color, right: Color) -> Color {
     return Color(red: left.red * right.red, green: left.green * right.green, blue: left.blue * right.blue)
 }

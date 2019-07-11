@@ -27,8 +27,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let viewController = UITabBarController()
         viewController.addChild(rasterizationViewController)
-        viewController.addChild(raycasterViewController)
         viewController.addChild(raytracerViewController)
+        viewController.addChild(raycasterViewController)
 
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()
