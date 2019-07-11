@@ -120,6 +120,7 @@ final class RaytracerRenderer: Renderer {
     var sampleNumber: Int = 0
     let cameraPosition = Vector3D(x: 0.0, y: 0.0, z: -3.0)
     let cameraUp = Vector3D.up()
+    let cameraRight = Vector3D.right()
     let lightPosition = Vector3D(x: 0.0, y: 0.9, z: 0.0)
     lazy var sceneObjects: [Sphere] = {
         return setupScene()
@@ -144,7 +145,7 @@ final class RaytracerRenderer: Renderer {
                 let ray: Ray = makeRayThatIntersectsPixel(xPos: xPos, yPos: yPos)
 
                 // Recursively trace that ray and determine the color
-                let newColor = traceRay(ray: ray, bounceIteration: 0)
+                let newColor = traceRay(ray: ray, bounce: 0)
 
                 // Mix the new color with the current known color.
                 let currentColor = output[yPos][xPos]
@@ -156,14 +157,14 @@ final class RaytracerRenderer: Renderer {
         return CGImage.image(colorData: output)
     }
 
-    func traceRay(ray: Ray, bounceIteration: Int) -> Color {
+    func traceRay(ray: Ray, bounce: Int) -> Color {
 
-        // We've bounced the ray around the scene 5 times. Return.
-        if bounceIteration >= 5 {
+        // We've bounced the ray around the scene 7 times. Return.
+        if bounce >= 7 {
             return Color.black
         }
 
-        // Go through each object in the scene and find the closest sphere that the ray intersects with.
+        // Go through each object in the scene and find the closest object that the ray intersects with.
         var closestHit: HitRecord?
 
         for sceneObject: Sphere in sceneObjects {
@@ -189,8 +190,8 @@ final class RaytracerRenderer: Renderer {
             nextRay = ray.refractRay(from: hit.position, normal: hit.normal)
         }
 
-        // Recursively Gather color and lighting data about the next ray and combine it with this one
-        return (traceRay(ray: nextRay, bounceIteration: bounceIteration + 1) * hit.object.color) + hit.object.emission
+        // Recursively gather color and lighting data about the next ray and combine it with this one
+        return traceRay(ray: nextRay, bounce: bounce + 1) * hit.object.color + hit.object.emission
     }
 
     func makeRayThatIntersectsPixel(xPos: Int, yPos: Int) -> Ray {
@@ -211,11 +212,11 @@ final class RaytracerRenderer: Renderer {
         cameraY += (randomY - 0.5)/Float(height)
 
         // Transform the world coordinate into a ray
-        let lookAt = -cameraPosition.normalized()
+        let lookAt = -cameraPosition
         let eyeVector = (lookAt - cameraPosition).normalized()
-        let rightVector = (eyeVector × cameraUp)
-        let upVector = (eyeVector × rightVector)
-        let rayDirection = (eyeVector + rightVector * cameraX + upVector * cameraY).normalized()
+        let rightVector = (eyeVector × cameraUp) * cameraX
+        let upVector = (eyeVector × cameraRight) * cameraY
+        let rayDirection = (eyeVector + rightVector + upVector).normalized()
 
         return Ray(origin: cameraPosition, direction: rayDirection)
     }
@@ -248,7 +249,7 @@ final class RaytracerRenderer: Renderer {
         let topWall = Sphere(center: Vector3D(x: 0.0, y: 10e3, z: 0.0),
                              radius: 10e3 - 1.0,
                              color: Color.black,
-                             emission: Color(red: 1.6, green: 1.47, blue: 1.29),
+                             emission: Color(red: 1.5, green: 1.5, blue: 1.5),
                              material: .DIFFUSE )
 
         let bottomWall = Sphere(center: Vector3D(x: 0.0, y: -10e3, z: 0.0),

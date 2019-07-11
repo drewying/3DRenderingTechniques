@@ -185,11 +185,11 @@ final class RasterizerRenderer: Renderer {
             let leftDistance = (Float(yPos) - vertex0.point.y) / (leftVertex.point.y - vertex0.point.y)
             let rightDistance = (Float(yPos) - vertex0.point.y) / (rightVertex.point.y - vertex0.point.y)
 
-            // Create two points along the edges of triangle using interporlation
+            // Calculate the next row of pixels along the edges of triangle using interporlation
             let start = interpolate(min: vertex0, max: leftVertex, distance: leftDistance)
             let end = interpolate(min: vertex0, max: rightVertex, distance: rightDistance)
 
-            // Draw a horizontal line between the two interpolated points
+            // Draw a horizontal line between the two interpolated pixels
             drawLine(left: start, right: end)
         }
 
@@ -199,9 +199,9 @@ final class RasterizerRenderer: Renderer {
         leftVertex = (vertex0.point.x < vertex1.point.x) ? vertex0 : vertex1
         rightVertex = (vertex0.point.x < vertex1.point.x) ? vertex1 : vertex0
 
-        for row in Int(vertex1.point.y)...Int(vertex2.point.y) {
-            let leftDistance = (Float(row) - leftVertex.point.y) / (vertex2.point.y - leftVertex.point.y)
-            let rightDistance = (Float(row) - rightVertex.point.y) / (vertex2.point.y - rightVertex.point.y)
+        for yPos in Int(vertex1.point.y)...Int(vertex2.point.y) {
+            let leftDistance = (Float(yPos) - leftVertex.point.y) / (vertex2.point.y - leftVertex.point.y)
+            let rightDistance = (Float(yPos) - rightVertex.point.y) / (vertex2.point.y - rightVertex.point.y)
 
             let left = interpolate(min: leftVertex, max: vertex2, distance: leftDistance)
             let right = interpolate(min: rightVertex, max: vertex2, distance: rightDistance)
