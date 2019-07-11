@@ -25,6 +25,7 @@ struct Color {
     static let gray      = Color(red: 0.5, green: 0.5, blue: 0.5)
     static let royalBlue = Color(red: 0.25, green: 0.25, blue: 0.75)
     static let crimson   = Color(red: 0.75, green: 0.25, blue: 0.25)
+    static let green     = Color(red: 0.25, green: 0.75, blue: 0.25)
 }
 
 extension CGImage {

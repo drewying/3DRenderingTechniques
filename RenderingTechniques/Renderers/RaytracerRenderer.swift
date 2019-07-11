@@ -264,12 +264,18 @@ final class RaytracerRenderer: Renderer {
                                   emission: Color.black,
                                   material: .REFLECTIVE )
 
-        let glassSphere = Sphere(center: Vector3D(x: 0.5, y: -0.65, z: 0.25),
-                                 radius: 0.35,
+        let glassSphere = Sphere(center: Vector3D(x: -0.1, y: -0.75, z: -0.1),
+                                 radius: 0.25,
                                  color: Color.white,
                                  emission: Color.black,
                                  material: .REFRACTIVE )
 
-        return [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, mirrorSphere]
+        let diffuseSphere = Sphere(center: Vector3D(x: 0.5, y: -0.65, z: 0.3),
+                                 radius: 0.35,
+                                 color: Color.green,
+                                 emission: Color.black,
+                                 material: .DIFFUSE )
+
+        return [leftWall, rightWall, topWall, bottomWall, frontWall, backWall, glassSphere, diffuseSphere, mirrorSphere]
     }
 }
