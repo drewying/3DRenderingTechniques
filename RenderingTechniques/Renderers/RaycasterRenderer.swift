@@ -107,7 +107,7 @@ final class RaycasterRenderer: Renderer {
             wallDistance = (Float(mapCoordinateY) - cameraPosition.y + (1.0 - Float(wallStepY)) / 2.0) / ray.y
         }
 
-        // Using th wall distance, calculate the height of the column to draw values to draw
+        // Using the wall distance, calculate the height of the column to draw values to draw
         let lineHeight = Int(Float(height) / wallDistance)
         let yStartPixel = -lineHeight / 2 + height / 2
         let yEndPixel = lineHeight / 2 + height / 2
@@ -122,9 +122,9 @@ final class RaycasterRenderer: Renderer {
         wallHitPositionX -= floor((wallHitPositionX))
 
         // Go through and draw each pixel in the column into our output
-        let wallHitPositionStartY: Float = Float(height) / 2.0 - Float(lineHeight) / 2.0
+        let wallHitPositionStartY = Float(height) / 2.0 - Float(lineHeight) / 2.0
         for yPixel in yStartPixel..<yEndPixel {
-            let wallHitPositionY: Float = (Float(yPixel) - wallHitPositionStartY) / Float(lineHeight)
+            let wallHitPositionY = (Float(yPixel) - wallHitPositionStartY) / Float(lineHeight)
             let textureXPos = Int(wallHitPositionX * Float(texture.count))
             let textureYPos = Int(wallHitPositionY * Float(texture[0].count))
 

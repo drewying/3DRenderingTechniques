@@ -248,8 +248,8 @@ final class RaytracerRenderer: Renderer {
 
         let topWall = Sphere(center: Vector3D(x: 0.0, y: 10e3, z: 0.0),
                              radius: 10e3 - 1.0,
-                             color: Color.black,
-                             emission: Color(red: 1.5, green: 1.5, blue: 1.5),
+                             color: Color.offWhite,
+                             emission: Color.white,
                              material: .DIFFUSE )
 
         let bottomWall = Sphere(center: Vector3D(x: 0.0, y: -10e3, z: 0.0),
